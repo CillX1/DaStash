@@ -20,6 +20,9 @@ AI CHAT - FREE LOCAL AI
   1. Install Ollama (free) from https://ollama.com/download
   2. In GameDesk's AI panel, pick 'Local AI' and click 'Download (3.3 GB)'. Done.
   It runs on your processor; a PC with 16 GB of RAM or more is recommended.
+  GameDesk starts Ollama when it opens and stops it when it closes, so it doesn't use
+  memory while GameDesk is closed. It also switches off Ollama starting with Windows
+  (turn it back on in Task Manager > Startup apps; uninstalling GameDesk does it too).
 
 AI CHAT - CLAUDE (OPTIONAL)
   For smarter answers, pick 'Claude' in the AI panel and paste a Claude API key.

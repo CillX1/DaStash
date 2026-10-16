@@ -407,6 +407,19 @@ function Stop-Ollama {
     taskkill.exe /PID $script:ollamaProc.Id /T /F | Out-Null
 }
 
+# GameDesk starts Ollama when it opens, so Ollama no longer needs to start with Windows and hold memory all day.
+# Switched off once, the same way Task Manager > Startup apps does it, so the user can turn it back on there
+# (the marker file makes sure GameDesk doesn't undo that). Uninstalling GameDesk turns it back on.
+function Disable-OllamaAutostart {
+    $marker = Join-Path $env:LOCALAPPDATA 'GameDesk\ollama-autostart-off'
+    if ((Test-Path $marker) -or -not (Test-Path (Join-Path ([Environment]::GetFolderPath('Startup')) 'Ollama.lnk'))) { return }
+    $key = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\StartupFolder'
+    if (-not (Test-Path $key)) { New-Item -Path $key -Force | Out-Null }
+    # 03 = disabled, then the time it was switched off.
+    Set-ItemProperty -Path $key -Name 'Ollama.lnk' -Type Binary -Value ([byte[]](@(3, 0, 0, 0) + [BitConverter]::GetBytes((Get-Date).ToFileTime())))
+    New-Item -ItemType File -Force $marker | Out-Null
+}
+
 function Get-LocalAiStatus {
     $installed = (Test-Path $ollamaExe) -or [bool](Get-Command ollama -ErrorAction SilentlyContinue)
     $running = $false; $hasModel = $false
@@ -418,6 +431,7 @@ function Get-LocalAiStatus {
         $hasModel = [bool]($tags.models | Where-Object { $_.name -eq $localModel -or $_.model -eq $localModel })
     } catch {}
     if ($installed -and -not $running) { Start-Ollama }   # e.g. Ollama was installed while GameDesk was open
+    if ($installed) { try { Disable-OllamaAutostart } catch {} }
     @{ installed = $installed; running = $running; hasModel = $hasModel; model = $localModel; name = $localModelName }
 }
 
@@ -637,6 +651,7 @@ function Handle($ctx) {
 
 # ---------- Open the window ----------
 try { Start-Ollama } catch {}
+try { Disable-OllamaAutostart } catch {}
 $url = "http://127.0.0.1:$port/?t=$token"
 $edge = @("${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe", "$env:ProgramFiles\Microsoft\Edge\Application\msedge.exe") |
     Where-Object { Test-Path $_ } | Select-Object -First 1

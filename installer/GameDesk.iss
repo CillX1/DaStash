@@ -71,3 +71,10 @@ begin
        '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
   Result := '';
 end;
+
+// GameDesk switched off Ollama starting with Windows; turn it back on (before {localappdata}\GameDesk is deleted).
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+begin
+  if (CurUninstallStep = usUninstall) and FileExists(ExpandConstant('{localappdata}\GameDesk\ollama-autostart-off')) then
+    RegDeleteValue(HKEY_CURRENT_USER, 'Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\StartupFolder', 'Ollama.lnk');
+end;
