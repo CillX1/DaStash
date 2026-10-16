@@ -326,4 +326,27 @@ function stopAllOllama() {
   run('pkill', ['-x', 'ollama']);
 }
 
-module.exports = { isMac, stats, spotifyStats, spotifyControl, spotifyStart, art, volume, scanApps, launchApp, steamGames, availableTools, runTool, ollamaInstalled, startOllama, stopAllOllama };
+// ---------- anti-freeze ----------
+// macOS and Linux have no general "Not Responding" signal for other apps, so here GameDesk only watches memory
+// and offers to close the biggest apps of this user when it's almost full.
+const NEVER_END = /^(Finder|Dock|WindowServer|loginwindow|SystemUIServer|kernel_task|launchd|systemd|Xorg|Xwayland|gnome-shell|plasmashell|kwin.*|sddm|gdm.*|pipewire.*|pulseaudio|dbus.*|GameDesk.*|electron)$/i;
+async function memoryPct() {
+  const total = os.totalmem();
+  return Math.round(100 * (total - await memAvailable()) / total);
+}
+async function topMemory() {
+  const out = await run('ps', ['-x', '-o', 'pid=,rss=,comm=']);   // this user's processes only
+  if (!out) return [];
+  const seen = new Map();
+  for (const line of out.trim().split('\n')) {
+    const m = line.trim().match(/^(\d+)\s+(\d+)\s+(.+)$/);
+    if (!m || +m[1] === process.pid || +m[1] === process.ppid) continue;
+    const name = path.basename(m[3]).replace(/ Helper.*$/, '');
+    if (NEVER_END.test(name)) continue;
+    const kb = +m[2];
+    if (!seen.has(name) || seen.get(name).kb < kb) seen.set(name, { pid: +m[1], name, kb });
+  }
+  return [...seen.values()].sort((a, b) => b.kb - a.kb).slice(0, 3).map(p => ({ pid: p.pid, name: p.name, mb: Math.round(p.kb / 1024) }));
+}
+
+module.exports = { isMac, stats, spotifyStats, spotifyControl, spotifyStart, art, volume, scanApps, launchApp, steamGames, availableTools, runTool, ollamaInstalled, startOllama, stopAllOllama, memoryPct, topMemory };

@@ -15,7 +15,7 @@ const osName = P.isMac ? 'Mac' : 'Linux PC';
 
 // uiDir: folder with dashboard.html and logo.svg. dataDir: where data.json and the Claude key live.
 // secret: { encrypt(string) -> Buffer, decrypt(Buffer) -> string } (Electron safeStorage) or null.
-function start({ uiDir, dataDir, secret, openUrl }) {
+function start({ uiDir, dataDir, secret, openUrl, notify = () => {} }) {
   const token = crypto.randomBytes(16).toString('hex');
   const dataFile = path.join(dataDir, 'data.json');
   const keyFile = path.join(dataDir, 'claude.key');
@@ -24,6 +24,20 @@ function start({ uiDir, dataDir, secret, openUrl }) {
   const apps = P.scanApps();
   const steam = P.steamGames();
   const tools = P.availableTools();
+
+  // Anti-freeze: warn when memory is almost full (the usual reason a Mac or Linux PC grinds to a halt).
+  const af = { memSince: null, noticed: false, log: [], pct: 0 };
+  const afLog = text => { af.log.unshift({ at: new Date().toTimeString().slice(0, 5), text }); af.log.length = Math.min(af.log.length, 8); };
+  const afAlert = () => af.memSince && Date.now() - af.memSince >= 10000;
+  const afTimer = setInterval(async () => {
+    af.pct = await P.memoryPct();
+    if (af.pct < 92) { af.memSince = null; af.noticed = false; return; }
+    if (!af.memSince) af.memSince = Date.now();
+    else if (afAlert() && !af.noticed) {
+      af.noticed = true; afLog(`Memory almost full (${af.pct} %)`);
+      notify('GameDesk Anti-Freeze', `Memory is almost full (${af.pct} %). Your computer may freeze. Open GameDesk to close a big app.`);
+    }
+  }, 3000);
   let stopOllama = null, ollamaStarting = false;   // stopOllama: set when GameDesk started Ollama itself
   // The on/off switch in the AI panel (saved by the dashboard in data.json). Off: GameDesk doesn't start Ollama.
   let ollamaOff = false;
@@ -157,6 +171,10 @@ function start({ uiDir, dataDir, secret, openUrl }) {
 
       if (req.method === 'GET') switch (p) {
         case '/api/stats': return json({ ...(await P.stats()), spotify: await P.spotifyStats() });
+        case '/api/freeze': return json({
+          hungSupported: false, auto: false, autoSeconds: 30, hung: [], log: af.log,
+          memory: { pct: af.pct || await P.memoryPct(), alert: !!afAlert(), top: afAlert() ? await P.topMemory() : [] },
+        });
         case '/api/ping': return json(await Promise.all(Object.entries(PING_HOSTS).map(async ([name, host]) => ({ name, host, ms: await pingOne(host) }))));
         case '/api/apps': return json({ apps, steam, ...tools, platform: process.platform });
         case '/api/store': return send(200, fs.existsSync(dataFile) ? fs.readFileSync(dataFile) : '{}');
@@ -221,6 +239,15 @@ function start({ uiDir, dataDir, secret, openUrl }) {
           if (!tools.tools.includes(id)) return send(404, '{"error":"unknown tool"}');
           await P.runTool(id); return json({ ok: true });
         }
+        case '/api/freeze/kill': {
+          // Only one of the biggest apps, and only while memory is almost full.
+          const pid = Number(q.get('pid'));
+          const top = afAlert() ? await P.topMemory() : [];
+          const t = top.find(x => x.pid === pid);
+          if (!t) return send(403, '{"error":"not allowed"}');
+          try { process.kill(pid, 'SIGTERM'); setTimeout(() => { try { process.kill(pid, 'SIGKILL'); } catch {} }, 3000); } catch {}
+          afLog('Ended ' + t.name); return json({ ok: true });
+        }
         case '/api/steam': {
           const id = q.get('id');
           if (!/^\d{1,10}$/.test(id)) return send(400, '{"error":"bad id"}');
@@ -237,7 +264,7 @@ function start({ uiDir, dataDir, secret, openUrl }) {
   });
 
   ensureOllama();
-  const close = () => { server.close(); if (stopOllama) { stopOllama(); stopOllama = null; } };
+  const close = () => { server.close(); clearInterval(afTimer); if (stopOllama) { stopOllama(); stopOllama = null; } };
 
   return new Promise((resolve, reject) => {
     const tryListen = () => {

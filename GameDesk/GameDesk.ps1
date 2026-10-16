@@ -42,6 +42,8 @@ public static class GD {
     [DllImport("user32.dll")] public static extern bool IsWindow(IntPtr hWnd);
     [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr hWnd);
     [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hWnd);
+    // True when a window hasn't handled any input for 5 seconds (what Windows shows as "Not Responding").
+    [DllImport("user32.dll")] public static extern bool IsHungAppWindow(IntPtr hWnd);
 
     static long pIdle, pKernel, pUser;
     public static double Cpu() {
@@ -510,6 +512,96 @@ function Read-JsonBody($req) {
     return $body | ConvertFrom-Json
 }
 
+# ---------- Anti-freeze ----------
+# Watches for programs that stop responding ("Not Responding") and for memory running out, while GameDesk is open
+# (minimized is fine). It can only help while Windows itself still runs: a full freeze from a driver or
+# hardware problem stops GameDesk too.
+$afFile = Join-Path $env:LOCALAPPDATA 'GameDesk\antifreeze.json'
+$script:af = @{ auto = $false; autoSeconds = 30 }
+try {
+    $saved = Get-Content $afFile -Raw -ErrorAction Stop | ConvertFrom-Json
+    $script:af.auto = [bool]$saved.auto
+    if ($saved.autoSeconds -in 15, 30, 60, 120) { $script:af.autoSeconds = [int]$saved.autoSeconds }
+} catch {}
+$script:afHung = @{}                         # process id -> @{ name; title; since; noticed }
+$script:afLog = [Collections.ArrayList]::new()
+$script:afMemSince = $null; $script:afMemNoticed = $false
+# Never ended by GameDesk: Windows itself (ending these crashes or logs you out).
+$afNever = 'explorer', 'dwm', 'csrss', 'winlogon', 'wininit', 'lsass', 'services', 'smss', 'svchost', 'System', 'Idle',
+    'fontdrvhost', 'LogonUI', 'sihost', 'ShellExperienceHost', 'StartMenuExperienceHost', 'SearchHost', 'TextInputHost'
+
+function Add-AfLog([string]$text) {
+    [void]$script:afLog.Insert(0, @{ at = (Get-Date).ToString('HH:mm'); text = $text })
+    while ($script:afLog.Count -gt 8) { $script:afLog.RemoveAt(8) }
+}
+# A Windows notification, so you hear about it even while GameDesk is minimized.
+function Show-AfNotice([string]$text) {
+    try {
+        if (-not $script:afIcon) {
+            Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+            $script:afIcon = New-Object System.Windows.Forms.NotifyIcon
+            $script:afIcon.Icon = New-Object System.Drawing.Icon (Join-Path $root 'GameDesk.ico')
+            $script:afIcon.Text = 'GameDesk Anti-Freeze'
+        }
+        $script:afIcon.Visible = $true
+        $script:afIcon.ShowBalloonTip(8000, 'GameDesk Anti-Freeze', $text, [System.Windows.Forms.ToolTipIcon]::Warning)
+    } catch {}
+}
+function Get-AfName($p) {
+    $d = try { $p.MainModule.FileVersionInfo.FileDescription } catch { $null }
+    if ($d) { $d } else { $p.ProcessName }
+}
+function Get-AfTopMemory {
+    Get-Process | Where-Object { $_.MainWindowHandle -ne 0 -and $afNever -notcontains $_.ProcessName -and $_.Id -ne $PID -and $_.MainWindowTitle -notlike '*GameDesk*' } |
+        Sort-Object WorkingSet64 -Descending | Select-Object -First 3 |
+        ForEach-Object { @{ pid = $_.Id; name = (Get-AfName $_); mb = [int]($_.WorkingSet64 / 1MB) } }
+}
+function Update-AntiFreeze {
+    $now = Get-Date; $seen = @{}
+    foreach ($p in Get-Process | Where-Object { $_.MainWindowHandle -ne 0 }) {
+        if ($afNever -contains $p.ProcessName -or $p.Id -eq $PID -or $p.MainWindowTitle -like '*GameDesk*') { continue }
+        if (-not [GD]::IsHungAppWindow($p.MainWindowHandle)) { continue }
+        $seen[$p.Id] = $true
+        if (-not $script:afHung.ContainsKey($p.Id)) {
+            $script:afHung[$p.Id] = @{ name = (Get-AfName $p); title = $p.MainWindowTitle; since = $now; noticed = $false }
+        }
+    }
+    foreach ($id in @($script:afHung.Keys)) {
+        if (-not $seen.ContainsKey($id)) { $script:afHung.Remove($id); continue }
+        $h = $script:afHung[$id]; $secs = [int]($now - $h.since).TotalSeconds
+        if ($script:af.auto -and $secs -ge $script:af.autoSeconds) {
+            Stop-Process -Id $id -Force -ErrorAction SilentlyContinue
+            Add-AfLog "Ended $($h.name) automatically (not responding for $secs s)"
+            Show-AfNotice "$($h.name) stopped responding, so GameDesk ended it."
+            $script:afHung.Remove($id)
+        } elseif (-not $h.noticed -and $secs -ge 10) {
+            $h.noticed = $true
+            Add-AfLog "$($h.name) stopped responding"
+            Show-AfNotice "$($h.name) is not responding. Open GameDesk to end it."
+        }
+    }
+    $load = ([GD]::Mem()).dwMemoryLoad
+    if ($load -ge 92) {
+        if (-not $script:afMemSince) { $script:afMemSince = $now }
+        elseif (-not $script:afMemNoticed -and ($now - $script:afMemSince).TotalSeconds -ge 10) {
+            $script:afMemNoticed = $true
+            Add-AfLog "Memory almost full ($load %)"
+            Show-AfNotice "Memory is almost full ($load %). Your PC may freeze. Open GameDesk to close a big app."
+        }
+    } else { $script:afMemSince = $null; $script:afMemNoticed = $false }
+}
+function Get-AntiFreeze {
+    $now = Get-Date
+    $load = ([GD]::Mem()).dwMemoryLoad
+    $memAlert = [bool]$script:afMemSince -and ($now - $script:afMemSince).TotalSeconds -ge 10
+    @{
+        hungSupported = $true; auto = $script:af.auto; autoSeconds = $script:af.autoSeconds
+        hung = @($script:afHung.GetEnumerator() | ForEach-Object { @{ pid = $_.Key; name = $_.Value.name; title = $_.Value.title; secs = [int]($now - $_.Value.since).TotalSeconds } })
+        memory = @{ pct = $load; alert = $memAlert; top = @($(if ($memAlert) { Get-AfTopMemory })) }
+        log = @($script:afLog)
+    }
+}
+
 # ---------- HTTP server ----------
 $token = [guid]::NewGuid().ToString('N')
 $port = 47821
@@ -559,6 +651,7 @@ function Handle($ctx) {
     switch ($path) {
         '/api/stats' { return SendJson $ctx (Get-Stats) }
         '/api/ping' { return SendJson $ctx @(Get-Pings) }
+        '/api/freeze' { return SendJson $ctx (Get-AntiFreeze) }
         '/api/apps' {
             return SendJson $ctx @{ apps = @($apps.Keys | Sort-Object); steam = $steamGames }
         }
@@ -644,6 +737,24 @@ function Handle($ctx) {
             & $tools[$id]
             return SendJson $ctx @{ ok = $true }
         }
+        '/api/freeze/kill' {
+            # Only a program that is frozen right now, or one of the biggest memory users during a memory alert.
+            $id = 0
+            if (-not [int]::TryParse($q['pid'], [ref]$id)) { return Send $ctx 400 '{"error":"bad pid"}' }
+            $allowed = $script:afHung.ContainsKey($id) -or ($script:afMemSince -and @(Get-AfTopMemory | Where-Object { $_.pid -eq $id }).Count)
+            if (-not $allowed) { return Send $ctx 403 '{"error":"not allowed"}' }
+            $p = Get-Process -Id $id -ErrorAction SilentlyContinue
+            if ($p) { $name = Get-AfName $p; Stop-Process -Id $id -Force -ErrorAction SilentlyContinue; Add-AfLog "Ended $name" }
+            $script:afHung.Remove($id)
+            return SendJson $ctx @{ ok = $true }
+        }
+        '/api/freeze/auto' {
+            $script:af.auto = $q['on'] -eq '1'
+            $s = 0; if ([int]::TryParse($q['secs'], [ref]$s) -and $s -in 15, 30, 60, 120) { $script:af.autoSeconds = $s }
+            New-Item -ItemType Directory -Force (Split-Path $afFile) | Out-Null
+            $script:af | ConvertTo-Json -Compress | Set-Content $afFile
+            return SendJson $ctx @{ ok = $true }
+        }
         '/api/steam' {
             $id = $q['id']
             if ($id -notmatch '^\d{1,10}$') { return Send $ctx 400 '{"error":"bad id"}' }
@@ -701,11 +812,13 @@ try {
         if (([DateTime]::Now - $lastCheck).TotalSeconds -ge 3) {
             $lastCheck = [DateTime]::Now
             if (-not (Test-WindowOpen)) { break }
+            try { Update-AntiFreeze } catch {}
         }
     }
 } finally {
     # Never leave Spotify playing invisibly after GameDesk closes: put it back on the taskbar (minimized).
     try { Show-Spotify -Minimized } catch {}
     try { Stop-Ollama } catch {}
+    if ($script:afIcon) { $script:afIcon.Dispose() }
     $listener.Stop()
 }

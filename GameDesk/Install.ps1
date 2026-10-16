@@ -1,6 +1,6 @@
 ﻿# Installs GameDesk for the current user. No admin rights needed.
 $ErrorActionPreference = 'Stop'
-$version = '1.6.0'
+$version = '1.7.0'
 $src = $PSScriptRoot
 $dest = Join-Path $env:LOCALAPPDATA 'Programs\GameDesk'
 $ps = "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe"

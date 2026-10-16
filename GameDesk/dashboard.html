@@ -263,6 +263,19 @@
 
   textarea.notes { width: 100%; flex: 1; min-height: 160px; resize: none; line-height: 1.55; }
 
+  /* ---------- anti-freeze ---------- */
+  .af-ok { display: flex; align-items: center; gap: 10px; margin: 12px 0 8px; color: var(--muted); font-size: 13px; }
+  .af-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--good); box-shadow: 0 0 0 4px color-mix(in srgb, var(--good) 20%, transparent); flex: none; }
+  .af-ok.bad .af-dot { background: var(--bad); box-shadow: 0 0 0 4px color-mix(in srgb, var(--bad) 20%, transparent); }
+  .af-ok.bad { color: var(--text); font-weight: 600; }
+  .af-item { display: flex; align-items: center; gap: 10px; background: var(--card-2); border-radius: 10px; padding: 8px 10px; }
+  .af-item span { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 13px; }
+  .af-item small { color: var(--muted); }
+  .af-item .btn { flex: none; width: auto; padding: 0 12px; height: 30px; background: var(--bad); border-color: transparent; color: #fff; font-weight: 600; }
+  .af-auto { display: flex; gap: 10px; align-items: center; margin-top: auto; padding-top: 12px; font-size: 12.5px; color: var(--muted); cursor: pointer; }
+  .af-auto select { background: var(--card-2); color: var(--text); border: 1px solid var(--line-2); border-radius: 6px; padding: 1px 2px; }
+  .af-log { margin-top: 8px; font-size: 11.5px; color: var(--faint); display: grid; gap: 2px; }
+
   /* ---------- customize ---------- */
   .drawer { position: absolute; right: 0; top: 46px; width: 260px; background: var(--card); border: 1px solid var(--line-2);
     border-radius: 14px; padding: 14px; z-index: 10; box-shadow: 0 24px 60px #000a; }
@@ -385,6 +398,15 @@
       <div><div class="stat"><span>Memory</span><b id="ramTxt">–</b></div><div class="bar"><i id="ramBar"></i></div></div>
       <div><div class="stat"><span>Disk C:</span><b id="diskTxt">–</b></div><div class="bar"><i id="diskBar"></i></div></div>
     </div>
+  </section>
+
+  <section class="card" data-w="antifreeze" data-name="Anti-Freeze" style="--c:var(--good)">
+    <div class="card-h"><div class="badge"><svg class="i" data-i="shield"></svg></div><h2>Anti-Freeze</h2><div class="meta" id="afMeta">watching</div></div>
+    <div class="af-ok" id="afOk"><span class="af-dot"></span><span id="afOkTxt">All programs are responding</span></div>
+    <div class="stack" id="afList" style="gap:6px"></div>
+    <label class="af-auto" id="afAutoRow"><input type="checkbox" id="afAuto">
+      <span>End frozen programs automatically after <select id="afSecs"><option>15</option><option selected>30</option><option>60</option><option>120</option></select> s</span></label>
+    <div class="af-log" id="afLog"></div>
   </section>
 
   <!-- Rows 2-3: games is tall -->
@@ -510,6 +532,7 @@ const ICONS = {
   bluetooth: '<path d="m7 7 10 10-5 5V2l5 5L7 17"/>',
   calc: '<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M16 14v4M16 10h.01M12 10h.01M8 10h.01M12 14h.01M8 14h.01M12 18h.01M8 18h.01"/>',
   lock: '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',
   monitor: '<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>',
   zap: '<path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>',
   wrench: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.940 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
@@ -890,6 +913,33 @@ async function mediaPress(k) {
   }
   setTimeout(pollStats, 400);
 }
+
+/* ---------- anti-freeze (frozen programs and low memory; watched by the app even while minimized) ---------- */
+async function pollFreeze() {
+  let f; try { f = await api('/api/freeze'); } catch { return; }
+  const L = $('afList'); L.innerHTML = '';
+  const item = (label, sub, pid) => {
+    const end = el('button', { className: 'btn', textContent: 'End', title: 'Close it now. Unsaved work in it is lost.' });
+    end.onclick = async () => { end.disabled = true; try { await post('/api/freeze/kill?pid=' + pid); toast('Ended ' + label); } catch { toast('Could not end it'); } pollFreeze(); };
+    const s = el('span', { textContent: label + ' ' }); s.append(el('small', { textContent: sub }));
+    L.append(el('div', { className: 'af-item' }, s, end));
+  };
+  f.hung.forEach(h => item(h.name, `not responding · ${h.secs}s`, h.pid));
+  if (f.memory.alert) f.memory.top.forEach(t => item(t.name, `${(t.mb / 1024).toFixed(1)} GB`, t.pid));
+  const bad = f.hung.length || f.memory.alert;
+  $('afOk').classList.toggle('bad', !!bad);
+  $('afOkTxt').textContent = f.hung.length ? `${f.hung.length === 1 ? 'A program is' : f.hung.length + ' programs are'} not responding`
+    : f.memory.alert ? `Memory almost full (${f.memory.pct}%). Close a big app:` : f.hungSupported ? 'All programs are responding' : `Memory OK (${f.memory.pct}%)`;
+  $('afMeta').textContent = f.auto ? 'auto mode' : 'watching';
+  $('afAutoRow').classList.toggle('hidden', !f.hungSupported);
+  if (document.activeElement !== $('afSecs')) { $('afAuto').checked = f.auto; $('afSecs').value = String(f.autoSeconds); }
+  const log = $('afLog'); log.innerHTML = '';
+  f.log.slice(0, 3).forEach(e => log.append(el('div', { textContent: `${e.at}  ${e.text}` })));
+}
+const saveFreeze = () => post(`/api/freeze/auto?on=${$('afAuto').checked ? 1 : 0}&secs=${$('afSecs').value}`).then(pollFreeze).catch(() => toast('Could not save that'));
+$('afAuto').onchange = () => { saveFreeze(); if ($('afAuto').checked) toast('Frozen programs will be ended automatically'); };
+$('afSecs').onchange = saveFreeze;
+every(3000, pollFreeze); pollFreeze();
 
 /* ---------- sparklines ---------- */function spark(canvas, data, max, color) {
   const dpr = devicePixelRatio || 1, w = canvas.clientWidth, h = canvas.clientHeight;

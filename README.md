@@ -23,6 +23,7 @@
 | 🎵 **Spotify** | Play, pause and skip with album art. Press play and Spotify starts hidden in the background. |
 | 🤖 **AI chat** | A free AI that runs on your own PC (Ollama), or Claude with your own API key. |
 | 📊 **PC stats** | CPU, RAM, disk, battery and ping at a glance. |
+| 🛡️ **Anti-Freeze** | Spots programs that stop responding and lets you end them with one click, or automatically. Warns you before memory runs out. |
 | 🎮 **Games** | Launch Steam, Xbox, Ubisoft, Epic, EA, Battle.net and more, plus your installed Steam games. |
 | 🛠️ **Quick tools** | System shortcuts, weather, to-do list, timer and notes. |
 | 🔗 **Quick links** | Your favourite websites one click away. Add or remove them with **Edit links**. |
@@ -64,10 +65,18 @@ Spotify controls use the standard MPRIS interface (`gdbus`, included in most des
 | Spotify controls, song and album art | ✅ | ✅ | ✅ |
 | Start Spotify hidden in the background | ✅ | ✅ | starts normally |
 | CPU, RAM, disk, battery, ping | ✅ | ✅ | ✅ |
+| Anti-Freeze: end frozen programs (also automatically) | ✅ | – | – |
+| Anti-Freeze: warning when memory is almost full | ✅ | ✅ | ✅ |
 | Steam games and game launchers | ✅ | ✅ | ✅ (Steam, Heroic, Lutris, ...) |
 | AI chat (local and Claude) | ✅ | ✅ | ✅ |
 | Quick tools | Windows tools | Mac apps and settings | GNOME, KDE or Xfce apps |
 | Xbox Game Bar, Game Mode | ✅ | – | – |
+
+## Anti-Freeze
+
+While GameDesk is open (minimized is fine), it checks every 3 seconds for programs that show "Not Responding" and for memory that is almost full, and shows a notification. In the Anti-Freeze widget you can end a frozen program with **End**, or tick **End frozen programs automatically** to let GameDesk do it after 15 to 120 seconds. Windows itself (Explorer, the taskbar and system processes) is never ended.
+
+It can't help when the whole computer freezes because of a driver or hardware problem: then GameDesk freezes too.
 
 ## AI chat
 

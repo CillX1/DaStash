@@ -8,6 +8,7 @@ INSTALL
   3. GameDesk opens. Next time, use the GameDesk icon on your Desktop or in the Start menu.
 
 WHAT'S INSIDE
+  NEW: Anti-Freeze spots programs that stop responding and can end them for you.
   Spotify controls (press play and Spotify starts hidden in the background, with album art), an AI chat (free local AI or Claude), CPU / RAM / disk, battery, ping, game launchers
   (Steam, Xbox, Ubisoft, Epic, ...), your installed Steam games, Windows quick tools,
   weather, to-do list, timer, notes and quick links (click "Edit links" to choose your own). Click "Customize" to hide widgets.

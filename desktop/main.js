@@ -1,5 +1,5 @@
 // GameDesk for macOS and Linux: an Electron window around the same dashboard the Windows version uses.
-const { app, BrowserWindow, shell, safeStorage, nativeTheme, Menu } = require('electron');
+const { app, BrowserWindow, shell, safeStorage, nativeTheme, Menu, Notification } = require('electron');
 const path = require('path');
 const server = require('./server');
 
@@ -12,7 +12,8 @@ app.whenReady().then(async () => {
   nativeTheme.themeSource = 'dark';   // dark (black) title bar and menus
   const uiDir = app.isPackaged ? path.join(process.resourcesPath, 'ui') : path.join(__dirname, '..', 'GameDesk');
   const secret = safeStorage.isEncryptionAvailable() ? { encrypt: s => safeStorage.encryptString(s), decrypt: b => safeStorage.decryptString(b) } : null;
-  srv = await server.start({ uiDir, dataDir: app.getPath('userData'), secret, openUrl: u => shell.openExternal(u) });
+  const notify = (title, body) => { if (Notification.isSupported()) { const n = new Notification({ title, body }); n.on('click', () => { if (win) { win.show(); win.focus(); } }); n.show(); } };
+  srv = await server.start({ uiDir, dataDir: app.getPath('userData'), secret, openUrl: u => shell.openExternal(u), notify });
 
   if (process.platform !== 'darwin') Menu.setApplicationMenu(null);
   win = new BrowserWindow({
