@@ -479,7 +479,7 @@ function Start-LocalJob($messages) {
         'Keep answers short and easy to scan: lead with the answer, then brief details. Use simple Markdown only when it helps. ' +
         'If you are not sure about a fact, say so instead of guessing.'
     $msgs = @([ordered]@{ role = 'system'; content = $system }) + @($messages | ForEach-Object { [ordered]@{ role = $_.role; content = [string]$_.content } })
-    $payload = [ordered]@{ model = $localModel; messages = $msgs; stream = $true; keep_alive = '15m' }
+    $payload = [ordered]@{ model = $localModel; messages = $msgs; stream = $true; keep_alive = '5m' }
     return Start-BackgroundJob $localWorker $ollamaBase ($payload | ConvertTo-Json -Depth 6 -Compress)
 }
 

@@ -74,7 +74,7 @@ function start({ uiDir, dataDir, secret, openUrl }) {
       `You run locally on their computer (model: ${LOCAL_NAME}), so you work offline and cannot browse the web. Today is ${today}. ` +
       'Keep answers short and easy to scan: lead with the answer, then brief details. Use simple Markdown only when it helps. If you are not sure about a fact, say so instead of guessing.';
     try {
-      const res = await fetch(OLLAMA + '/api/chat', { method: 'POST', body: JSON.stringify({ model: LOCAL_MODEL, messages: [{ role: 'system', content: system }, ...messages], stream: true, keep_alive: '15m' }) });
+      const res = await fetch(OLLAMA + '/api/chat', { method: 'POST', body: JSON.stringify({ model: LOCAL_MODEL, messages: [{ role: 'system', content: system }, ...messages], stream: true, keep_alive: '5m' }) });
       if (!res.ok) { const raw = await res.text(); job.status = res.status; try { job.error = JSON.parse(raw).error; } catch { job.error = raw; } return; }
       await readLines(res, line => {
         const ev = JSON.parse(line);
