@@ -309,9 +309,16 @@ async function runTool(id) {
 
 // ---------- Ollama (local AI) ----------
 function ollamaInstalled() { return which('ollama') || (isMac && fs.existsSync('/Applications/Ollama.app')); }
+// Starts Ollama in the background and returns a function that stops it again (or null if it couldn't start).
 function startOllama() {
-  if (isMac && fs.existsSync('/Applications/Ollama.app')) return detach('open', ['-g', '-a', 'Ollama']);
-  if (which('ollama')) return detach('ollama', ['serve']);
+  if (isMac && fs.existsSync('/Applications/Ollama.app')) return detach('open', ['-g', '-a', 'Ollama']) ? () => osa('quit app "Ollama"') : null;
+  if (!which('ollama')) return null;
+  try {
+    const c = spawn('ollama', ['serve'], { detached: true, stdio: 'ignore' });
+    c.on('error', () => {}); c.unref();
+    // detached = its own process group, so this also ends the model runner Ollama started.
+    return () => { try { process.kill(-c.pid); } catch {} };
+  } catch { return null; }
 }
 
 module.exports = { isMac, stats, spotifyStats, spotifyControl, spotifyStart, art, volume, scanApps, launchApp, steamGames, availableTools, runTool, ollamaInstalled, startOllama };

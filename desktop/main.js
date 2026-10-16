@@ -5,14 +5,14 @@ const server = require('./server');
 
 if (!app.requestSingleInstanceLock()) { app.quit(); return; }
 
-let win;
+let win, srv;
 app.on('second-instance', () => { if (win) { if (win.isMinimized()) win.restore(); win.focus(); } });
 
 app.whenReady().then(async () => {
   nativeTheme.themeSource = 'dark';   // dark (black) title bar and menus
   const uiDir = app.isPackaged ? path.join(process.resourcesPath, 'ui') : path.join(__dirname, '..', 'GameDesk');
   const secret = safeStorage.isEncryptionAvailable() ? { encrypt: s => safeStorage.encryptString(s), decrypt: b => safeStorage.decryptString(b) } : null;
-  const srv = await server.start({ uiDir, dataDir: app.getPath('userData'), secret, openUrl: u => shell.openExternal(u) });
+  srv = await server.start({ uiDir, dataDir: app.getPath('userData'), secret, openUrl: u => shell.openExternal(u) });
 
   if (process.platform !== 'darwin') Menu.setApplicationMenu(null);
   win = new BrowserWindow({
@@ -27,3 +27,4 @@ app.whenReady().then(async () => {
 });
 
 app.on('window-all-closed', () => app.quit());
+app.on('will-quit', () => { if (srv) srv.close(); });   // also stops Ollama if GameDesk started it

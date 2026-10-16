@@ -24,7 +24,7 @@ function start({ uiDir, dataDir, secret, openUrl }) {
   const apps = P.scanApps();
   const steam = P.steamGames();
   const tools = P.availableTools();
-  let ollamaStartTried = false;
+  let stopOllama = null, ollamaStarting = false;   // stopOllama: set when GameDesk started Ollama itself
 
   const getKey = () => {
     try {
@@ -94,6 +94,14 @@ function start({ uiDir, dataDir, secret, openUrl }) {
     } catch (e) { job.status = 0; job.error = e.message; } finally { job.done = true; }
   }
 
+  const ollamaUp = () => fetch(OLLAMA + '/api/tags', { signal: AbortSignal.timeout(1200) }).then(() => true, () => false);
+  // Ollama only runs while GameDesk is open: start it unless it's already running (then it isn't ours to stop).
+  async function ensureOllama() {
+    if (stopOllama || ollamaStarting || !P.ollamaInstalled()) return;
+    ollamaStarting = true;
+    try { if (!(await ollamaUp())) stopOllama = P.startOllama(); } finally { ollamaStarting = false; }
+  }
+
   async function localStatus() {
     const installed = P.ollamaInstalled();
     let running = false, hasModel = false;
@@ -102,7 +110,7 @@ function start({ uiDir, dataDir, secret, openUrl }) {
       const tags = await r.json(); running = true;
       hasModel = (tags.models || []).some(m => m.name === LOCAL_MODEL || m.model === LOCAL_MODEL);
     } catch {}
-    if (installed && !running && !ollamaStartTried) { ollamaStartTried = true; P.startOllama(); }
+    if (installed && !running) ensureOllama();   // e.g. Ollama was installed while GameDesk was open
     return { installed, running, hasModel, model: LOCAL_MODEL, name: LOCAL_NAME };
   }
 
@@ -220,10 +228,13 @@ function start({ uiDir, dataDir, secret, openUrl }) {
     } catch (e) { try { send(500, JSON.stringify({ error: String(e.message || e) })); } catch {} }
   });
 
+  ensureOllama();
+  const close = () => { server.close(); if (stopOllama) { stopOllama(); stopOllama = null; } };
+
   return new Promise((resolve, reject) => {
     const tryListen = () => {
       server.once('error', err => { if (['EADDRINUSE', 'EACCES'].includes(err.code) && port < 47841) { port++; tryListen(); } else reject(err); });
-      server.listen(port, '127.0.0.1', () => resolve({ url: `http://127.0.0.1:${port}/?t=${token}`, close: () => server.close() }));
+      server.listen(port, '127.0.0.1', () => resolve({ url: `http://127.0.0.1:${port}/?t=${token}`, close }));
     };
     tryListen();
   });

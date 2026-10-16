@@ -387,8 +387,25 @@ $ollamaBase = 'http://127.0.0.1:11434'
 $localModel = 'gemma3:4b'
 $localModelName = 'Gemma 3'
 $ollamaExe = Join-Path $env:LOCALAPPDATA 'Programs\Ollama\ollama.exe'
-$ollamaApp = Join-Path $env:LOCALAPPDATA 'Programs\Ollama\ollama app.exe'
-$script:ollamaStartTried = $false
+$script:ollamaProc = $null   # the Ollama server GameDesk started itself; stopped again when GameDesk closes
+
+function Test-OllamaRunning {
+    try { $r = [Net.HttpWebRequest]::Create("$ollamaBase/api/tags"); $r.Timeout = 1200; $r.GetResponse().Close(); return $true } catch { return $false }
+}
+
+# Ollama only runs while GameDesk is open: start it here unless it's already running (then it isn't ours to stop).
+function Start-Ollama {
+    if ($script:ollamaProc -and -not $script:ollamaProc.HasExited) { return }
+    $exe = if (Test-Path $ollamaExe) { $ollamaExe } else { (Get-Command ollama -ErrorAction SilentlyContinue).Source }
+    if (-not $exe -or (Test-OllamaRunning)) { return }
+    $script:ollamaProc = Start-Process $exe 'serve' -WindowStyle Hidden -PassThru
+}
+
+function Stop-Ollama {
+    if (-not $script:ollamaProc -or $script:ollamaProc.HasExited) { return }
+    # /T also ends the model runner (llama-server) Ollama started, which holds the model's memory.
+    taskkill.exe /PID $script:ollamaProc.Id /T /F | Out-Null
+}
 
 function Get-LocalAiStatus {
     $installed = (Test-Path $ollamaExe) -or [bool](Get-Command ollama -ErrorAction SilentlyContinue)
@@ -400,11 +417,7 @@ function Get-LocalAiStatus {
         $running = $true
         $hasModel = [bool]($tags.models | Where-Object { $_.name -eq $localModel -or $_.model -eq $localModel })
     } catch {}
-    if ($installed -and -not $running -and -not $script:ollamaStartTried) {
-        # Ollama normally starts with Windows; if it isn't running yet, start it once.
-        $script:ollamaStartTried = $true
-        if (Test-Path $ollamaApp) { Start-Process $ollamaApp -WindowStyle Hidden } elseif (Test-Path $ollamaExe) { Start-Process $ollamaExe 'serve' -WindowStyle Hidden }
-    }
+    if ($installed -and -not $running) { Start-Ollama }   # e.g. Ollama was installed while GameDesk was open
     @{ installed = $installed; running = $running; hasModel = $hasModel; model = $localModel; name = $localModelName }
 }
 
@@ -623,6 +636,7 @@ function Handle($ctx) {
 }
 
 # ---------- Open the window ----------
+try { Start-Ollama } catch {}
 $url = "http://127.0.0.1:$port/?t=$token"
 $edge = @("${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe", "$env:ProgramFiles\Microsoft\Edge\Application\msedge.exe") |
     Where-Object { Test-Path $_ } | Select-Object -First 1
@@ -665,5 +679,6 @@ try {
 } finally {
     # Never leave Spotify playing invisibly after GameDesk closes: put it back on the taskbar (minimized).
     try { Show-Spotify -Minimized } catch {}
+    try { Stop-Ollama } catch {}
     $listener.Stop()
 }
