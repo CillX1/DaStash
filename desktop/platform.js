@@ -320,5 +320,10 @@ function startOllama() {
     return () => { try { process.kill(-c.pid); } catch {} };
   } catch { return null; }
 }
+// The AI panel's off switch: also stops an Ollama GameDesk didn't start.
+function stopAllOllama() {
+  if (isMac) osa('quit app "Ollama"');
+  run('pkill', ['-x', 'ollama']);
+}
 
-module.exports = { isMac, stats, spotifyStats, spotifyControl, spotifyStart, art, volume, scanApps, launchApp, steamGames, availableTools, runTool, ollamaInstalled, startOllama };
+module.exports = { isMac, stats, spotifyStats, spotifyControl, spotifyStart, art, volume, scanApps, launchApp, steamGames, availableTools, runTool, ollamaInstalled, startOllama, stopAllOllama };

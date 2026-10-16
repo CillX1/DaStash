@@ -25,6 +25,9 @@ function start({ uiDir, dataDir, secret, openUrl }) {
   const steam = P.steamGames();
   const tools = P.availableTools();
   let stopOllama = null, ollamaStarting = false;   // stopOllama: set when GameDesk started Ollama itself
+  // The on/off switch in the AI panel (saved by the dashboard in data.json). Off: GameDesk doesn't start Ollama.
+  let ollamaOff = false;
+  try { ollamaOff = !!JSON.parse(fs.readFileSync(dataFile, 'utf8')).localAiOff; } catch {}
 
   const getKey = () => {
     try {
@@ -97,7 +100,7 @@ function start({ uiDir, dataDir, secret, openUrl }) {
   const ollamaUp = () => fetch(OLLAMA + '/api/tags', { signal: AbortSignal.timeout(1200) }).then(() => true, () => false);
   // Ollama only runs while GameDesk is open: start it unless it's already running (then it isn't ours to stop).
   async function ensureOllama() {
-    if (stopOllama || ollamaStarting || !P.ollamaInstalled()) return;
+    if (ollamaOff || stopOllama || ollamaStarting || !P.ollamaInstalled()) return;
     ollamaStarting = true;
     try { if (!(await ollamaUp())) stopOllama = P.startOllama(); } finally { ollamaStarting = false; }
   }
@@ -111,7 +114,7 @@ function start({ uiDir, dataDir, secret, openUrl }) {
       hasModel = (tags.models || []).some(m => m.name === LOCAL_MODEL || m.model === LOCAL_MODEL);
     } catch {}
     if (installed && !running) ensureOllama();   // e.g. Ollama was installed while GameDesk was open
-    return { installed, running, hasModel, model: LOCAL_MODEL, name: LOCAL_NAME };
+    return { installed, running, hasModel, off: ollamaOff, model: LOCAL_MODEL, name: LOCAL_NAME };
   }
 
   async function testKey(key) {
@@ -178,6 +181,11 @@ function start({ uiDir, dataDir, secret, openUrl }) {
           const problem = await testKey(key);
           if (problem) return json({ ok: false, error: problem });
           fs.writeFileSync(keyFile, secret ? secret.encrypt(key) : key, { mode: 0o600 });
+          return json({ ok: true });
+        }
+        case '/api/ai/power': {   // the on/off switch in the AI panel
+          ollamaOff = q.get('on') !== '1';
+          if (ollamaOff) { if (stopOllama) stopOllama(); stopOllama = null; P.stopAllOllama(); } else await ensureOllama();
           return json({ ok: true });
         }
         case '/api/ai/pull': {

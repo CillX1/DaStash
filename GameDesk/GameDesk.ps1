@@ -388,6 +388,9 @@ $localModel = 'gemma3:4b'
 $localModelName = 'Gemma 3'
 $ollamaExe = Join-Path $env:LOCALAPPDATA 'Programs\Ollama\ollama.exe'
 $script:ollamaProc = $null   # the Ollama server GameDesk started itself; stopped again when GameDesk closes
+# The on/off switch in the AI panel (saved by the dashboard in data.json). Off: GameDesk doesn't start Ollama.
+$script:ollamaOff = $false
+try { $script:ollamaOff = [bool]([IO.File]::ReadAllText($dataFile) | ConvertFrom-Json).localAiOff } catch {}
 
 function Test-OllamaRunning {
     try { $r = [Net.HttpWebRequest]::Create("$ollamaBase/api/tags"); $r.Timeout = 1200; $r.GetResponse().Close(); return $true } catch { return $false }
@@ -395,16 +398,19 @@ function Test-OllamaRunning {
 
 # Ollama only runs while GameDesk is open: start it here unless it's already running (then it isn't ours to stop).
 function Start-Ollama {
-    if ($script:ollamaProc -and -not $script:ollamaProc.HasExited) { return }
+    if ($script:ollamaOff -or ($script:ollamaProc -and -not $script:ollamaProc.HasExited)) { return }
     $exe = if (Test-Path $ollamaExe) { $ollamaExe } else { (Get-Command ollama -ErrorAction SilentlyContinue).Source }
     if (-not $exe -or (Test-OllamaRunning)) { return }
     $script:ollamaProc = Start-Process $exe 'serve' -WindowStyle Hidden -PassThru
 }
 
-function Stop-Ollama {
-    if (-not $script:ollamaProc -or $script:ollamaProc.HasExited) { return }
-    # /T also ends the model runner (llama-server) Ollama started, which holds the model's memory.
-    taskkill.exe /PID $script:ollamaProc.Id /T /F | Out-Null
+# -All (the panel's off switch) also stops an Ollama GameDesk didn't start, e.g. its tray app.
+function Stop-Ollama([switch]$All) {
+    if ($script:ollamaProc -and -not $script:ollamaProc.HasExited) {
+        # /T also ends the model runner (llama-server) Ollama started, which holds the model's memory.
+        taskkill.exe /PID $script:ollamaProc.Id /T /F | Out-Null
+    }
+    if ($All) { Stop-Process -Name 'ollama app', 'ollama', 'llama-server' -Force -ErrorAction SilentlyContinue }
 }
 
 # GameDesk starts Ollama when it opens, so Ollama no longer needs to start with Windows and hold memory all day.
@@ -432,7 +438,7 @@ function Get-LocalAiStatus {
     } catch {}
     if ($installed -and -not $running) { Start-Ollama }   # e.g. Ollama was installed while GameDesk was open
     if ($installed) { try { Disable-OllamaAutostart } catch {} }
-    @{ installed = $installed; running = $running; hasModel = $hasModel; model = $localModel; name = $localModelName }
+    @{ installed = $installed; running = $running; hasModel = $hasModel; off = $script:ollamaOff; model = $localModel; name = $localModelName }
 }
 
 # Streams an answer from Ollama (newline-delimited JSON).
@@ -590,6 +596,12 @@ function Handle($ctx) {
             if ($problem) { return SendJson $ctx @{ ok = $false; error = $problem } }
             New-Item -ItemType Directory -Force (Split-Path $claudeKeyFile) | Out-Null
             ConvertTo-SecureString $key -AsPlainText -Force | ConvertFrom-SecureString | Set-Content $claudeKeyFile
+            return SendJson $ctx @{ ok = $true }
+        }
+        '/api/ai/power' {
+            # The on/off switch in the AI panel.
+            $script:ollamaOff = $q['on'] -ne '1'
+            if ($script:ollamaOff) { Stop-Ollama -All } else { Start-Ollama }
             return SendJson $ctx @{ ok = $true }
         }
         '/api/ai/pull' {

@@ -123,6 +123,7 @@
     border-radius: 8px; color: var(--muted); }
   .ibtn:hover { background: var(--card-2); border-color: var(--line); color: var(--text); }
   .ibtn svg.i { width: 15px; height: 15px; }
+  #localPower.on { color: var(--good); }
   .claude-card { min-height: 0; --c: var(--claude); }
   .claude-card.big { position: fixed; inset: 28px max(28px, calc(50vw - 520px)); z-index: 30; box-shadow: 0 30px 90px #000b; }
   .chat-backdrop { position: fixed; inset: 0; background: #05060acc; z-index: 29; backdrop-filter: blur(3px); }
@@ -328,6 +329,7 @@
         <button class="ibtn" id="chatNew" title="New chat"><svg class="i" data-i="plus"></svg></button>
         <button class="ibtn" id="chatExpand" title="Bigger / smaller"><svg class="i" data-i="expand"></svg></button>
         <button class="ibtn" id="chatKeyBtn" title="API key"><svg class="i" data-i="key"></svg></button>
+        <button class="ibtn hidden" id="localPower" title="Turn the local AI off"><svg class="i" data-i="power"></svg></button>
       </div>
     </div>
 
@@ -362,6 +364,7 @@
         <div class="bar"><i id="pullBar"></i></div>
       </div>
       <div class="key-alt">
+        <button class="btn solid hidden" id="localOn"><svg class="i" data-i="power"></svg>Turn on</button>
         <button class="btn solid hidden" id="localPull"><svg class="i" data-i="download"></svg>Download (3.3 GB)</button>
         <button class="btn" id="localCheck"><svg class="i" data-i="refresh"></svg>Check again</button>
       </div>
@@ -525,6 +528,7 @@ const ICONS = {
   circle: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/>',
   expand: '<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>',
   key: '<circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6M15.5 7.5l3 3L22 7l-3-3"/>',
+  power: '<path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.8 0"/>',
 };
 const svg = name => `<svg class="i" viewBox="0 0 24 24">${ICONS[name] || ''}</svg>`;
 document.querySelectorAll('svg.i[data-i]').forEach(s => { s.setAttribute('viewBox', '0 0 24 24'); s.innerHTML = ICONS[s.dataset.i] || ''; });
@@ -620,7 +624,7 @@ let ai = { local: { installed: false, running: false, hasModel: false, name: 'Ge
 const chatLog = $('chatLog'), chatQ = $('claudeQ');
 const starters = [['Explain something', 'Explain this simply: '], ['Plan my day', 'Help me plan my day: '],
   ['Game tips', 'Give me tips for '], ['Best settings', 'What are the best settings for ']];
-const localReady = () => ai.local.running && ai.local.hasModel;
+const localReady = () => !ai.local.off && ai.local.running && ai.local.hasModel;
 const sleep = ms => new Promise(res => setTimeout(res, ms));
 
 function chatScroll() { chatLog.scrollTop = chatLog.scrollHeight; }
@@ -655,16 +659,23 @@ function refreshView() {
   $('claudeCard').classList.toggle('local', engine === 'local');
   [...$('engineSeg').children].forEach(b => b.classList.toggle('on', b.dataset.engine === engine));
   $('chatKeyBtn').classList.toggle('hidden', engine !== 'claude');
+  const pw = $('localPower');
+  pw.classList.toggle('hidden', engine !== 'local' || !ai.local.installed);
+  pw.classList.toggle('on', !ai.local.off);
+  pw.title = ai.local.off ? 'Turn the local AI on' : 'Turn the local AI off (frees its memory)';
   if (engine === 'claude') setView(forceKey || !hasKey ? 'key' : 'chat');
   else setView(localReady() ? 'chat' : 'local');
 }
 function renderLocalSetup() {
   const L = ai.local;
   $('localSteps').classList.toggle('hidden', L.installed);
-  $('localPull').classList.toggle('hidden', !(L.running && !L.hasModel) || pulling);
+  $('localOn').classList.toggle('hidden', !(L.installed && L.off));
+  $('localCheck').classList.toggle('hidden', L.installed && L.off);
+  $('localPull').classList.toggle('hidden', L.off || !(L.running && !L.hasModel) || pulling);
   $('pullBox').classList.toggle('hidden', !pulling);
   $('localText').textContent =
     !L.installed ? 'Chat with an AI that runs on your own PC: free, private and works offline. It needs the free Ollama app.'
+    : L.off ? 'The local AI is turned off, so it isn\'t using any memory. Turn it on to chat (it uses about 3–4 GB of memory while on).'
     : !L.running ? 'Ollama is installed but not running yet. GameDesk is starting it; this can take a few seconds.'
     : pulling ? `Downloading ${L.name}. This only happens once.`
     : `One last step: download the ${L.name} AI model (about 3.3 GB, one time only).`;
@@ -685,6 +696,20 @@ $('localCheck').onclick = async () => {
   $('localCheck').disabled = true; await loadAiStatus(); refreshView(); $('localCheck').disabled = false;
   if (localReady()) toast('Local AI is ready');
 };
+// The power button: off stops Ollama completely and frees its memory; GameDesk then won't start it until it's turned back on.
+async function setLocalPower(on) {
+  if (chatBusy || pulling) return toast('Wait until the AI has finished');
+  $('localPower').disabled = $('localOn').disabled = true;
+  try {
+    await post('/api/ai/power?on=' + (on ? 1 : 0));
+    state.localAiOff = !on; save();
+    toast(on ? 'Local AI is starting…' : 'Local AI is off');
+  } catch { toast('Could not switch the local AI ' + (on ? 'on' : 'off')); }
+  await loadAiStatus(); refreshView();
+  $('localPower').disabled = $('localOn').disabled = false;
+}
+$('localPower').onclick = () => setLocalPower(!!ai.local.off);
+$('localOn').onclick = () => setLocalPower(true);
 $('localPull').onclick = async () => {
   pulling = true; renderLocalSetup();
   const pretty = t => /^pulling/.test(t) ? 'Downloading…' : /verifying/.test(t) ? 'Checking the download…' : /writing|success/.test(t) ? 'Finishing…' : 'Starting download…';
@@ -703,7 +728,7 @@ $('localPull').onclick = async () => {
   if (localReady()) toast('Local AI is ready');
 };
 // While the local AI is still getting ready (e.g. Ollama starting up), check again now and then.
-every(8000, () => { if (engine === 'local' && !localReady() && !pulling) loadAiStatus().then(refreshView); });
+every(8000, () => { if (engine === 'local' && !ai.local.off && !localReady() && !pulling) loadAiStatus().then(refreshView); });
 
 function friendlyError(r, eng) {
   const m = (r.error || '').toLowerCase();
