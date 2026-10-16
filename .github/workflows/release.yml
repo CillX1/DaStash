@@ -1,0 +1,50 @@
+name: Build installer
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Work out version
+        id: ver
+        shell: pwsh
+        run: |
+          if ($env:GITHUB_REF_TYPE -eq 'tag') { $v = $env:GITHUB_REF_NAME.TrimStart('v') }
+          else { $v = ((Select-String -Path GameDesk/Install.ps1 -Pattern "\`$version = '(.+)'").Matches[0].Groups[1].Value) }
+          "version=$v" >> $env:GITHUB_OUTPUT
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) { choco install innosetup -y --no-progress }
+
+      - name: Build installer
+        shell: pwsh
+        run: '& "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" /DAppVersion=${{ steps.ver.outputs.version }} installer\GameDesk.iss'
+
+      - name: Build portable zip
+        shell: pwsh
+        run: |
+          $files = 'GameDesk.ps1','dashboard.html','logo.svg','logo.png','GameDesk.ico','Install GameDesk.bat','Install.ps1','Uninstall.ps1','README.txt' | ForEach-Object { "GameDesk/$_" }
+          Compress-Archive -Path $files -DestinationPath "installer/Output/GameDesk-${{ steps.ver.outputs.version }}.zip"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: GameDesk-${{ steps.ver.outputs.version }}
+          path: installer/Output/*
+
+      - name: Publish GitHub release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: installer/Output/*
+          generate_release_notes: true
