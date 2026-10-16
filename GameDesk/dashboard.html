@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#000000">
 <title>GameDesk</title>
 <link rel="icon" href="/logo.svg" type="image/svg+xml">
 <style>
@@ -97,6 +98,14 @@
   .tile .ic { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center;
     background: color-mix(in srgb, var(--c, #9aa3b5) 15%, transparent); color: var(--c, #b8bfcc); }
   .tile span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+  .tile { position: relative; }
+  .tile .rm { position: absolute; top: 5px; right: 5px; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; background: var(--bad); color: #fff; }
+  .tile .rm svg.i { width: 12px; height: 12px; }
+  .tile.editing { border-color: var(--line-2); border-style: dashed; }
+  .tile.editing:hover { border-color: var(--bad); }
+  #linkForm { margin-top: 10px; }
+  #linkForm input { flex: 1; min-width: 0; }
+  #linkForm .btn { flex: none; width: auto; padding: 0 14px; }
 
   /* ---------- meters ---------- */
   .stat { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 7px; }
@@ -442,8 +451,15 @@
 
   <!-- Row 5 -->
   <section class="card full" data-w="links" data-name="Quick links" style="--c:var(--accent-2)">
-    <div class="card-h"><div class="badge"><svg class="i" data-i="globe"></svg></div><h2>Quick links</h2><div class="meta">opens in your browser</div></div>
+    <div class="card-h"><div class="badge"><svg class="i" data-i="globe"></svg></div><h2>Quick links</h2><div class="meta"><button class="link" id="linkEdit">Edit links</button></div></div>
     <div class="tiles" id="linkTiles" style="--cols:9"></div>
+    <form class="row hidden" id="linkForm">
+      <input id="linkName" placeholder="Name, e.g. Netflix" maxlength="24">
+      <input id="linkUrl" placeholder="Address, e.g. netflix.com">
+      <button class="btn solid">Add link</button>
+      <button class="btn" type="button" id="linkReset" title="Bring back the original links">Reset</button>
+      <button class="btn" type="button" id="linkDone">Done</button>
+    </form>
   </section>
 
 </main>
@@ -946,10 +962,7 @@ async function loadApps() {
             tile('monitor', 'Display', null, { tool: 'display' }), tile('speaker', 'Sound', null, { tool: 'sound' }));
   while (lt.children.length > 6) lt.lastChild.remove();
 
-  if (installed.has('WhatsApp')) {
-    const w = [...$('linkTiles').children].find(x => x.dataset.url?.includes('whatsapp'));
-    if (w) { delete w.dataset.url; w.dataset.app = 'WhatsApp'; }
-  }
+  hasWhatsApp = installed.has('WhatsApp'); renderLinks();
 
   const games = data.steam || [];
   $('gamesCount').textContent = games.length ? `${games.length} Steam games` : '';
@@ -974,10 +987,49 @@ async function loadApps() {
  ['bluetooth', 'Bluetooth', 'bluetooth'], ['calc', 'Calculator', 'calc'], ['refresh', 'Update', 'update'], ['lock', 'Lock PC', 'lock']]
   .forEach(([i, l, id]) => $('toolTiles').append(tile(i, l, '#6fb4ff', { tool: id })));
 
-[['tv', 'YouTube', '#ff4e45', 'https://www.youtube.com'], ['twitch', 'Twitch', '#a970ff', 'https://www.twitch.tv'], ['mail', 'Gmail', '#ea6c5f', 'https://mail.google.com'],
+/* ---------- quick links (your own list is saved in state.links) ---------- */
+const DEFAULT_LINKS = [['tv', 'YouTube', '#ff4e45', 'https://www.youtube.com'], ['twitch', 'Twitch', '#a970ff', 'https://www.twitch.tv'], ['mail', 'Gmail', '#ea6c5f', 'https://mail.google.com'],
  ['calendar', 'Calendar', '#5aa9ff', 'https://calendar.google.com'], ['bubble', 'Reddit', '#ff6a2b', 'https://www.reddit.com'], ['phone', 'WhatsApp', '#33d36b', 'https://web.whatsapp.com'],
  ['bag', 'Steam Store', '#66c0f4', 'https://store.steampowered.com'], ['gift', 'Free games', '#f5b947', 'https://store.epicgames.com/free-games'], ['globe', 'Google', '#9aa3b5', 'https://www.google.com']]
-  .forEach(([i, l, c, u]) => $('linkTiles').append(tile(i, l, c, { url: u })));
+  .map(([icon, name, color, url]) => ({ icon, name, color, url }));
+let hasWhatsApp = false, editingLinks = false;
+const links = () => Array.isArray(state.links) ? state.links : DEFAULT_LINKS;
+function renderLinks() {
+  const T = $('linkTiles'); T.innerHTML = '';
+  links().forEach((l, i) => {
+    const app = hasWhatsApp && !editingLinks && l.url.includes('web.whatsapp.com');
+    const t = tile(l.icon || 'globe', l.name, l.color || '#9aa3b5', editingLinks ? {} : app ? { app: 'WhatsApp' } : { url: l.url });
+    t.title = editingLinks ? 'Remove ' + l.name : l.url;
+    if (editingLinks) {
+      t.classList.add('editing');
+      const rm = el('span', { className: 'rm' }); rm.innerHTML = svg('x'); t.append(rm);
+      t.onclick = () => { state.links = links().filter((_, j) => j !== i); save(); renderLinks(); };
+    }
+    T.append(t);
+  });
+  if (!links().length) T.append(el('div', { className: 'empty', textContent: 'No links yet. Click "Edit links" to add some.' }));
+  T.style.setProperty('--cols', Math.max(1, Math.min(9, links().length)));
+  $('linkForm').classList.toggle('hidden', !editingLinks);
+  $('linkEdit').textContent = editingLinks ? 'Click a link to remove it' : 'Edit links';
+}
+$('linkEdit').onclick = () => { editingLinks = !editingLinks; renderLinks(); if (editingLinks) $('linkName').focus(); };
+$('linkDone').onclick = () => { editingLinks = false; renderLinks(); };
+$('linkReset').onclick = () => { delete state.links; save(); renderLinks(); };
+$('linkForm').onsubmit = e => {
+  e.preventDefault();
+  let url = $('linkUrl').value.trim();
+  if (!url) return $('linkUrl').focus();
+  if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+  url = url.replace(/^http:/i, 'https:');
+  let host;
+  try { host = new URL(url).hostname; } catch { host = ''; }
+  if (!host.includes('.') || /\s/.test(url)) return toast('That address doesn\'t look right');
+  const name = $('linkName').value.trim() || host.replace(/^www\./, '').split('.')[0].replace(/^./, c => c.toUpperCase());
+  state.links = [...links(), { icon: 'globe', name, color: '#3dd6c6', url }];
+  $('linkName').value = $('linkUrl').value = '';
+  $('linkName').focus();
+  save(); renderLinks();
+};
 
 /* ---------- weather (open-meteo, no key needed) ---------- */
 const wxIcon = c => c === 0 ? '☀️' : c <= 2 ? '🌤️' : c === 3 ? '☁️' : c <= 48 ? '🌫️' : c <= 57 ? '🌦️' : c <= 67 ? '🌧️' : c <= 77 ? '❄️' : c <= 82 ? '🌧️' : c <= 86 ? '🌨️' : '⛈️';
@@ -1096,7 +1148,7 @@ document.addEventListener('click', e => { if (!e.target.closest('#drawer')) $('d
 (async () => {
   try { state = { ...state, ...(await api('/api/store')) }; } catch {}
   $('notes').value = state.notes || '';
-  applyHidden(); renderTodos(); loadWeather(); loadApps(); initAi();
+  applyHidden(); renderTodos(); renderLinks(); loadWeather(); loadApps(); initAi();
 })();
 </script>
 </body>

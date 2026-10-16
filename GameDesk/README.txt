@@ -10,7 +10,7 @@ INSTALL
 WHAT'S INSIDE
   Spotify controls (press play and Spotify starts hidden in the background, with album art), an AI chat (free local AI or Claude), CPU / RAM / disk, battery, ping, game launchers
   (Steam, Xbox, Ubisoft, Epic, ...), your installed Steam games, Windows quick tools,
-  weather, to-do list, timer, notes and quick links. Click "Customize" to hide widgets.
+  weather, to-do list, timer, notes and quick links (click "Edit links" to choose your own). Click "Customize" to hide widgets.
 
 NEEDS
   Windows 10 or 11 with Microsoft Edge (installed by default). Nothing else.

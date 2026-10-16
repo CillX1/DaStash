@@ -2,7 +2,7 @@
 ; Build:  ISCC.exe installer\GameDesk.iss  (optionally /DAppVersion=1.2.3)
 
 #ifndef AppVersion
-  #define AppVersion "1.4.0"
+  #define AppVersion "1.5.0"
 #endif
 #define AppSrc "..\GameDesk"
 #define PS "{sys}\WindowsPowerShell\v1.0\powershell.exe"

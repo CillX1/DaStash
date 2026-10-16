@@ -24,7 +24,8 @@
 | 🤖 **AI chat** | A free AI that runs on your own PC (Ollama), or Claude with your own API key. |
 | 📊 **PC stats** | CPU, RAM, disk, battery and ping at a glance. |
 | 🎮 **Games** | Launch Steam, Xbox, Ubisoft, Epic, EA, Battle.net and more, plus your installed Steam games. |
-| 🛠️ **Quick tools** | Windows shortcuts, weather, to-do list, timer, notes and quick links. |
+| 🛠️ **Quick tools** | Windows shortcuts, weather, to-do list, timer and notes. |
+| 🔗 **Quick links** | Your favourite websites one click away. Add or remove them with **Edit links**. |
 | 🎨 **Customize** | Hide the widgets you don't need. |
 
 ## Install
@@ -72,8 +73,8 @@ The installer lands in `installer\Output\`.
 Bump `$version` in `GameDesk/Install.ps1`, then push a tag:
 
 ```powershell
-git tag v1.4.0
-git push origin v1.4.0
+git tag v1.5.0
+git push origin v1.5.0
 ```
 
 GitHub Actions ([`.github/workflows/release.yml`](.github/workflows/release.yml)) builds the installer and the zip and attaches both to a new GitHub release.
