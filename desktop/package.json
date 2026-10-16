@@ -1,0 +1,46 @@
+{
+  "name": "gamedesk",
+  "productName": "GameDesk",
+  "version": "1.5.0",
+  "description": "All your everyday and gaming widgets in one window.",
+  "author": "CillX1 <291351647+CillX1@users.noreply.github.com>",
+  "homepage": "https://github.com/CillX1/GameDesk",
+  "license": "GPL-3.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist:mac": "electron-builder --mac --x64 --arm64 --publish never",
+    "dist:linux": "electron-builder --linux --x64 --publish never"
+  },
+  "devDependencies": {
+    "electron": "33.2.1",
+    "electron-builder": "25.1.8"
+  },
+  "build": {
+    "appId": "io.github.cillx1.gamedesk",
+    "productName": "GameDesk",
+    "files": ["main.js", "server.js", "platform.js", "package.json"],
+    "extraResources": [
+      { "from": "../GameDesk", "to": "ui", "filter": ["dashboard.html", "logo.svg", "logo.png"] }
+    ],
+    "directories": { "output": "dist" },
+    "artifactName": "GameDesk-${version}-${arch}.${ext}",
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.utilities",
+      "icon": "../GameDesk/logo-2048.png",
+      "identity": null,
+      "darkModeSupport": true
+    },
+    "afterPack": "./adhoc-sign.js",
+    "dmg": { "title": "GameDesk" },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "category": "Utility",
+      "icon": "../GameDesk/logo-2048.png",
+      "maintainer": "CillX1 <291351647+CillX1@users.noreply.github.com>",
+      "synopsis": "Widget dashboard for gamers"
+    },
+    "deb": { "depends": ["libnotify4", "libxtst6", "libnss3"] }
+  }
+}

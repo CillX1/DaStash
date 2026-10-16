@@ -812,7 +812,7 @@ function setPlayIcon(playing) {
 }
 let spMode = 'open';
 function renderAppBtn(sp) {
-  spMode = !sp.running ? 'open' : sp.hidden ? 'show' : 'hide';
+  spMode = !sp.running ? 'open' : sp.hidden || sp.canHide === false ? 'show' : 'hide';
   $('spAppBtn').lastChild.textContent = { open: 'Open Spotify', show: 'Show app', hide: 'Hide app' }[spMode];
   $('spAppBtn').title = { open: 'Open the Spotify app', show: 'Spotify is running hidden in the background. Show its window.', hide: 'Hide the Spotify window; keep the music playing' }[spMode];
 }
@@ -943,6 +943,7 @@ const launcherInfo = {
   Steam: ['gamepad', '#66c0f4'], XBOX: ['circle', '#3fbf3f'], 'Ubisoft Connect': ['circle', '#4c8dff'], 'Epic Games Launcher': ['layers', '#d6d6d6'],
   EA: ['circle', '#ff5a5a'], 'EA app': ['circle', '#ff5a5a'], 'Battle.net': ['circle', '#22b4ff'], 'Riot Client': ['circle', '#ff4655'],
   'GOG GALAXY': ['circle', '#b26be0'], Discord: ['chat', '#7b86ff'], 'OBS Studio': ['circle', '#c7c7c7'],
+  Heroic: ['layers', '#ff6f61'], Lutris: ['circle', '#ff9f1c'],
 };
 const shortName = a => ({ 'Ubisoft Connect': 'Ubisoft', 'Epic Games Launcher': 'Epic', XBOX: 'Xbox', 'GOG GALAXY': 'GOG', 'Riot Client': 'Riot', 'OBS Studio': 'OBS' }[a] || a);
 async function loadApps() {
@@ -960,6 +961,12 @@ async function loadApps() {
   if (installed.has('AMD Software')) lt.append(tile('cpu', 'AMD', '#ff5148', { app: 'AMD Software' }));
   lt.append(tile('zap', 'Power', null, { tool: 'power' }), tile('battery', 'Battery', null, { tool: 'battery' }),
             tile('monitor', 'Display', null, { tool: 'display' }), tile('speaker', 'Sound', null, { tool: 'sound' }));
+  if (data.platform) document.querySelector('[data-w="lenovo"] h2').textContent = 'Battery & Power';
+  // Mac/Linux: only show the tools that exist there, with their own names (e.g. "Activity Monitor").
+  if (data.tools) document.querySelectorAll('.tile[data-tool]').forEach(t => {
+    if (!data.tools.includes(t.dataset.tool)) t.remove();
+    else if (data.toolNames?.[t.dataset.tool]) t.lastChild.textContent = data.toolNames[t.dataset.tool];
+  });
   while (lt.children.length > 6) lt.lastChild.remove();
 
   hasWhatsApp = installed.has('WhatsApp'); renderLinks();

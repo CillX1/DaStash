@@ -3,3 +3,6 @@ GameDesk/data.json
 # Build output
 dist/
 installer/Output/
+desktop/node_modules/
+desktop/dist/
+desktop/package-lock.json

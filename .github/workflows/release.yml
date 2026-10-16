@@ -1,7 +1,10 @@
-name: Build installer
+name: Build installers
 
+# Every push to main builds all installers (downloadable from the run's page);
+# pushing a tag like v1.6.0 also publishes them as a GitHub release.
 on:
   push:
+    branches: [main]
     tags: ['v*']
   workflow_dispatch:
 
@@ -9,7 +12,7 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  windows:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -35,16 +38,63 @@ jobs:
         shell: pwsh
         run: |
           $files = 'GameDesk.ps1','dashboard.html','logo.svg','logo.png','GameDesk.ico','Install GameDesk.bat','Install.ps1','Uninstall.ps1','README.txt' | ForEach-Object { "GameDesk/$_" }
-          Compress-Archive -Path $files -DestinationPath "installer/Output/GameDesk-${{ steps.ver.outputs.version }}.zip"
+          Compress-Archive -Path $files -DestinationPath "installer/Output/GameDesk-${{ steps.ver.outputs.version }}-windows-portable.zip"
 
       - uses: actions/upload-artifact@v4
         with:
-          name: GameDesk-${{ steps.ver.outputs.version }}
+          name: windows
           path: installer/Output/*
 
-      - name: Publish GitHub release
+      - name: Publish to the GitHub release
         if: github.ref_type == 'tag'
         uses: softprops/action-gh-release@v2
         with:
           files: installer/Output/*
           generate_release_notes: true
+
+  mac-linux:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            target: mac
+          - os: ubuntu-latest
+            target: linux
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Set version
+        if: github.ref_type == 'tag'
+        run: npm version "${GITHUB_REF_NAME#v}" --no-git-tag-version --allow-same-version
+
+      - name: Install
+        run: npm install --no-audit --no-fund
+
+      - name: Build
+        run: npm run dist:${{ matrix.target }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.target }}
+          path: |
+            desktop/dist/*.dmg
+            desktop/dist/*.AppImage
+            desktop/dist/*.deb
+
+      - name: Publish to the GitHub release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            desktop/dist/*.dmg
+            desktop/dist/*.AppImage
+            desktop/dist/*.deb
