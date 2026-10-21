@@ -22,7 +22,7 @@ jobs:
         shell: pwsh
         run: |
           if ($env:GITHUB_REF_TYPE -eq 'tag') { $v = $env:GITHUB_REF_NAME.TrimStart('v') }
-          else { $v = ((Select-String -Path GameDesk/Install.ps1 -Pattern "\`$version = '(.+)'").Matches[0].Groups[1].Value) }
+          else { $v = ((Select-String -Path Questrig/Install.ps1 -Pattern "\`$version = '(.+)'").Matches[0].Groups[1].Value) }
           "version=$v" >> $env:GITHUB_OUTPUT
 
       - name: Install Inno Setup
@@ -32,13 +32,13 @@ jobs:
 
       - name: Build installer
         shell: pwsh
-        run: '& "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" /DAppVersion=${{ steps.ver.outputs.version }} installer\GameDesk.iss'
+        run: '& "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" /DAppVersion=${{ steps.ver.outputs.version }} installer\Questrig.iss'
 
       - name: Build portable zip
         shell: pwsh
         run: |
-          $files ='GameDesk.ps1','dashboard.html','logo.svg','logo.png','GameDesk.ico','Install GameDesk.bat','Install.ps1','Uninstall.ps1','README.txt','quiz' | ForEach-Object { "GameDesk/$_" }
-          Compress-Archive -Path $files -DestinationPath "installer/Output/GameDesk-${{ steps.ver.outputs.version }}-windows-portable.zip"
+          $files ='Questrig.ps1','dashboard.html','logo.svg','logo.png','Questrig.ico','Install Questrig.bat','Install.ps1','Uninstall.ps1','README.txt','quiz','Move-From-GameDesk.ps1' | ForEach-Object { "Questrig/$_" }
+          Compress-Archive -Path $files -DestinationPath "installer/Output/Questrig-${{ steps.ver.outputs.version }}-windows-portable.zip"
 
       - uses: actions/upload-artifact@v4
         with:

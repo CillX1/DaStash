@@ -1,5 +1,5 @@
 // Everything that differs between macOS and Linux: stats, Spotify, installed apps, tools.
-// The Windows version of GameDesk is GameDesk/GameDesk.ps1; this file is for the Mac/Linux app.
+// The Windows version of Questrig is Questrig/Questrig.ps1; this file is for the Mac/Linux app.
 const os = require('os');
 const fs = require('fs');
 const path = require('path');
@@ -320,16 +320,16 @@ function startOllama() {
     return () => { try { process.kill(-c.pid); } catch {} };
   } catch { return null; }
 }
-// The AI panel's off switch: also stops an Ollama GameDesk didn't start.
+// The AI panel's off switch: also stops an Ollama Questrig didn't start.
 function stopAllOllama() {
   if (isMac) osa('quit app "Ollama"');
   run('pkill', ['-x', 'ollama']);
 }
 
 // ---------- anti-freeze ----------
-// macOS and Linux have no general "Not Responding" signal for other apps, so here GameDesk only watches memory
+// macOS and Linux have no general "Not Responding" signal for other apps, so here Questrig only watches memory
 // and offers to close the biggest apps of this user when it's almost full.
-const NEVER_END = /^(Finder|Dock|WindowServer|loginwindow|SystemUIServer|kernel_task|launchd|systemd|Xorg|Xwayland|gnome-shell|plasmashell|kwin.*|sddm|gdm.*|pipewire.*|pulseaudio|dbus.*|GameDesk.*|electron)$/i;
+const NEVER_END = /^(Finder|Dock|WindowServer|loginwindow|SystemUIServer|kernel_task|launchd|systemd|Xorg|Xwayland|gnome-shell|plasmashell|kwin.*|sddm|gdm.*|pipewire.*|pulseaudio|dbus.*|Questrig.*|electron)$/i;
 async function memoryPct() {
   const total = os.totalmem();
   return Math.round(100 * (total - await memAvailable()) / total);
