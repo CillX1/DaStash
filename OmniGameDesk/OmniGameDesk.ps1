@@ -1,4 +1,4 @@
-﻿# OminiGameDesk - a widget dashboard for Windows.
+﻿# OmniGameDesk - a widget dashboard for Windows.
 # Runs a tiny local server (127.0.0.1 only) that the dashboard window talks to,
 # then opens the dashboard in its own Edge app window. Closing the window stops everything.
 param([switch]$CreateShortcut)
@@ -9,14 +9,14 @@ $dataFile = Join-Path $root 'data.json'
 
 if ($CreateShortcut) {
     $sh = New-Object -ComObject WScript.Shell
-    $lnk = $sh.CreateShortcut((Join-Path ([Environment]::GetFolderPath('Desktop')) 'OminiGameDesk.lnk'))
+    $lnk = $sh.CreateShortcut((Join-Path ([Environment]::GetFolderPath('Desktop')) 'OmniGameDesk.lnk'))
     $lnk.TargetPath = "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe"
-    $lnk.Arguments = "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$root\OminiGameDesk.ps1`""
+    $lnk.Arguments = "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$root\OmniGameDesk.ps1`""
     $lnk.WorkingDirectory = $root
     $lnk.WindowStyle = 7
-    $lnk.IconLocation = "$root\OminiGameDesk.ico"
+    $lnk.IconLocation = "$root\OmniGameDesk.ico"
     $lnk.Save()
-    Write-Host 'Shortcut "OminiGameDesk" created on your Desktop.'
+    Write-Host 'Shortcut "OmniGameDesk" created on your Desktop.'
     return
 }
 
@@ -65,10 +65,10 @@ public static class GD {
 '@
 [void][GD]::Cpu()
 
-$singleInstance = [Threading.Mutex]::new($false, 'Local\OminiGameDesk')
+$singleInstance = [Threading.Mutex]::new($false, 'Local\OmniGameDesk')
 $isFirst = try { $singleInstance.WaitOne(0) } catch [Threading.AbandonedMutexException] { $true }
 if (-not $isFirst) {
-    $w = Get-Process msedge -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowTitle -like '*OminiGameDesk*' } | Select-Object -First 1
+    $w = Get-Process msedge -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowTitle -like '*OmniGameDesk*' } | Select-Object -First 1
     if ($w) { [void][GD]::ShowWindow($w.MainWindowHandle, 9); [void][GD]::SetForegroundWindow($w.MainWindowHandle) }
     return
 }
@@ -176,7 +176,7 @@ function Get-SpotifyNow {
     }
 }
 
-# Spotify's window handle while OminiGameDesk keeps it hidden (a hidden window has no MainWindowHandle, so remember it).
+# Spotify's window handle while OmniGameDesk keeps it hidden (a hidden window has no MainWindowHandle, so remember it).
 $script:spotifyHwnd = [IntPtr]::Zero
 function Get-SpotifyVisibleWindow { Get-Process Spotify -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne 0 } | Select-Object -First 1 }
 function Test-SpotifyHidden { $script:spotifyHwnd -ne [IntPtr]::Zero -and [GD]::IsWindow($script:spotifyHwnd) -and -not [GD]::IsWindowVisible($script:spotifyHwnd) }
@@ -290,9 +290,9 @@ function Get-Pings {
 # ---------- Claude chat ----------
 # The API key is stored encrypted for this Windows user only (DPAPI), outside the app folder,
 # so it is never part of a shared zip.
-$claudeKeyFile = Join-Path $env:LOCALAPPDATA 'OminiGameDesk\claude.key'
+$claudeKeyFile = Join-Path $env:LOCALAPPDATA 'OmniGameDesk\claude.key'
 $claudeModel = 'claude-opus-5-5'
-$claudeSystem = 'You are Claude, answering inside OminiGameDesk, a small widget dashboard on the user''s Windows gaming PC. ' +
+$claudeSystem = 'You are Claude, answering inside OmniGameDesk, a small widget dashboard on the user''s Windows gaming PC. ' +
     'Keep answers short and easy to scan: lead with the answer, then brief details. Use simple Markdown (bold, lists, code blocks) only when it helps.'
 $claudeJobs = @{}
 [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
@@ -389,8 +389,8 @@ $ollamaBase = 'http://127.0.0.1:11434'
 $localModel = 'gemma3:4b'
 $localModelName = 'Gemma 3'
 $ollamaExe = Join-Path $env:LOCALAPPDATA 'Programs\Ollama\ollama.exe'
-$script:ollamaProc = $null   # the Ollama server OminiGameDesk started itself; stopped again when OminiGameDesk closes
-# The on/off switch in the AI panel (saved by the dashboard in data.json). Off: OminiGameDesk doesn't start Ollama.
+$script:ollamaProc = $null   # the Ollama server OmniGameDesk started itself; stopped again when OmniGameDesk closes
+# The on/off switch in the AI panel (saved by the dashboard in data.json). Off: OmniGameDesk doesn't start Ollama.
 $script:ollamaOff = $false
 try { $script:ollamaOff = [bool]([IO.File]::ReadAllText($dataFile) | ConvertFrom-Json).localAiOff } catch {}
 
@@ -398,7 +398,7 @@ function Test-OllamaRunning {
     try { $r = [Net.HttpWebRequest]::Create("$ollamaBase/api/tags"); $r.Timeout = 1200; $r.GetResponse().Close(); return $true } catch { return $false }
 }
 
-# Ollama only runs while OminiGameDesk is open: start it here unless it's already running (then it isn't ours to stop).
+# Ollama only runs while OmniGameDesk is open: start it here unless it's already running (then it isn't ours to stop).
 function Start-Ollama {
     if ($script:ollamaOff -or ($script:ollamaProc -and -not $script:ollamaProc.HasExited)) { return }
     $exe = if (Test-Path $ollamaExe) { $ollamaExe } else { (Get-Command ollama -ErrorAction SilentlyContinue).Source }
@@ -406,7 +406,7 @@ function Start-Ollama {
     $script:ollamaProc = Start-Process $exe 'serve' -WindowStyle Hidden -PassThru
 }
 
-# -All (the panel's off switch) also stops an Ollama OminiGameDesk didn't start, e.g. its tray app.
+# -All (the panel's off switch) also stops an Ollama OmniGameDesk didn't start, e.g. its tray app.
 function Stop-Ollama([switch]$All) {
     if ($script:ollamaProc -and -not $script:ollamaProc.HasExited) {
         # /T also ends the model runner (llama-server) Ollama started, which holds the model's memory.
@@ -415,11 +415,11 @@ function Stop-Ollama([switch]$All) {
     if ($All) { Stop-Process -Name 'ollama app', 'ollama', 'llama-server' -Force -ErrorAction SilentlyContinue }
 }
 
-# OminiGameDesk starts Ollama when it opens, so Ollama no longer needs to start with Windows and hold memory all day.
+# OmniGameDesk starts Ollama when it opens, so Ollama no longer needs to start with Windows and hold memory all day.
 # Switched off once, the same way Task Manager > Startup apps does it, so the user can turn it back on there
-# (the marker file makes sure OminiGameDesk doesn't undo that). Uninstalling OminiGameDesk turns it back on.
+# (the marker file makes sure OmniGameDesk doesn't undo that). Uninstalling OmniGameDesk turns it back on.
 function Disable-OllamaAutostart {
-    $marker = Join-Path $env:LOCALAPPDATA 'OminiGameDesk\ollama-autostart-off'
+    $marker = Join-Path $env:LOCALAPPDATA 'OmniGameDesk\ollama-autostart-off'
     if ((Test-Path $marker) -or -not (Test-Path (Join-Path ([Environment]::GetFolderPath('Startup')) 'Ollama.lnk'))) { return }
     $key = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\StartupFolder'
     if (-not (Test-Path $key)) { New-Item -Path $key -Force | Out-Null }
@@ -438,7 +438,7 @@ function Get-LocalAiStatus {
         $running = $true
         $hasModel = [bool]($tags.models | Where-Object { $_.name -eq $localModel -or $_.model -eq $localModel })
     } catch {}
-    if ($installed -and -not $running) { Start-Ollama }   # e.g. Ollama was installed while OminiGameDesk was open
+    if ($installed -and -not $running) { Start-Ollama }   # e.g. Ollama was installed while OmniGameDesk was open
     if ($installed) { try { Disable-OllamaAutostart } catch {} }
     @{ installed = $installed; running = $running; hasModel = $hasModel; off = $script:ollamaOff; model = $localModel; name = $localModelName }
 }
@@ -476,7 +476,7 @@ $localWorker = {
 }
 
 function Start-LocalJob($messages) {
-    $system = "You are OminiGameDesk AI, a helpful assistant built into OminiGameDesk, a widget dashboard on the user's Windows gaming PC. " +
+    $system = "You are OmniGameDesk AI, a helpful assistant built into OmniGameDesk, a widget dashboard on the user's Windows gaming PC. " +
         "You run locally on their PC (model: $localModelName), so you work offline and cannot browse the web. Today is $((Get-Date).ToString('dddd, d MMMM yyyy')). " +
         'Keep answers short and easy to scan: lead with the answer, then brief details. Use simple Markdown only when it helps. ' +
         'If you are not sure about a fact, say so instead of guessing.'
@@ -513,10 +513,10 @@ function Read-JsonBody($req) {
 }
 
 # ---------- Anti-freeze ----------
-# Watches for programs that stop responding ("Not Responding") and for memory running out, while OminiGameDesk is open
+# Watches for programs that stop responding ("Not Responding") and for memory running out, while OmniGameDesk is open
 # (minimized is fine). It can only help while Windows itself still runs: a full freeze from a driver or
-# hardware problem stops OminiGameDesk too.
-$afFile = Join-Path $env:LOCALAPPDATA 'OminiGameDesk\antifreeze.json'
+# hardware problem stops OmniGameDesk too.
+$afFile = Join-Path $env:LOCALAPPDATA 'OmniGameDesk\antifreeze.json'
 $script:af = @{ auto = $false; autoSeconds = 30 }
 try {
     $saved = Get-Content $afFile -Raw -ErrorAction Stop | ConvertFrom-Json
@@ -526,7 +526,7 @@ try {
 $script:afHung = @{}                         # process id -> @{ name; title; since; noticed }
 $script:afLog = [Collections.ArrayList]::new()
 $script:afMemSince = $null; $script:afMemNoticed = $false
-# Never ended by OminiGameDesk: Windows itself (ending these crashes or logs you out).
+# Never ended by OmniGameDesk: Windows itself (ending these crashes or logs you out).
 $afNever = 'explorer', 'dwm', 'csrss', 'winlogon', 'wininit', 'lsass', 'services', 'smss', 'svchost', 'System', 'Idle',
     'fontdrvhost', 'LogonUI', 'sihost', 'ShellExperienceHost', 'StartMenuExperienceHost', 'SearchHost', 'TextInputHost'
 
@@ -534,17 +534,17 @@ function Add-AfLog([string]$text) {
     [void]$script:afLog.Insert(0, @{ at = (Get-Date).ToString('HH:mm'); text = $text })
     while ($script:afLog.Count -gt 8) { $script:afLog.RemoveAt(8) }
 }
-# A Windows notification, so you hear about it even while OminiGameDesk is minimized.
+# A Windows notification, so you hear about it even while OmniGameDesk is minimized.
 function Show-AfNotice([string]$text) {
     try {
         if (-not $script:afIcon) {
             Add-Type -AssemblyName System.Windows.Forms, System.Drawing
             $script:afIcon = New-Object System.Windows.Forms.NotifyIcon
-            $script:afIcon.Icon = New-Object System.Drawing.Icon (Join-Path $root 'OminiGameDesk.ico')
-            $script:afIcon.Text = 'OminiGameDesk Anti-Freeze'
+            $script:afIcon.Icon = New-Object System.Drawing.Icon (Join-Path $root 'OmniGameDesk.ico')
+            $script:afIcon.Text = 'OmniGameDesk Anti-Freeze'
         }
         $script:afIcon.Visible = $true
-        $script:afIcon.ShowBalloonTip(8000, 'OminiGameDesk Anti-Freeze', $text, [System.Windows.Forms.ToolTipIcon]::Warning)
+        $script:afIcon.ShowBalloonTip(8000, 'OmniGameDesk Anti-Freeze', $text, [System.Windows.Forms.ToolTipIcon]::Warning)
     } catch {}
 }
 function Get-AfName($p) {
@@ -552,14 +552,14 @@ function Get-AfName($p) {
     if ($d) { $d } else { $p.ProcessName }
 }
 function Get-AfTopMemory {
-    Get-Process | Where-Object { $_.MainWindowHandle -ne 0 -and $afNever -notcontains $_.ProcessName -and $_.Id -ne $PID -and $_.MainWindowTitle -notlike '*OminiGameDesk*' } |
+    Get-Process | Where-Object { $_.MainWindowHandle -ne 0 -and $afNever -notcontains $_.ProcessName -and $_.Id -ne $PID -and $_.MainWindowTitle -notlike '*OmniGameDesk*' } |
         Sort-Object WorkingSet64 -Descending | Select-Object -First 3 |
         ForEach-Object { @{ pid = $_.Id; name = (Get-AfName $_); mb = [int]($_.WorkingSet64 / 1MB) } }
 }
 function Update-AntiFreeze {
     $now = Get-Date; $seen = @{}
     foreach ($p in Get-Process | Where-Object { $_.MainWindowHandle -ne 0 }) {
-        if ($afNever -contains $p.ProcessName -or $p.Id -eq $PID -or $p.MainWindowTitle -like '*OminiGameDesk*') { continue }
+        if ($afNever -contains $p.ProcessName -or $p.Id -eq $PID -or $p.MainWindowTitle -like '*OmniGameDesk*') { continue }
         if (-not [GD]::IsHungAppWindow($p.MainWindowHandle)) { continue }
         $seen[$p.Id] = $true
         if (-not $script:afHung.ContainsKey($p.Id)) {
@@ -572,12 +572,12 @@ function Update-AntiFreeze {
         if ($script:af.auto -and $secs -ge $script:af.autoSeconds) {
             Stop-Process -Id $id -Force -ErrorAction SilentlyContinue
             Add-AfLog "Ended $($h.name) automatically (not responding for $secs s)"
-            Show-AfNotice "$($h.name) stopped responding, so OminiGameDesk ended it."
+            Show-AfNotice "$($h.name) stopped responding, so OmniGameDesk ended it."
             $script:afHung.Remove($id)
         } elseif (-not $h.noticed -and $secs -ge 10) {
             $h.noticed = $true
             Add-AfLog "$($h.name) stopped responding"
-            Show-AfNotice "$($h.name) is not responding. Open OminiGameDesk to end it."
+            Show-AfNotice "$($h.name) is not responding. Open OmniGameDesk to end it."
         }
     }
     $load = ([GD]::Mem()).dwMemoryLoad
@@ -586,7 +586,7 @@ function Update-AntiFreeze {
         elseif (-not $script:afMemNoticed -and ($now - $script:afMemSince).TotalSeconds -ge 10) {
             $script:afMemNoticed = $true
             Add-AfLog "Memory almost full ($load %)"
-            Show-AfNotice "Memory is almost full ($load %). Your PC may freeze. Open OminiGameDesk to close a big app."
+            Show-AfNotice "Memory is almost full ($load %). Your PC may freeze. Open OmniGameDesk to close a big app."
         }
     } else { $script:afMemSince = $null; $script:afMemNoticed = $false }
 }
@@ -614,7 +614,7 @@ for ($try = 0; $try -lt 20; $try++) {
         break
     } catch { $listener = $null; $port++ }
 }
-if (-not $listener) { throw 'Could not start the OminiGameDesk server.' }
+if (-not $listener) { throw 'Could not start the OmniGameDesk server.' }
 
 function Send($ctx, [int]$code, [string]$body, [string]$type = 'application/json; charset=utf-8') {
     $bytes = [Text.Encoding]::UTF8.GetBytes($body)
@@ -636,16 +636,6 @@ function Handle($ctx) {
     }
     if ($path -eq '/logo.svg') {
         return Send $ctx 200 ([IO.File]::ReadAllText((Join-Path $root 'logo.svg'))) 'image/svg+xml'
-    }
-    if ($path -cmatch '^/quiz/((?:quizzes/)?[a-z0-9][a-z0-9.-]*\.(js|css|json|html))$') {
-        # QuizDesk files (quiz/ next to the app). Sent as raw bytes so the quizzes' checksums stay valid.
-        $file = Join-Path $root ('quiz/' + $Matches[1])
-        if (-not (Test-Path -LiteralPath $file -PathType Leaf)) { return Send $ctx 404 'not found' 'text/plain' }
-        $bytes = [IO.File]::ReadAllBytes($file)
-        $ctx.Response.ContentType = @{ js = 'text/javascript'; css = 'text/css'; json = 'application/json'; html = 'text/html' }[$Matches[2]] + '; charset=utf-8'
-        $ctx.Response.Headers['Cache-Control'] = 'no-store'
-        $ctx.Response.OutputStream.Write($bytes, 0, $bytes.Length)
-        return $ctx.Response.Close()
     }
     if ($path -eq '/api/spotify/art' -and $req.QueryString['t'] -eq $token) {
         # Album cover for <img>, which cannot send the X-Token header, so it takes the token in the URL.
@@ -788,7 +778,7 @@ try { Disable-OllamaAutostart } catch {}
 $url = "http://127.0.0.1:$port/?t=$token"
 $edge = @("${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe", "$env:ProgramFiles\Microsoft\Edge\Application\msedge.exe") |
     Where-Object { Test-Path $_ } | Select-Object -First 1
-$profileDir = Join-Path $env:LOCALAPPDATA 'OminiGameDesk\browser'
+$profileDir = Join-Path $env:LOCALAPPDATA 'OmniGameDesk\browser'
 $browser = $null
 if ($edge) {
     $browser = Start-Process $edge -PassThru -ArgumentList @(
@@ -806,7 +796,7 @@ function Test-WindowOpen {
     if (-not $browser) { return $true }
     if (-not $browser.HasExited) { return $true }
     $left = Get-CimInstance Win32_Process -Filter "Name='msedge.exe'" -ErrorAction SilentlyContinue |
-        Where-Object { $_.CommandLine -like "*OminiGameDesk\browser*" }
+        Where-Object { $_.CommandLine -like "*OmniGameDesk\browser*" }
     return [bool]$left
 }
 
@@ -826,7 +816,7 @@ try {
         }
     }
 } finally {
-    # Never leave Spotify playing invisibly after OminiGameDesk closes: put it back on the taskbar (minimized).
+    # Never leave Spotify playing invisibly after OmniGameDesk closes: put it back on the taskbar (minimized).
     try { Show-Spotify -Minimized } catch {}
     try { Stop-Ollama } catch {}
     if ($script:afIcon) { $script:afIcon.Dispose() }

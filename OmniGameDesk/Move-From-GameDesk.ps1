@@ -1,10 +1,10 @@
-# OminiGameDesk used to be called GameDesk. When GameDesk is installed, this moves its saved data over
-# (widgets, notes, to-dos, links, the Claude key, Anti-Freeze settings and the quizzes) and removes the old app.
-param([string]$Dest = (Join-Path $env:LOCALAPPDATA 'Programs\OminiGameDesk'))
+# OmniGameDesk used to be called GameDesk. When GameDesk is installed, this moves its saved data over
+# (widgets, notes, to-dos, links, the Claude key, Anti-Freeze settings) and removes the old app.
+param([string]$Dest = (Join-Path $env:LOCALAPPDATA 'Programs\OmniGameDesk'))
 $ErrorActionPreference = 'SilentlyContinue'
 $old = Join-Path $env:LOCALAPPDATA 'Programs\GameDesk'
 $oldData = Join-Path $env:LOCALAPPDATA 'GameDesk'
-$newData = Join-Path $env:LOCALAPPDATA 'OminiGameDesk'
+$newData = Join-Path $env:LOCALAPPDATA 'OmniGameDesk'
 if (-not (Test-Path $old) -and -not (Test-Path $oldData)) { return }
 
 # Close a running GameDesk, the Ollama server it started and its window.
@@ -23,7 +23,7 @@ Start-Sleep -Milliseconds 800
 # data.json (widgets, notes, to-dos, links, city, AI switch) lives next to the app.
 New-Item -ItemType Directory -Force $Dest | Out-Null
 if ((Test-Path "$old\data.json") -and -not (Test-Path "$Dest\data.json")) { Copy-Item "$old\data.json" "$Dest\data.json" }
-# The Claude key, Anti-Freeze settings, the Ollama marker and the dashboard's browser profile (with the quizzes).
+# The Claude key, Anti-Freeze settings, the Ollama marker and the dashboard's browser profile.
 if ((Test-Path $oldData) -and -not (Test-Path $newData)) { Move-Item $oldData $newData }
 
 # Remove the old app: its own uninstaller when it was installed with the setup, otherwise by hand.

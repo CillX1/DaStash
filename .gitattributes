@@ -1,3 +1,0 @@
-# Quiz files are checked against SHA-256 checksums, so keep their bytes exactly as they are.
-OminiGameDesk/quiz/quizzes/*.html -text
-OminiGameDesk/quiz/quizzes/*.duel.json -text

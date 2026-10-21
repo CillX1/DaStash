@@ -1,4 +1,4 @@
-// The local server the dashboard talks to (127.0.0.1 only), same API as OminiGameDesk.ps1 on Windows.
+// The local server the dashboard talks to (127.0.0.1 only), same API as OmniGameDesk.ps1 on Windows.
 const http = require('http');
 const fs = require('fs');
 const os = require('os');
@@ -35,11 +35,11 @@ function start({ uiDir, dataDir, secret, openUrl, notify = () => {} }) {
     if (!af.memSince) af.memSince = Date.now();
     else if (afAlert() && !af.noticed) {
       af.noticed = true; afLog(`Memory almost full (${af.pct} %)`);
-      notify('OminiGameDesk Anti-Freeze', `Memory is almost full (${af.pct} %). Your computer may freeze. Open OminiGameDesk to close a big app.`);
+      notify('OmniGameDesk Anti-Freeze', `Memory is almost full (${af.pct} %). Your computer may freeze. Open OmniGameDesk to close a big app.`);
     }
   }, 3000);
-  let stopOllama = null, ollamaStarting = false;   // stopOllama: set when OminiGameDesk started Ollama itself
-  // The on/off switch in the AI panel (saved by the dashboard in data.json). Off: OminiGameDesk doesn't start Ollama.
+  let stopOllama = null, ollamaStarting = false;   // stopOllama: set when OmniGameDesk started Ollama itself
+  // The on/off switch in the AI panel (saved by the dashboard in data.json). Off: OmniGameDesk doesn't start Ollama.
   let ollamaOff = false;
   try { ollamaOff = !!JSON.parse(fs.readFileSync(dataFile, 'utf8')).localAiOff; } catch {}
 
@@ -67,7 +67,7 @@ function start({ uiDir, dataDir, secret, openUrl, notify = () => {} }) {
         headers: { 'content-type': 'application/json', 'x-api-key': getKey(), 'anthropic-version': '2023-06-01', 'anthropic-beta': 'server-side-fallback-2026-07-01' },
         body: JSON.stringify({
           model: CLAUDE_MODEL, max_tokens: 16000, stream: true, fallbacks: 'default', output_config: { effort: 'low' },
-          system: `You are Claude, answering inside OminiGameDesk, a small widget dashboard on the user's ${osName}. Keep answers short and easy to scan: lead with the answer, then brief details. Use simple Markdown (bold, lists, code blocks) only when it helps.`,
+          system: `You are Claude, answering inside OmniGameDesk, a small widget dashboard on the user's ${osName}. Keep answers short and easy to scan: lead with the answer, then brief details. Use simple Markdown (bold, lists, code blocks) only when it helps.`,
           messages,
         }),
       });
@@ -84,7 +84,7 @@ function start({ uiDir, dataDir, secret, openUrl, notify = () => {} }) {
 
   async function localJob(job, messages) {
     const today = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-    const system = `You are OminiGameDesk AI, a helpful assistant built into OminiGameDesk, a widget dashboard on the user's ${osName}. ` +
+    const system = `You are OmniGameDesk AI, a helpful assistant built into OmniGameDesk, a widget dashboard on the user's ${osName}. ` +
       `You run locally on their computer (model: ${LOCAL_NAME}), so you work offline and cannot browse the web. Today is ${today}. ` +
       'Keep answers short and easy to scan: lead with the answer, then brief details. Use simple Markdown only when it helps. If you are not sure about a fact, say so instead of guessing.';
     try {
@@ -112,7 +112,7 @@ function start({ uiDir, dataDir, secret, openUrl, notify = () => {} }) {
   }
 
   const ollamaUp = () => fetch(OLLAMA + '/api/tags', { signal: AbortSignal.timeout(1200) }).then(() => true, () => false);
-  // Ollama only runs while OminiGameDesk is open: start it unless it's already running (then it isn't ours to stop).
+  // Ollama only runs while OmniGameDesk is open: start it unless it's already running (then it isn't ours to stop).
   async function ensureOllama() {
     if (ollamaOff || stopOllama || ollamaStarting || !P.ollamaInstalled()) return;
     ollamaStarting = true;
@@ -127,7 +127,7 @@ function start({ uiDir, dataDir, secret, openUrl, notify = () => {} }) {
       const tags = await r.json(); running = true;
       hasModel = (tags.models || []).some(m => m.name === LOCAL_MODEL || m.model === LOCAL_MODEL);
     } catch {}
-    if (installed && !running) ensureOllama();   // e.g. Ollama was installed while OminiGameDesk was open
+    if (installed && !running) ensureOllama();   // e.g. Ollama was installed while OmniGameDesk was open
     return { installed, running, hasModel, off: ollamaOff, model: LOCAL_MODEL, name: LOCAL_NAME };
   }
 
@@ -163,13 +163,6 @@ function start({ uiDir, dataDir, secret, openUrl, notify = () => {} }) {
       if (req.headers.host !== `127.0.0.1:${port}`) return send(403, 'forbidden', 'text/plain');
       if (p === '/') return send(200, fs.readFileSync(path.join(uiDir, 'dashboard.html')), 'text/html; charset=utf-8');
       if (p === '/logo.svg') return send(200, fs.readFileSync(path.join(uiDir, 'logo.svg')), 'image/svg+xml');
-      const qm = /^\/quiz\/((?:quizzes\/)?[a-z0-9][a-z0-9.-]*\.(js|css|json|html))$/.exec(p);
-      if (qm) {   // QuizDesk files (quiz/ next to the dashboard)
-        const file = path.join(uiDir, 'quiz', qm[1]);
-        if (!fs.existsSync(file)) return send(404, 'not found', 'text/plain');
-        const type = { js: 'text/javascript', css: 'text/css', json: 'application/json', html: 'text/html' }[qm[2]];
-        return send(200, fs.readFileSync(file), type + '; charset=utf-8');
-      }
       if (p === '/api/spotify/art' && q.get('t') === token) {
         if (!P.art.bytes) return send(404, '', 'text/plain');
         res.writeHead(200, { 'Content-Type': P.art.type, 'Cache-Control': 'max-age=3600' }); return res.end(P.art.bytes);
