@@ -1,12 +1,14 @@
-// GameDesk for macOS and Linux: an Electron window around the same dashboard the Windows version uses.
+// DaStash for macOS and Linux: an Electron window around the same dashboard the Windows version uses.
 const { app, BrowserWindow, shell, safeStorage, nativeTheme, Menu, Notification } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const server = require('./server');
 
-// GameDesk was briefly called OmniGameDesk (2.0.0): keep its saved data (widgets, notes, the Claude key).
-const oldData = path.join(app.getPath('appData'), 'OmniGameDesk');
-if (fs.existsSync(oldData) && !fs.existsSync(app.getPath('userData'))) { try { fs.renameSync(oldData, app.getPath('userData')); } catch {} }
+// DaStash used to be called GameDesk (and OmniGameDesk in 2.0.0): keep its saved data (widgets, notes, the Claude key).
+for (const name of ['GameDesk', 'OmniGameDesk']) {
+  const oldData = path.join(app.getPath('appData'), name);
+  if (fs.existsSync(oldData) && !fs.existsSync(app.getPath('userData'))) { try { fs.renameSync(oldData, app.getPath('userData')); } catch {} }
+}
 
 if (!app.requestSingleInstanceLock()) { app.quit(); return; }
 
@@ -15,7 +17,7 @@ app.on('second-instance', () => { if (win) { if (win.isMinimized()) win.restore(
 
 app.whenReady().then(async () => {
   nativeTheme.themeSource = 'dark';   // dark (black) title bar and menus
-  const uiDir = app.isPackaged ? path.join(process.resourcesPath, 'ui') : path.join(__dirname, '..', 'GameDesk');
+  const uiDir = app.isPackaged ? path.join(process.resourcesPath, 'ui') : path.join(__dirname, '..', 'DaStash');
   const secret = safeStorage.isEncryptionAvailable() ? { encrypt: s => safeStorage.encryptString(s), decrypt: b => safeStorage.decryptString(b) } : null;
   const notify = (title, body) => { if (Notification.isSupported()) { const n = new Notification({ title, body }); n.on('click', () => { if (win) { win.show(); win.focus(); } }); n.show(); } };
   srv = await server.start({ uiDir, dataDir: app.getPath('userData'), secret, openUrl: u => shell.openExternal(u), notify, version: app.getVersion() });
@@ -23,7 +25,7 @@ app.whenReady().then(async () => {
   if (process.platform !== 'darwin') Menu.setApplicationMenu(null);
   win = new BrowserWindow({
     width: 1500, height: 960, minWidth: 900, minHeight: 600,
-    title: 'GameDesk', backgroundColor: '#000000', autoHideMenuBar: true,
+    title: 'DaStash', backgroundColor: '#000000', autoHideMenuBar: true,
     icon: path.join(uiDir, 'logo.png'),
     webPreferences: { contextIsolation: true, sandbox: true, nodeIntegration: false },
   });
@@ -33,4 +35,4 @@ app.whenReady().then(async () => {
 });
 
 app.on('window-all-closed', () => app.quit());
-app.on('will-quit', () => { if (srv) srv.close(); });   // also stops Ollama if GameDesk started it
+app.on('will-quit', () => { if (srv) srv.close(); });   // also stops Ollama if DaStash started it

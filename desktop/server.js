@@ -1,4 +1,4 @@
-// The local server the dashboard talks to (127.0.0.1 only), same API as GameDesk.ps1 on Windows.
+// The local server the dashboard talks to (127.0.0.1 only), same API as DaStash.ps1 on Windows.
 const http = require('http');
 const fs = require('fs');
 const os = require('os');
@@ -35,11 +35,11 @@ function start({ uiDir, dataDir, secret, openUrl, notify = () => {}, version = '
     if (!af.memSince) af.memSince = Date.now();
     else if (afAlert() && !af.noticed) {
       af.noticed = true; afLog(`Memory almost full (${af.pct} %)`);
-      notify('GameDesk Anti-Freeze', `Memory is almost full (${af.pct} %). Your computer may freeze. Open GameDesk to close a big app.`);
+      notify('DaStash Anti-Freeze', `Memory is almost full (${af.pct} %). Your computer may freeze. Open DaStash to close a big app.`);
     }
   }, 3000);
-  let stopOllama = null, ollamaStarting = false;   // stopOllama: set when GameDesk started Ollama itself
-  // The on/off switch in the AI panel (saved by the dashboard in data.json). Off: GameDesk doesn't start Ollama.
+  let stopOllama = null, ollamaStarting = false;   // stopOllama: set when DaStash started Ollama itself
+  // The on/off switch in the AI panel (saved by the dashboard in data.json). Off: DaStash doesn't start Ollama.
   let ollamaOff = false;
   try { ollamaOff = !!JSON.parse(fs.readFileSync(dataFile, 'utf8')).localAiOff; } catch {}
 
@@ -67,7 +67,7 @@ function start({ uiDir, dataDir, secret, openUrl, notify = () => {}, version = '
         headers: { 'content-type': 'application/json', 'x-api-key': getKey(), 'anthropic-version': '2023-06-01', 'anthropic-beta': 'server-side-fallback-2026-07-01' },
         body: JSON.stringify({
           model: CLAUDE_MODEL, max_tokens: 16000, stream: true, fallbacks: 'default', output_config: { effort: 'low' },
-          system: `You are Claude, answering inside GameDesk, a small widget dashboard on the user's ${osName}. Keep answers short and easy to scan: lead with the answer, then brief details. Use simple Markdown (bold, lists, code blocks) only when it helps.`,
+          system: `You are Claude, answering inside DaStash, a small widget dashboard on the user's ${osName}. Keep answers short and easy to scan: lead with the answer, then brief details. Use simple Markdown (bold, lists, code blocks) only when it helps.`,
           messages,
         }),
       });
@@ -84,7 +84,7 @@ function start({ uiDir, dataDir, secret, openUrl, notify = () => {}, version = '
 
   async function localJob(job, messages) {
     const today = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-    const system = `You are GameDesk AI, a helpful assistant built into GameDesk, a widget dashboard on the user's ${osName}. ` +
+    const system = `You are DaStash AI, a helpful assistant built into DaStash, a widget dashboard on the user's ${osName}. ` +
       `You run locally on their computer (model: ${LOCAL_NAME}), so you work offline and cannot browse the web. Today is ${today}. ` +
       'Keep answers short and easy to scan: lead with the answer, then brief details. Use simple Markdown only when it helps. If you are not sure about a fact, say so instead of guessing.';
     try {
@@ -112,7 +112,7 @@ function start({ uiDir, dataDir, secret, openUrl, notify = () => {}, version = '
   }
 
   const ollamaUp = () => fetch(OLLAMA + '/api/tags', { signal: AbortSignal.timeout(1200) }).then(() => true, () => false);
-  // Ollama only runs while GameDesk is open: start it unless it's already running (then it isn't ours to stop).
+  // Ollama only runs while DaStash is open: start it unless it's already running (then it isn't ours to stop).
   async function ensureOllama() {
     if (ollamaOff || stopOllama || ollamaStarting || !P.ollamaInstalled()) return;
     ollamaStarting = true;
@@ -127,7 +127,7 @@ function start({ uiDir, dataDir, secret, openUrl, notify = () => {}, version = '
       const tags = await r.json(); running = true;
       hasModel = (tags.models || []).some(m => m.name === LOCAL_MODEL || m.model === LOCAL_MODEL);
     } catch {}
-    if (installed && !running) ensureOllama();   // e.g. Ollama was installed while GameDesk was open
+    if (installed && !running) ensureOllama();   // e.g. Ollama was installed while DaStash was open
     return { installed, running, hasModel, off: ollamaOff, model: LOCAL_MODEL, name: LOCAL_NAME };
   }
 
