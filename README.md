@@ -7,7 +7,7 @@
   A free widget dashboard for Windows, macOS and Linux.
 </p>
 
-> **GameDesk was called GameDesk until version 1.8.** Installing GameDesk 2.0 on Windows moves your widgets, notes, links, and AI settings over and removes the old GameDesk. On a Mac, delete the old GameDesk from Applications yourself; your data comes along.
+> **Installed OmniGameDesk 2.0.0?** That was a short-lived name for GameDesk. Installing GameDesk 2.1 on Windows moves your widgets, notes, links and AI settings back and removes OmniGameDesk. On a Mac, delete OmniGameDesk from Applications yourself; your data comes along.
 
 <p align="center">
   <a href="https://github.com/CillX1/GameDesk/releases/latest"><img src="https://img.shields.io/github/v/release/CillX1/GameDesk?label=download&style=for-the-badge&color=6d28d9" alt="Download latest release"></a>
