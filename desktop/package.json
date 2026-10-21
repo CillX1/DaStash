@@ -1,10 +1,10 @@
 {
-  "name": "omnigamedesk",
-  "productName": "OmniGameDesk",
-  "version": "2.0.0",
+  "name": "gamedesk",
+  "productName": "GameDesk",
+  "version": "2.1.0",
   "description": "All your everyday and gaming widgets in one window.",
   "author": "CillX1 <291351647+CillX1@users.noreply.github.com>",
-  "homepage": "https://github.com/CillX1/OmniGameDesk",
+  "homepage": "https://github.com/CillX1/GameDesk",
   "license": "GPL-3.0",
   "main": "main.js",
   "scripts": {
@@ -17,27 +17,27 @@
     "electron-builder": "25.1.8"
   },
   "build": {
-    "appId": "io.github.cillx1.omnigamedesk",
-    "productName": "OmniGameDesk",
+    "appId": "io.github.cillx1.gamedesk",
+    "productName": "GameDesk",
     "files": ["main.js", "server.js", "platform.js", "package.json"],
     "extraResources": [
-      { "from": "../OmniGameDesk", "to": "ui", "filter": ["dashboard.html", "logo.svg", "logo.png"] }
+      { "from": "../GameDesk", "to": "ui", "filter": ["dashboard.html", "logo.svg", "logo.png"] }
     ],
     "directories": { "output": "dist" },
-    "artifactName": "OmniGameDesk-${version}-${arch}.${ext}",
+    "artifactName": "GameDesk-${version}-${arch}.${ext}",
     "mac": {
       "target": "dmg",
       "category": "public.app-category.utilities",
-      "icon": "../OmniGameDesk/logo-2048.png",
+      "icon": "../GameDesk/logo-2048.png",
       "identity": null,
       "darkModeSupport": true
     },
     "afterPack": "./adhoc-sign.js",
-    "dmg": { "title": "OmniGameDesk" },
+    "dmg": { "title": "GameDesk" },
     "linux": {
       "target": ["AppImage", "deb"],
       "category": "Utility",
-      "icon": "../OmniGameDesk/logo-2048.png",
+      "icon": "../GameDesk/logo-2048.png",
       "maintainer": "CillX1 <291351647+CillX1@users.noreply.github.com>",
       "synopsis": "Widget dashboard for gamers"
     },

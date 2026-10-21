@@ -22,8 +22,12 @@ jobs:
         shell: pwsh
         run: |
           if ($env:GITHUB_REF_TYPE -eq 'tag') { $v = $env:GITHUB_REF_NAME.TrimStart('v') }
-          else { $v = ((Select-String -Path OmniGameDesk/Install.ps1 -Pattern "\`$version = '(.+)'").Matches[0].Groups[1].Value) }
+          else { $v = ((Select-String -Path GameDesk/Install.ps1 -Pattern "\`$version = '(.+)'").Matches[0].Groups[1].Value) }
           "version=$v" >> $env:GITHUB_OUTPUT
+
+      - name: Stamp the version into the app
+        shell: pwsh
+        run: (Get-Content GameDesk/GameDesk.ps1 -Raw) -replace "\`$appVersion = '[^']*'", "`$appVersion = '${{ steps.ver.outputs.version }}'" | Set-Content GameDesk/GameDesk.ps1 -NoNewline -Encoding utf8BOM
 
       - name: Install Inno Setup
         shell: pwsh
@@ -32,13 +36,13 @@ jobs:
 
       - name: Build installer
         shell: pwsh
-        run: '& "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" /DAppVersion=${{ steps.ver.outputs.version }} installer\OmniGameDesk.iss'
+        run: '& "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" /DAppVersion=${{ steps.ver.outputs.version }} installer\GameDesk.iss'
 
       - name: Build portable zip
         shell: pwsh
         run: |
-          $files ='OmniGameDesk.ps1','dashboard.html','logo.svg','logo.png','OmniGameDesk.ico','Install OmniGameDesk.bat','Install.ps1','Uninstall.ps1','README.txt','Move-From-GameDesk.ps1' | ForEach-Object { "OmniGameDesk/$_" }
-          Compress-Archive -Path $files -DestinationPath "installer/Output/OmniGameDesk-${{ steps.ver.outputs.version }}-windows-portable.zip"
+          $files ='GameDesk.ps1','dashboard.html','logo.svg','logo.png','GameDesk.ico','Install GameDesk.bat','Install.ps1','Uninstall.ps1','README.txt','Move-From-OmniGameDesk.ps1' | ForEach-Object { "GameDesk/$_" }
+          Compress-Archive -Path $files -DestinationPath "installer/Output/GameDesk-${{ steps.ver.outputs.version }}-windows-portable.zip"
 
       - uses: actions/upload-artifact@v4
         with:

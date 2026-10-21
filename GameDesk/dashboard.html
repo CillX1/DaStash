@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#000000">
-<title>OmniGameDesk</title>
+<title>GameDesk</title>
 <link rel="icon" href="/logo.svg" type="image/svg+xml">
 <style>
   :root {
@@ -51,10 +51,12 @@
   .brand b { display: block; font-size: 17px; font-weight: 650; letter-spacing: -.2px; }
   .brand span { color: var(--muted); font-size: 12.5px; }
   .clockwrap { text-align: center; }
-  .clock { font: 600 58px/1 "Segoe UI Variable Display", "Segoe UI", sans-serif; letter-spacing: -2px; font-variant-numeric: tabular-nums; }
+  .clock { cursor: pointer; font: 600 58px/1 "Segoe UI Variable Display", "Segoe UI", sans-serif; letter-spacing: -2px; font-variant-numeric: tabular-nums; }
   .clock small { font-size: 22px; letter-spacing: 0; color: var(--muted); margin-left: 6px; font-weight: 500; }
   .date { color: var(--muted); margin-top: 8px; font-size: 14px; }
-  .head-right { justify-self: end; position: relative; }
+  .head-right { justify-self: end; position: relative; display: flex; gap: 8px; }
+  .btn.update { border-color: color-mix(in srgb, var(--good) 50%, transparent); color: var(--good); }
+  .drawer .ver { margin-top: 10px; font-size: 11.5px; color: var(--faint); }
 
   /* ---------- grid: 3 equal columns, equal-height rows ---------- */
   .grid { display: grid; gap: var(--gap); grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-flow: row dense;
@@ -292,17 +294,19 @@
 <header>
   <div class="brand">
     <img src="/logo.svg" alt="">
-    <div><b>OmniGameDesk</b><span id="greet"></span></div>
+    <div><b>GameDesk</b><span id="greet"></span></div>
   </div>
   <div class="clockwrap">
     <div class="clock" id="clock">--:--</div>
     <div class="date" id="date"></div>
   </div>
   <div class="head-right">
+    <button class="btn update hidden" id="updateBtn" title="Open the download page"><svg class="i" data-i="download"></svg><span>Update available</span></button>
     <button class="btn" id="customizeBtn"><svg class="i" data-i="sliders"></svg>Customize</button>
     <div class="drawer hidden" id="drawer">
       <h3>Show widgets</h3>
       <div id="drawerList"></div>
+      <div class="ver" id="verTxt"></div>
     </div>
   </div>
 </header>
@@ -348,7 +352,7 @@
 
     <div class="chat-setup hidden" id="chatSetup">
       <b>Get answers right here</b>
-      <p class="muted">OmniGameDesk needs a Claude API key to answer inside the app.</p>
+      <p class="muted">GameDesk needs a Claude API key to answer inside the app.</p>
       <ol>
         <li>Open the <a href="#" data-url="https://console.anthropic.com/settings/keys">Claude Console</a> and sign in.</li>
         <li>Add a little credit under <b>Billing</b> (API use is billed separately from a Claude Pro plan; a typical question costs about 1–3 cents).</li>
@@ -396,7 +400,7 @@
     <canvas class="spark" id="cpuSpark"></canvas>
     <div class="stack" style="gap:14px;margin-top:auto">
       <div><div class="stat"><span>Memory</span><b id="ramTxt">–</b></div><div class="bar"><i id="ramBar"></i></div></div>
-      <div><div class="stat"><span>Disk C:</span><b id="diskTxt">–</b></div><div class="bar"><i id="diskBar"></i></div></div>
+      <div><div class="stat"><span id="diskLbl">Disk C:</span><b id="diskTxt">–</b></div><div class="bar"><i id="diskBar"></i></div></div>
     </div>
   </section>
 
@@ -581,19 +585,40 @@ function save() {
   saveTimer = setTimeout(() => api('/api/store', { method: 'POST', body: JSON.stringify(state) }).catch(() => {}), 400);
 }
 
+/* ---------- update check (once per start, asks GitHub for the newest release) ---------- */
+const newer = (a, b) => { const x = a.split('.').map(Number), y = b.split('.').map(Number); for (let i = 0; i < 3; i++) if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) > (y[i] || 0); return false; };
+async function checkUpdate(current) {
+  try {
+    const r = await fetch('https://api.github.com/repos/CillX1/GameDesk/releases/latest').then(r => r.json());
+    const latest = String(r.tag_name || '').replace(/^v/, '');
+    if (!/^\d+\.\d+\.\d+$/.test(latest) || !newer(latest, current)) return;
+    const b = $('updateBtn');
+    b.lastChild.textContent = 'Update to ' + latest;
+    b.classList.remove('hidden');
+    b.onclick = () => openUrl('https://github.com/CillX1/GameDesk/releases/latest');
+  } catch {}
+}
+
 /* ---------- clock ---------- */
+const localIs24h = new Intl.DateTimeFormat([], { hour: 'numeric' }).resolvedOptions().hourCycle?.startsWith('h2') ?? false;
+// Click the clock to switch between 24-hour and AM/PM; the choice is saved.
+const use24hNow = () => state.clock24 ?? localIs24h;
 function tick() {
   const d = new Date();
   const hh = d.getHours(), mm = String(d.getMinutes()).padStart(2, '0');
-  $('clock').innerHTML = `${hh % 12 || 12}:${mm}<small>${hh < 12 ? 'AM' : 'PM'}</small>`;
+  // 24-hour clock where that's the local habit (e.g. Switzerland, Germany), AM/PM elsewhere.
+  if (use24hNow()) $('clock').textContent = `${String(hh).padStart(2, '0')}:${mm}`;
+  else $('clock').innerHTML = `${hh % 12 || 12}:${mm}<small>${hh < 12 ? 'AM' : 'PM'}</small>`;
   $('date').textContent = d.toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   $('greet').textContent = hh < 5 ? 'Late night session' : hh < 12 ? 'Good morning' : hh < 18 ? 'Good afternoon' : 'Good evening';
 }
-// Timers that only run while OmniGameDesk is visible (minimized or covered by a game = no work at all).
+// Timers that only run while GameDesk is visible (minimized or covered by a game = no work at all).
 const visibleTimers = [];
 function every(ms, fn) { visibleTimers.push(fn); setInterval(() => { if (!document.hidden) fn(); }, ms); }
 document.addEventListener('visibilitychange', () => { if (!document.hidden) visibleTimers.forEach(fn => fn()); });
 every(1000, tick); tick();
+$('clock').title = 'Click to switch between 24-hour and AM/PM';
+$('clock').onclick = () => { state.clock24 = !use24hNow(); save(); tick(); };
 
 /* ---------- launching ---------- */
 document.addEventListener('click', e => {
@@ -699,7 +724,7 @@ function renderLocalSetup() {
   $('localText').textContent =
     !L.installed ? 'Chat with an AI that runs on your own PC: free, private and works offline. It needs the free Ollama app.'
     : L.off ? 'The local AI is turned off, so it isn\'t using any memory. Turn it on to chat (it uses about 3–4 GB of memory while on).'
-    : !L.running ? 'Ollama is installed but not running yet. OmniGameDesk is starting it; this can take a few seconds.'
+    : !L.running ? 'Ollama is installed but not running yet. GameDesk is starting it; this can take a few seconds.'
     : pulling ? `Downloading ${L.name}. This only happens once.`
     : `One last step: download the ${L.name} AI model (about 3.3 GB, one time only).`;
 }
@@ -719,7 +744,7 @@ $('localCheck').onclick = async () => {
   $('localCheck').disabled = true; await loadAiStatus(); refreshView(); $('localCheck').disabled = false;
   if (localReady()) toast('Local AI is ready');
 };
-// The power button: off stops Ollama completely and frees its memory; OmniGameDesk then won't start it until it's turned back on.
+// The power button: off stops Ollama completely and frees its memory; GameDesk then won't start it until it's turned back on.
 async function setLocalPower(on) {
   if (chatBusy || pulling) return toast('Wait until the AI has finished');
   $('localPower').disabled = $('localOn').disabled = true;
@@ -903,7 +928,7 @@ async function mediaPress(k) {
   let r;
   try { r = await post('/api/media?k=' + k); } catch { return toast('That didn\'t work'); }
   if (r && r.starting) {
-    // Spotify wasn't open: OmniGameDesk starts it minimized in the background, then plays.
+    // Spotify wasn't open: GameDesk starts it minimized in the background, then plays.
     spStarting = true;
     spStateNow = ''; $('spState').textContent = 'Starting…'; $('spTitle').textContent = 'Starting Spotify'; $('spArtist').textContent = 'in the background…';
     let j = { done: false };
@@ -1024,6 +1049,8 @@ const shortName = a => ({ 'Ubisoft Connect': 'Ubisoft', 'Epic Games Launcher': '
 async function loadApps() {
   let data; try { data = await api('/api/apps'); } catch { return; }
   const installed = new Set(data.apps);
+  if (data.platform) $('diskLbl').textContent = 'Disk';
+  if (data.version) { $('verTxt').textContent = 'GameDesk ' + data.version; checkUpdate(data.version); }
 
   const L = $('launchers'); L.innerHTML = '';
   Object.keys(launcherInfo).filter(a => installed.has(a)).forEach(a => L.append(tile(launcherInfo[a][0], shortName(a), launcherInfo[a][1], { app: a })));
@@ -1181,7 +1208,7 @@ const fmt = s => s >= 3600 ? `${Math.floor(s / 3600)}:${pad(Math.floor(s % 3600 
 function drawTimer() {
   $('timerDisplay').textContent = fmt(timerLeft);
   $('ringPrg').style.strokeDashoffset = CIRC * (1 - timerLeft / timerTotal);
-  document.title = timerId ? fmt(timerLeft) + ' · OmniGameDesk' : 'OmniGameDesk';
+  document.title = timerId ? fmt(timerLeft) + ' · GameDesk' : 'GameDesk';
 }
 function beep() {
   const ctx = new AudioContext();
