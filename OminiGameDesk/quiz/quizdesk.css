@@ -1,4 +1,4 @@
-/* QuizDesk inside Questrig: full-screen layer over the dashboard, in Questrig's colours. */
+/* QuizDesk inside OminiGameDesk: full-screen layer over the dashboard, in OminiGameDesk's colours. */
 :root {
   --qd-mathe: #f0a05a; --qd-netz: #3dd6c6; --qd-sql: #b195f0; --qd-web: #45d483; --qd-sprache: #f08bb0; --qd-other: #8a93a6;
 }

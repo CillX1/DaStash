@@ -1,10 +1,10 @@
-# Questrig used to be called GameDesk. When GameDesk is installed, this moves its saved data over
+# OminiGameDesk used to be called GameDesk. When GameDesk is installed, this moves its saved data over
 # (widgets, notes, to-dos, links, the Claude key, Anti-Freeze settings and the quizzes) and removes the old app.
-param([string]$Dest = (Join-Path $env:LOCALAPPDATA 'Programs\Questrig'))
+param([string]$Dest = (Join-Path $env:LOCALAPPDATA 'Programs\OminiGameDesk'))
 $ErrorActionPreference = 'SilentlyContinue'
 $old = Join-Path $env:LOCALAPPDATA 'Programs\GameDesk'
 $oldData = Join-Path $env:LOCALAPPDATA 'GameDesk'
-$newData = Join-Path $env:LOCALAPPDATA 'Questrig'
+$newData = Join-Path $env:LOCALAPPDATA 'OminiGameDesk'
 if (-not (Test-Path $old) -and -not (Test-Path $oldData)) { return }
 
 # Close a running GameDesk, the Ollama server it started and its window.

@@ -1,4 +1,4 @@
-// QuizDesk inside Questrig: a quiz library that works offline, the shared quiz collection from
+// QuizDesk inside OminiGameDesk: a quiz library that works offline, the shared quiz collection from
 // github.com/CillX1/QuizDesk, and duels (live with a room code, or challenge codes).
 // Uses the same duel protocol and challenge codes as the standalone QuizDesk app, so both can play together.
 (() => {
@@ -39,7 +39,7 @@
     return questions;
   }
 
-  // ---------- storage: IndexedDB in Questrig's own browser profile ----------
+  // ---------- storage: IndexedDB in OminiGameDesk's own browser profile ----------
   let dbp;
   function db() {
     return dbp || (dbp = new Promise((resolve, reject) => {
@@ -68,7 +68,7 @@
   const meta = x => { const { html, duel, ...m } = x; return m; };
   async function refreshLibrary() { library = (await getAll()).map(meta).sort((a, b) => (a.order || 0) - (b.order || 0) || a.title.localeCompare(b.title)); }
 
-  // Quizzes that ship with Questrig go into the library once each, so removing one keeps it removed.
+  // Quizzes that ship with OminiGameDesk go into the library once each, so removing one keeps it removed.
   async function seedBundled() {
     let seeded = [];
     try { seeded = JSON.parse(localStorage.getItem('qd-seeded') || '[]'); } catch {}
@@ -142,7 +142,7 @@
           <button role="tab" data-tab="duel">Duel</button>
         </nav>
         <button class="qd-btn" id="qd-import" type="button">+ Add quiz file</button>
-        <button class="qd-btn qd-close" id="qd-close" type="button" title="Back to Questrig">✕</button>
+        <button class="qd-btn qd-close" id="qd-close" type="button" title="Back to OminiGameDesk">✕</button>
       </header>
       <section data-view="mine">
         <div class="qd-bar"><input class="qd-input qd-search" id="qd-search" type="search" placeholder="Search quizzes…"><div class="qd-chips" id="qd-chips"></div></div>
@@ -152,7 +152,7 @@
       <section data-view="find" hidden>
         <div class="qd-bar"><p class="qd-net" id="qd-net"></p><button class="qd-btn" id="qd-refresh" type="button">Refresh</button></div>
         <div class="qd-grid" id="qd-grid-find"></div>
-        <p class="qd-note qd-share-note">Share your own quiz: add it with <b>+ Add quiz file</b>, then click <b>Submit</b> on its card. Questrig saves a copy to your Downloads and opens the GitHub form; drag the file in and send it. Once approved, everyone sees it here.</p>
+        <p class="qd-note qd-share-note">Share your own quiz: add it with <b>+ Add quiz file</b>, then click <b>Submit</b> on its card. OminiGameDesk saves a copy to your Downloads and opens the GitHub form; drag the file in and send it. Once approved, everyone sees it here.</p>
       </section>
       <section data-view="duel" hidden>
         <div class="qd-setup">
@@ -609,7 +609,7 @@
     if (game.mode === 'solo') {
       const code = 'QD-' + b64(JSON.stringify({ v: 1, q: game.quizId, h: game.sha.slice(0, 10), s: game.seed, t: game.time, m: game.me.name, p: game.me.pts }));
       $q('qd-chalcode').textContent = code; $q('qd-share').hidden = false;
-      const msg = `I challenge you in Questrig! "${game.title}", ${game.questions.length} questions, I scored ${me}. Duel → accept a challenge and paste this code:\n${code}`;
+      const msg = `I challenge you in OminiGameDesk! "${game.title}", ${game.questions.length} questions, I scored ${me}. Duel → accept a challenge and paste this code:\n${code}`;
       showEnd(`${me} points`, 'Send the code to someone. Can they beat you?', [['Copy code with message', 'solid', () => copy(msg)], ['Copy code only', '', () => copy(code)], ['Done', '', closeGame]]);
       return;
     }
@@ -645,7 +645,7 @@
   $q('qd-code').addEventListener('keydown', e => { if (e.key === 'Enter') $q('qd-join').click(); });
   $q('qd-start').onclick = () => { $q('qd-start').hidden = true; hostStartDuel(); };
   $q('qd-leave').onclick = leave;
-  $q('qd-copy-code').onclick = () => copy(`Duel me in Questrig! Duel → join with code: ${$q('qd-lobby-code').textContent}`);
+  $q('qd-copy-code').onclick = () => copy(`Duel me in OminiGameDesk! Duel → join with code: ${$q('qd-lobby-code').textContent}`);
   $q('qd-solo').onclick = async () => {
     $q('qd-chal-err').textContent = '';
     try {

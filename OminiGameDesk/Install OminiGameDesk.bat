@@ -1,5 +1,5 @@
 @echo off
-title Installing Questrig
+title Installing OminiGameDesk
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0Install.ps1"
 if errorlevel 1 (
   echo.

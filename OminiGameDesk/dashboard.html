@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#000000">
-<title>Questrig</title>
+<title>OminiGameDesk</title>
 <link rel="icon" href="/logo.svg" type="image/svg+xml">
 <style>
   :root {
@@ -292,7 +292,7 @@
 <header>
   <div class="brand">
     <img src="/logo.svg" alt="">
-    <div><b>Questrig</b><span id="greet"></span></div>
+    <div><b>OminiGameDesk</b><span id="greet"></span></div>
   </div>
   <div class="clockwrap">
     <div class="clock" id="clock">--:--</div>
@@ -348,7 +348,7 @@
 
     <div class="chat-setup hidden" id="chatSetup">
       <b>Get answers right here</b>
-      <p class="muted">Questrig needs a Claude API key to answer inside the app.</p>
+      <p class="muted">OminiGameDesk needs a Claude API key to answer inside the app.</p>
       <ol>
         <li>Open the <a href="#" data-url="https://console.anthropic.com/settings/keys">Claude Console</a> and sign in.</li>
         <li>Add a little credit under <b>Billing</b> (API use is billed separately from a Claude Pro plan; a typical question costs about 1–3 cents).</li>
@@ -598,7 +598,7 @@ function tick() {
   $('date').textContent = d.toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   $('greet').textContent = hh < 5 ? 'Late night session' : hh < 12 ? 'Good morning' : hh < 18 ? 'Good afternoon' : 'Good evening';
 }
-// Timers that only run while Questrig is visible (minimized or covered by a game = no work at all).
+// Timers that only run while OminiGameDesk is visible (minimized or covered by a game = no work at all).
 const visibleTimers = [];
 function every(ms, fn) { visibleTimers.push(fn); setInterval(() => { if (!document.hidden) fn(); }, ms); }
 document.addEventListener('visibilitychange', () => { if (!document.hidden) visibleTimers.forEach(fn => fn()); });
@@ -708,7 +708,7 @@ function renderLocalSetup() {
   $('localText').textContent =
     !L.installed ? 'Chat with an AI that runs on your own PC: free, private and works offline. It needs the free Ollama app.'
     : L.off ? 'The local AI is turned off, so it isn\'t using any memory. Turn it on to chat (it uses about 3–4 GB of memory while on).'
-    : !L.running ? 'Ollama is installed but not running yet. Questrig is starting it; this can take a few seconds.'
+    : !L.running ? 'Ollama is installed but not running yet. OminiGameDesk is starting it; this can take a few seconds.'
     : pulling ? `Downloading ${L.name}. This only happens once.`
     : `One last step: download the ${L.name} AI model (about 3.3 GB, one time only).`;
 }
@@ -728,7 +728,7 @@ $('localCheck').onclick = async () => {
   $('localCheck').disabled = true; await loadAiStatus(); refreshView(); $('localCheck').disabled = false;
   if (localReady()) toast('Local AI is ready');
 };
-// The power button: off stops Ollama completely and frees its memory; Questrig then won't start it until it's turned back on.
+// The power button: off stops Ollama completely and frees its memory; OminiGameDesk then won't start it until it's turned back on.
 async function setLocalPower(on) {
   if (chatBusy || pulling) return toast('Wait until the AI has finished');
   $('localPower').disabled = $('localOn').disabled = true;
@@ -912,7 +912,7 @@ async function mediaPress(k) {
   let r;
   try { r = await post('/api/media?k=' + k); } catch { return toast('That didn\'t work'); }
   if (r && r.starting) {
-    // Spotify wasn't open: Questrig starts it minimized in the background, then plays.
+    // Spotify wasn't open: OminiGameDesk starts it minimized in the background, then plays.
     spStarting = true;
     spStateNow = ''; $('spState').textContent = 'Starting…'; $('spTitle').textContent = 'Starting Spotify'; $('spArtist').textContent = 'in the background…';
     let j = { done: false };
@@ -1190,7 +1190,7 @@ const fmt = s => s >= 3600 ? `${Math.floor(s / 3600)}:${pad(Math.floor(s % 3600 
 function drawTimer() {
   $('timerDisplay').textContent = fmt(timerLeft);
   $('ringPrg').style.strokeDashoffset = CIRC * (1 - timerLeft / timerTotal);
-  document.title = timerId ? fmt(timerLeft) + ' · Questrig' : 'Questrig';
+  document.title = timerId ? fmt(timerLeft) + ' · OminiGameDesk' : 'OminiGameDesk';
 }
 function beep() {
   const ctx = new AudioContext();

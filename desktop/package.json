@@ -1,10 +1,10 @@
 {
-  "name": "questrig",
-  "productName": "Questrig",
+  "name": "ominigamedesk",
+  "productName": "OminiGameDesk",
   "version": "2.0.0",
   "description": "All your everyday and gaming widgets in one window.",
   "author": "CillX1 <291351647+CillX1@users.noreply.github.com>",
-  "homepage": "https://github.com/CillX1/Questrig",
+  "homepage": "https://github.com/CillX1/OminiGameDesk",
   "license": "GPL-3.0",
   "main": "main.js",
   "scripts": {
@@ -17,27 +17,27 @@
     "electron-builder": "25.1.8"
   },
   "build": {
-    "appId": "io.github.cillx1.questrig",
-    "productName": "Questrig",
+    "appId": "io.github.cillx1.ominigamedesk",
+    "productName": "OminiGameDesk",
     "files": ["main.js", "server.js", "platform.js", "package.json"],
     "extraResources": [
-      { "from": "../Questrig", "to": "ui", "filter": ["dashboard.html", "logo.svg", "logo.png", "quiz/**"] }
+      { "from": "../OminiGameDesk", "to": "ui", "filter": ["dashboard.html", "logo.svg", "logo.png", "quiz/**"] }
     ],
     "directories": { "output": "dist" },
-    "artifactName": "Questrig-${version}-${arch}.${ext}",
+    "artifactName": "OminiGameDesk-${version}-${arch}.${ext}",
     "mac": {
       "target": "dmg",
       "category": "public.app-category.utilities",
-      "icon": "../Questrig/logo-2048.png",
+      "icon": "../OminiGameDesk/logo-2048.png",
       "identity": null,
       "darkModeSupport": true
     },
     "afterPack": "./adhoc-sign.js",
-    "dmg": { "title": "Questrig" },
+    "dmg": { "title": "OminiGameDesk" },
     "linux": {
       "target": ["AppImage", "deb"],
       "category": "Utility",
-      "icon": "../Questrig/logo-2048.png",
+      "icon": "../OminiGameDesk/logo-2048.png",
       "maintainer": "CillX1 <291351647+CillX1@users.noreply.github.com>",
       "synopsis": "Widget dashboard for gamers"
     },
