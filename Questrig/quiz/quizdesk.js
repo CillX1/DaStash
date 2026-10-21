@@ -135,7 +135,7 @@
   root.innerHTML = `
     <div class="qd-wrap">
       <header class="qd-top">
-        <h1>QuizDesk</h1>
+        <h1>Quizzes</h1>
         <nav class="qd-tabs" role="tablist">
           <button role="tab" data-tab="mine">My quizzes <span id="qd-n"></span></button>
           <button role="tab" data-tab="find">Browse</button>
@@ -609,7 +609,7 @@
     if (game.mode === 'solo') {
       const code = 'QD-' + b64(JSON.stringify({ v: 1, q: game.quizId, h: game.sha.slice(0, 10), s: game.seed, t: game.time, m: game.me.name, p: game.me.pts }));
       $q('qd-chalcode').textContent = code; $q('qd-share').hidden = false;
-      const msg = `I challenge you in QuizDesk/Questrig! "${game.title}", ${game.questions.length} questions, I scored ${me}. Duel → accept a challenge and paste this code:\n${code}`;
+      const msg = `I challenge you in Questrig! "${game.title}", ${game.questions.length} questions, I scored ${me}. Duel → accept a challenge and paste this code:\n${code}`;
       showEnd(`${me} points`, 'Send the code to someone. Can they beat you?', [['Copy code with message', 'solid', () => copy(msg)], ['Copy code only', '', () => copy(code)], ['Done', '', closeGame]]);
       return;
     }
@@ -645,7 +645,7 @@
   $q('qd-code').addEventListener('keydown', e => { if (e.key === 'Enter') $q('qd-join').click(); });
   $q('qd-start').onclick = () => { $q('qd-start').hidden = true; hostStartDuel(); };
   $q('qd-leave').onclick = leave;
-  $q('qd-copy-code').onclick = () => copy(`Duel me in QuizDesk/Questrig! Duel → join with code: ${$q('qd-lobby-code').textContent}`);
+  $q('qd-copy-code').onclick = () => copy(`Duel me in Questrig! Duel → join with code: ${$q('qd-lobby-code').textContent}`);
   $q('qd-solo').onclick = async () => {
     $q('qd-chal-err').textContent = '';
     try {
