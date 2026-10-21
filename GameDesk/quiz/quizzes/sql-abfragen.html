@@ -1,0 +1,778 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>SQL-Abfragen-Quiz</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: eine Abfrage-Konsole in der Mitte, Hintergrund wie die Zeilen einer Resultattabelle; SQL mit Syntaxfarben */
+:root{
+  --bg:#ecf0f2; --rows:#e2e8eb; --sheet:#ffffff; --sheet-2:#f3f6f7; --ink:#15212a; --muted:#566571; --line:#cfd8dd;
+  --acc:#0b6e62; --acc-soft:#dcf0ec;
+  --ok:#17773f; --ok-soft:#e2f4e8; --bad:#b9302a; --bad-soft:#f9e3e1; --mid:#a65c06; --mid-soft:#fcefdd;
+  --sk:#7b3fb3; --ss:#b4501a; --sn:#1d66a8;
+  --f-display:"Familjen Grotesk",system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f161b; --rows:#131c22; --sheet:#172128; --sheet-2:#1d2932; --ink:#e3eaee; --muted:#93a3ae; --line:#2b3a44;
+  --acc:#4fc9b6; --acc-soft:#16332f;
+  --ok:#5acb8a; --ok-soft:#163323; --bad:#f2786f; --bad-soft:#3d1e1c; --mid:#f2b45e; --mid-soft:#3a2912;
+  --sk:#c39af0; --ss:#f0a070; --sn:#7fb6ee; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f161b; --rows:#131c22; --sheet:#172128; --sheet-2:#1d2932; --ink:#e3eaee; --muted:#93a3ae; --line:#2b3a44;
+  --acc:#4fc9b6; --acc-soft:#16332f;
+  --ok:#5acb8a; --ok-soft:#163323; --bad:#f2786f; --bad-soft:#3d1e1c; --mid:#f2b45e; --mid-soft:#3a2912;
+  --sk:#c39af0; --ss:#f0a070; --sn:#7fb6ee; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.55;
+  background-image:repeating-linear-gradient(180deg,transparent 0 34px,var(--rows) 34px 68px);
+  padding-block:28px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:740px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+header h1{font-family:var(--f-display);font-weight:700;font-size:clamp(28px,6vw,42px);line-height:1.05;margin:0;text-wrap:balance;letter-spacing:-.01em}
+header h1 span{font-family:var(--f-mono);font-weight:600;font-size:.62em;color:var(--acc);vertical-align:.18em;margin-right:.35em}
+header p{margin:6px 0 0;color:var(--muted)}
+.sheet{background:var(--sheet);border:1px solid var(--line);border-radius:12px;padding:24px;min-width:0}
+@media (max-width:480px){.sheet{padding:18px}}
+.label{font-size:13px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:0 0 10px;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:inherit;font-size:15px;border:1.5px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:7px 14px;cursor:pointer;display:flex;gap:8px;align-items:center}
+.chip .n{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.chip[aria-pressed="true"]{border-color:var(--acc);background:var(--acc-soft);color:var(--acc)}
+.chip[aria-pressed="true"] .n{color:var(--acc)}
+.dots{letter-spacing:2px;font-size:12px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.stack{display:flex;flex-direction:column;gap:20px}
+.btn{font:inherit;font-weight:700;border-radius:9px;padding:11px 20px;cursor:pointer;border:1.5px solid var(--acc);background:var(--acc);color:var(--sheet)}
+.btn.ghost{background:transparent;color:var(--acc)}
+.btn:focus-visible,.chip:focus-visible,.opt:focus-visible,.linkbtn:focus-visible,input:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.linkbtn{font:inherit;font-size:14px;background:none;border:0;color:var(--acc);cursor:pointer;text-decoration:underline;padding:0}
+.err{color:var(--bad);font-size:14px;margin:0}
+.hint{font-size:13px;color:var(--muted)}
+.meta{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:14px;color:var(--muted);flex-wrap:wrap}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:13px;font-weight:700;color:var(--acc);background:var(--acc-soft);border-radius:6px;padding:3px 10px}
+.lv1{color:var(--ok);background:var(--ok-soft)} .lv2{color:var(--mid);background:var(--mid-soft)} .lv3{color:var(--bad);background:var(--bad-soft)}
+.track{height:6px;background:var(--sheet-2);border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.track i{display:block;height:100%;background:var(--acc);transition:width .3s}
+.q{font-family:var(--f-display);font-weight:500;font-size:clamp(20px,4.4vw,24px);line-height:1.32;margin:0;text-wrap:pretty}
+code{font-family:var(--f-mono);font-size:.86em;background:var(--sheet-2);border:1px solid var(--line);border-radius:5px;padding:0 5px;white-space:nowrap}
+pre.sql{margin:0;font:15px/1.6 var(--f-mono);background:var(--sheet-2);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:8px;padding:12px 14px;overflow-x:auto;white-space:pre-wrap;word-break:break-word}
+.k{color:var(--sk);font-weight:600} .s{color:var(--ss)} .n2{color:var(--sn)}
+.slot{display:inline-block;min-width:3.2em;border-bottom:2px solid var(--acc);color:transparent}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+.tbl table{border-collapse:collapse;width:100%;font:14px var(--f-mono);font-variant-numeric:tabular-nums}
+.tbl caption{caption-side:top;text-align:left;font:700 12px var(--f-body);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);padding:8px 12px 4px}
+.tbl th{text-align:left;font-weight:600;color:var(--muted);border-bottom:1px solid var(--line);padding:6px 12px;white-space:nowrap}
+.tbl td{padding:5px 12px;border-top:1px solid var(--line);white-space:nowrap}
+.tbl tr:nth-child(even) td{background:var(--sheet-2)}
+.tbl .nul{color:var(--muted);font-style:italic}
+.tbl th.pk{color:var(--ink);text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
+.tbl .emp{color:var(--muted)}
+.legend{font-size:12px;color:var(--muted);margin:6px 2px 0}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:10px}
+.opt{font:inherit;text-align:left;border:1.5px solid var(--line);background:var(--sheet);color:var(--ink);border-radius:9px;padding:12px 14px;cursor:pointer;display:flex;gap:12px;align-items:center;min-width:0}
+.opt>span:last-child{min-width:0;overflow-wrap:anywhere}
+.opt:hover:not(:disabled){border-color:var(--acc)}
+.opt .key{font-family:var(--f-mono);font-size:13px;width:24px;height:24px;flex:none;border-radius:6px;border:1px solid var(--line);display:grid;place-items:center;color:var(--muted)}
+.opt.sqlopt>span:last-child{font-family:var(--f-mono);font-size:14px}
+.opt:disabled{cursor:default}
+.opt:disabled:not(.ok):not(.bad){opacity:.6}
+.opt.ok{border-color:var(--ok);background:var(--ok-soft);color:var(--ok)}
+.opt.bad{border-color:var(--bad);background:var(--bad-soft);color:var(--bad);text-decoration:line-through;text-decoration-thickness:2px}
+.answer{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.field{display:flex;align-items:center;flex:1 1 220px;min-width:0;border:1.5px solid var(--line);border-radius:9px;padding:0 14px;background:var(--sheet)}
+.field:focus-within{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-soft)}
+.field input{font-family:var(--f-mono);font-size:19px;border:0;outline:0;background:transparent;color:var(--ink);padding:11px 0;width:100%;min-width:0}
+.field.ok{border-color:var(--ok);background:var(--ok-soft)} .field.bad{border-color:var(--bad);background:var(--bad-soft)}
+.fb{border-left:4px solid var(--line);padding:4px 0 4px 14px;margin:0}
+.fb.ok{border-color:var(--ok)} .fb.bad{border-color:var(--bad)}
+.fb b{display:block}
+.fb.ok b{color:var(--ok)} .fb.bad b{color:var(--bad)}
+.big{font-family:var(--f-display);font-weight:700;font-size:56px;line-height:1;margin:0;font-variant-numeric:tabular-nums}
+.bars{display:flex;flex-direction:column;gap:10px}
+.bar{display:grid;grid-template-columns:minmax(0,200px) minmax(0,1fr) 54px;gap:12px;align-items:center;font-size:15px}
+.bar .t{height:10px;background:var(--sheet-2);border:1px solid var(--line);border-radius:5px;overflow:hidden}
+.bar .t i{display:block;height:100%}
+.bar .v{font-family:var(--f-mono);font-size:13px;text-align:right;color:var(--muted)}
+@media (max-width:480px){.bar{grid-template-columns:minmax(0,1fr) 54px}.bar .t{grid-column:1/-1;grid-row:2}}
+.wrong{display:flex;flex-direction:column;gap:12px;margin:0;padding:0;list-style:none}
+.wrong li{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:4px}
+.wrong .a{color:var(--ok);font-weight:700}
+kbd{font-family:var(--f-mono);font-size:12px;border:1px solid var(--line);border-radius:4px;padding:1px 5px}
+.tabs{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+.tab{font:inherit;font-weight:700;font-size:15px;border:1.5px solid var(--line);background:var(--sheet);color:var(--ink);border-radius:9px;padding:8px 16px;cursor:pointer}
+.tab[aria-pressed="true"]{background:var(--ink);color:var(--sheet);border-color:var(--ink)}
+.tab:focus-visible,textarea:focus-visible,summary:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+#sqlIn{width:100%;font:15px/1.6 var(--f-mono);background:var(--sheet-2);color:var(--ink);border:1.5px solid var(--line);border-left:4px solid var(--acc);border-radius:8px;padding:12px 14px;resize:vertical;min-height:130px}
+details summary{cursor:pointer;font-weight:700;font-size:15px}
+details p{margin:8px 0 0}
+.chip.code{font-family:var(--f-mono);font-size:13px}
+.tbl.res{max-height:460px;overflow:auto}
+.tbl.res th{position:sticky;top:0;background:var(--sheet)}
+@media (prefers-reduced-motion:reduce){.track i{transition:none}}
+</style>
+
+<div class="wrap" lang="de">
+  <header>
+    <h1><span>SELECT</span>SQL-Abfragen-Quiz</h1>
+    <p>M162: SELECT-Befehl, WHERE-Klausel und Normalisierung. Aufgaben mit Beispieltabelle werden jedes Mal neu erzeugt.</p>
+    <nav class="tabs" aria-label="Bereich"><button class="tab" id="tabQuiz" aria-pressed="true">Quiz</button><button class="tab" id="tabLab" aria-pressed="false">Testdatenbank</button></nav>
+  </header>
+
+  <section class="sheet stack" id="setup">
+    <div>
+      <p class="label">Schwierigkeit</p>
+      <div class="chips" id="levels"></div>
+    </div>
+    <div>
+      <p class="label">Aufgabentyp</p>
+      <div class="chips" id="types"></div>
+    </div>
+    <div>
+      <p class="label">Themen</p>
+      <div class="chips" id="topics"></div>
+      <p class="hint" style="margin:10px 0 0"><button class="linkbtn" id="all">Alle wählen</button> · <button class="linkbtn" id="none">Keine</button></p>
+    </div>
+    <div>
+      <p class="label">Anzahl Fragen</p>
+      <div class="chips" id="counts"></div>
+    </div>
+    <div class="row">
+      <p class="hint" id="avail" style="margin:0"></p>
+      <button class="btn" id="go">Quiz starten</button>
+    </div>
+    <p class="err" id="setupErr" hidden></p>
+  </section>
+
+  <section class="sheet stack" id="play" hidden>
+    <div class="stack" style="gap:10px">
+      <div class="meta"><span class="tags"><span class="tag" id="tag"></span><span class="tag" id="lvl"></span></span><span id="prog"></span></div>
+      <div class="track"><i id="bar" style="width:0"></i></div>
+    </div>
+    <p class="q" id="q"></p>
+    <div id="tblBox" hidden></div>
+    <pre class="sql" id="code" hidden></pre>
+    <div class="opts" id="opts"></div>
+    <form class="stack" id="inForm" style="gap:8px" hidden novalidate>
+      <div class="answer">
+        <label class="field" id="field" for="inp"><input id="inp" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Deine Antwort"></label>
+        <button class="btn" id="check" type="submit">Prüfen</button>
+      </div>
+      <p class="err" id="inErr" hidden></p>
+      <p class="hint" id="inHint" style="margin:0"></p>
+    </form>
+    <p class="fb" id="fb" hidden></p>
+    <div class="row">
+      <span class="hint" id="score"></span>
+      <div class="row" style="gap:16px">
+        <button class="linkbtn" id="quit">Abbrechen</button>
+        <button class="btn ghost" id="tryIt" hidden>Abfrage ausprobieren</button>
+        <button class="btn" id="next" hidden>Weiter</button>
+      </div>
+    </div>
+    <p class="hint" style="margin:0">Tastatur: <kbd>1</kbd>–<kbd>4</kbd> bei Multiple Choice, <kbd>Enter</kbd> zum Prüfen und für weiter</p>
+  </section>
+
+  <section class="sheet stack" id="end" hidden>
+    <div>
+      <p class="label">Dein Resultat</p>
+      <p class="big" id="final"></p>
+      <p id="msg" style="margin:8px 0 0"></p>
+    </div>
+    <div>
+      <p class="label">Nach Thema</p>
+      <div class="bars" id="bars"></div>
+    </div>
+    <div id="wrongBox">
+      <p class="label">Zum Wiederholen</p>
+      <ul class="wrong" id="wrong"></ul>
+    </div>
+    <div class="row" style="justify-content:flex-end">
+      <button class="btn ghost" id="retryWrong">Fehler nochmals</button>
+      <button class="btn" id="restart">Neues Quiz</button>
+    </div>
+  </section>
+
+  <section class="sheet stack" id="lab" hidden>
+    <div class="row" style="align-items:flex-start">
+      <div style="min-width:0;flex:1 1 260px">
+        <p class="label" style="margin:0">Testdatenbank (SQLite)</p>
+        <p class="hint" id="labInfo" style="margin:4px 0 0">Wird beim ersten Öffnen geladen …</p>
+      </div>
+      <button class="btn ghost" id="labReset">Datenbank zurücksetzen</button>
+    </div>
+    <details id="schema"><summary>Attribute der Tabelle lernende</summary><p class="hint" id="schemaTxt"></p></details>
+    <div>
+      <p class="label">Beispiele</p>
+      <div class="chips" id="examples"></div>
+    </div>
+    <div class="stack" style="gap:10px">
+      <label class="label" for="sqlIn" style="margin:0">Deine Abfrage</label>
+      <textarea id="sqlIn" spellcheck="false" autocapitalize="off" rows="5">SELECT * FROM lernende LIMIT 10;</textarea>
+      <div class="row"><span class="hint">Ausführen mit <kbd>Ctrl</kbd> + <kbd>Enter</kbd></span><button class="btn" id="run">Ausführen</button></div>
+    </div>
+    <p class="err" id="labErr" hidden></p>
+    <div id="labOut"></div>
+  </section>
+</div>
+
+<script>
+const T={S:"SELECT-Grundlagen",D:"DISTINCT & ALL",A:"AS & Verketten",F:"Berechnungen & Funktionen",O:"ORDER BY",W:"WHERE & Vergleiche",B:"AND, OR, NOT, BETWEEN",L:"LIKE & Platzhalter",N:"NULL & leere Werte",Z:"Normalisierung"};
+const L={1:"Leicht",2:"Mittel",3:"Schwer"};
+
+const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+function shuffle(a){a=a.slice();for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const fmt=n=>String(n);
+
+// Aufgabenvorlagen: K(Thema, Stufe, "m"=Multiple Choice und/oder "i"=Eingabe, Generator)
+// Generator liefert: q (Frage, `code` in Backticks), code (SQL-Block), table (Beispieltabelle), a (richtig), w (falsch), v (akzeptierte Eingaben), kind ("kw" Wort, "num" Zahl, "text" Name), e (Erklärung)
+const K=(t,l,f,g)=>({t,l,mc:f.includes("m"),inp:f.includes("i"),g});
+const M=(t,l,q,a,w,e,code)=>K(t,l,"m",()=>({q,code,a,w,e}));
+const X=(t,l,q,code,v,w,e)=>K(t,l,w?"mi":"i",()=>{v=[].concat(v);return{q,code,a:v[0],v,w:w||[],e,kind:"kw",sql:true}});
+
+// Beispieltabelle "lernende" für die Auswertungsaufgaben
+const NACH=["Ammann","Bader","Baumann","Brunner","Christen","Dubach","Egger","Frei","Gerber","Graf","Huber","Imhof","Keller","Koch","Lehmann","Marti","Meier","Moser","Roth","Schmid","Steiner","Suter","Weber","Zaugg"];
+const VOR=["Lena","Noah","Mia","Luca","Sara","Leon","Jan","Nina","Lara","Tim","Elias","Alina"];
+const ORT=["Bern","Thun","Biel","Burgdorf"];
+const FIRMA=["Swisscom","Post","SBB","BKW","Mobiliar"];
+function mkTable(){
+  const nach=shuffle(NACH).slice(0,ri(6,8)),vp=shuffle(VOR).slice(0,5),op=shuffle(ORT).slice(0,3);
+  const rows=nach.map(n=>({vorname:pick(vp),nachname:n,ort:pick(op),jahrgang:ri(2003,2009),firma:pick(FIRMA)}));
+  const idx=shuffle(rows.map((_,k)=>k));rows[idx[0]].firma=null;rows[idx[1]].firma="";
+  if(Math.random()<.5)rows[idx[2]].firma=Math.random()<.5?null:"";if(Math.random()<.3)rows[idx[3]].firma="";
+  return rows;
+}
+const COLS=["vorname","nachname","ort","jahrgang","firma"];
+function tableHTML(rows){
+  let h='<div class="tbl"><table><caption>Tabelle lernende</caption><thead><tr>'+COLS.map(c=>"<th>"+c+"</th>").join("")+"</tr></thead><tbody>";
+  for(const r of rows)h+="<tr>"+COLS.map(c=>{const v=r[c];return v===null?'<td class="nul">NULL</td>':v===""?"<td class=\"emp\">''</td>":"<td>"+esc(v)+"</td>"}).join("")+"</tr>";
+  return h+'</tbody></table></div><p class="legend">NULL = kein Wert (unbestimmt) · \'\' = leere Zeichenkette</p>';
+}
+const names=(rows,f)=>{const h=rows.filter(f).map(r=>r.nachname);return h.length?"Treffer: "+h.join(", ")+".":"Kein Datensatz passt."};
+const numW=(n,max)=>[n+1,n-1,n+2,n-2,max].filter(x=>x>=0&&x!==n).map(String);
+// Zeilen zählen: Frage, SQL, Filter
+function countQ(rows,code,f,extra){const n=rows.filter(f).length;return{q:"Wie viele Datensätze gibt diese Abfrage zurück?",code,table:rows,a:String(n),v:[String(n)],w:numW(n,rows.length),kind:"num",e:(extra?extra+" ":"")+names(rows,f)}}
+function valQ(rows,code,val,w,e,kind){return{q:"Welchen Wert liefert diese Abfrage?",code,table:rows,a:String(val),v:[String(val)],w,kind:kind||"num",e}}
+const age=r=>2026-r.jahrgang;
+const byName=(a,b)=>a.nachname<b.nachname?-1:a.nachname>b.nachname?1:0;
+const otherNames=(rows,n)=>shuffle(rows.map(r=>r.nachname).filter(x=>x!==n));
+
+// Varianten: V wählt bei jedem Aufruf eine der Varianten (Objekt oder Funktion)
+const V=(t,l,f,...vars)=>K(t,l,f,()=>{const x=pick(vars);return typeof x==="function"?x():Object.assign({},x)});
+const mc=(q,a,w,e,extra)=>Object.assign({q,a,w,e},extra||{});
+const fill=(q,code,v,w,e)=>({q,code,a:[].concat(v)[0],v:[].concat(v),w,e,kind:"kw",sql:true});
+const ATT={vorname:"Vorname",nachname:"Nachname",ort:"Wohnort",jahrgang:"Jahrgang",firma:"Lehrbetrieb",email:"E-Mail",plz:"PLZ"};
+const attrs=n=>shuffle(Object.keys(ATT)).slice(0,n);
+const WO=["Bern","Thun","Biel","Berlin","Burgdorf","Langenthal"];
+const cap=s=>s[0].toUpperCase()+s.slice(1);
+const LIKENAMES=NACH.concat(["Juker","Jufer","Rinke","Rippe","Rogge","Rose","Steffen","Braun","Bratschi","Brand","Kunz","Kurz","Keel","Kessler","Fischer","Wyss","Hofer","Rohrer","Stucki","Bachmann"]);
+const likeRe=p=>new RegExp("^"+p.replace(/%/g,".*").replace(/_/g,".")+"$","i");
+
+// Normalisierung: zufällige Beispieltabellen mit bekannter Normalform (fds = funktionale Abhängigkeiten, für die Prüfung)
+const NFL=["Nicht in der 1. NF","1. NF","2. NF","3. NF"];
+const PO=[["3000","Bern"],["3600","Thun"],["2502","Biel"],["3400","Burgdorf"],["4900","Langenthal"],["8001","Zürich"]];
+const FIR=[[11,"Swisscom"],[12,"Post"],[13,"SBB"],[14,"BKW"],[15,"Mobiliar"]];
+const KUR=[[1,"Mathematik"],[2,"Englisch"],[3,"Datenbanken"],[4,"Netzwerke"],[5,"Deutsch"]];
+const ART=[[101,"Maus"],[102,"Tastatur"],[103,"Monitor"],[104,"Headset"],[105,"USB-Kabel"]];
+const ABT=[[1,"Informatik"],[2,"Verkauf"],[3,"Buchhaltung"],[4,"Logistik"]];
+const PRJ=[[7,"Webshop"],[8,"Migration"],[9,"Intranet"]];
+const KUN=[[201,"Keller AG"],[202,"Moser GmbH"],[203,"Huber & Co"]];
+const tel=()=>"07"+pick([6,7,8,9])+" "+ri(100,999)+" "+ri(10,99)+" "+ri(10,99);
+const dat=()=>ri(10,28)+".0"+ri(1,9)+".2026";
+const ppl=n=>shuffle(NACH).slice(0,n).map((nn,k)=>({id:100+k*13+ri(0,9),vorname:pick(VOR),nachname:nn}));
+const combos=(A,B,n)=>shuffle(A.flatMap(a=>B.map(b=>[a,b]))).slice(0,n);
+const NOTE=[3.5,4,4.5,5,5.5,6];
+const WHY3="Alle Werte sind atomar, jedes Nicht-Schlüsselattribut hängt vom ganzen Primärschlüssel ab, und keines hängt von einem anderen Nicht-Schlüsselattribut ab.";
+const NFS=[
+  // nicht in der 1. NF
+  ()=>{const p=ppl(ri(3,5));return{nf:0,name:"lernende",cols:["lernende_id","vorname","nachname","telefon"],key:["lernende_id"],atomic:false,rows:p.map((x,k)=>[x.id,x.vorname,x.nachname,k%2===0?tel()+", "+tel():tel()]),culprit:"telefon",why:"In der Spalte telefon stehen teilweise mehrere Nummern in einer Zelle. Die Werte sind nicht atomar.",fix:"Die Nummern in eine eigene Tabelle telefon(lernende_id, nummer) auslagern, eine Nummer pro Zeile"}},
+  ()=>{const p=ppl(ri(3,5));return{nf:0,name:"lernende",cols:["lernende_id","vorname","nachname","adresse"],key:["lernende_id"],atomic:false,rows:p.map(x=>{const[z,o]=pick(PO);return[x.id,x.vorname,x.nachname,pick(["Bahnhofstrasse","Hauptstrasse","Schulweg","Lindenweg"])+" "+ri(1,60)+", "+z+" "+o]}),culprit:"adresse",why:"adresse enthält Strasse, Hausnummer, PLZ und Ort in einem Feld. Die Werte sind nicht atomar.",fix:"adresse aufteilen in die Attribute strasse, hausnummer, plz und ort"}},
+  ()=>{const n=ri(3,4);return{nf:0,name:"bestellung",cols:["bestell_nr","datum","artikel"],key:["bestell_nr"],atomic:false,rows:Array.from({length:n},(_,k)=>[5001+k,dat(),shuffle(ART).slice(0,k===0?3:ri(1,3)).map(a=>a[1]).join(", ")]),culprit:"artikel",why:"In der Spalte artikel stehen mehrere Artikel in einer Zelle.",fix:"Eine Tabelle bestellposition(bestell_nr, artikel_nr, menge) erstellen, ein Artikel pro Zeile"}},
+  ()=>{const c=shuffle(["INF23a","INF23b","INF24a","MED24a","KV24b"]).slice(0,ri(3,4));return{nf:0,name:"klasse",cols:["klasse","klassenlehrer","lernende"],key:["klasse"],atomic:false,rows:c.map(k=>[k,pick(["Frau Meier","Herr Huber","Frau Graf","Herr Roth"]),shuffle(VOR).slice(0,3).join(", ")]),culprit:"lernende",why:"In der Spalte lernende stehen mehrere Namen in einer Zelle.",fix:"Die Lernenden in eine eigene Tabelle lernende(lernende_id, vorname, klasse) auslagern, eine Person pro Zeile"}},
+  ()=>{const p=ppl(ri(3,5)),L=["Deutsch","Englisch","Französisch","Italienisch"];return{nf:0,name:"mitarbeitende",cols:["personal_nr","vorname","nachname","sprachen"],key:["personal_nr"],atomic:false,rows:p.map((x,k)=>[x.id,x.vorname,x.nachname,shuffle(L).slice(0,k===0?2:ri(1,3)).join(", ")]),culprit:"sprachen",why:"In der Spalte sprachen stehen teilweise mehrere Sprachen in einer Zelle.",fix:"Eine Tabelle sprachkenntnis(personal_nr, sprache) erstellen, eine Sprache pro Zeile"}},
+  ()=>{const p=ppl(ri(3,4));return{nf:0,name:"lernende",cols:["lernende_id","nachname","kurs1","kurs2","kurs3"],key:["lernende_id"],atomic:false,rows:p.map((x,k)=>{const c=shuffle(KUR).slice(0,3).map(z=>z[1]);if(k>0&&Math.random()<.5)c[2]="";return[x.id,x.nachname,...c]}),culprit:"kurs1, kurs2 und kurs3",why:"kurs1, kurs2 und kurs3 sind eine Wiederholungsgruppe: dieselbe Information in mehreren Spalten.",fix:"Eine Tabelle kursbesuch(lernende_id, kurs_id) erstellen, ein Kurs pro Zeile"}},
+  // 1. NF: partielle Abhängigkeit von einem Teil des zusammengesetzten Schlüssels
+  ()=>{const p=ppl(2),k=shuffle(KUR).slice(0,3);return{nf:1,name:"kursbesuch",cols:["lernende_id","kurs_id","vorname","note"],key:["lernende_id","kurs_id"],atomic:true,fds:[[["lernende_id"],["vorname"]],[["lernende_id","kurs_id"],["note"]]],rows:combos(p,k,ri(4,5)).map(([x,y])=>[x.id,y[0],x.vorname,pick(NOTE)]),culprit:"vorname",why:"Der Primärschlüssel ist (lernende_id, kurs_id). vorname hängt nur von lernende_id ab, also nur von einem Teil des Schlüssels (partielle Abhängigkeit).",fix:"vorname in eine eigene Tabelle lernende(lernende_id, vorname) auslagern"}},
+  ()=>{const p=ppl(3),k=shuffle(KUR).slice(0,2);return{nf:1,name:"kursbesuch",cols:["lernende_id","kurs_id","kursname","note"],key:["lernende_id","kurs_id"],atomic:true,fds:[[["kurs_id"],["kursname"]],[["lernende_id","kurs_id"],["note"]]],rows:combos(p,k,ri(4,5)).map(([x,y])=>[x.id,y[0],y[1],pick(NOTE)]),culprit:"kursname",why:"Der Primärschlüssel ist (lernende_id, kurs_id). kursname hängt nur von kurs_id ab (partielle Abhängigkeit).",fix:"kursname in eine eigene Tabelle kurs(kurs_id, kursname) auslagern"}},
+  ()=>{const o=[5001,5002,5003].slice(0,ri(2,3)),a=shuffle(ART).slice(0,3);return{nf:1,name:"bestellposition",cols:["bestell_nr","artikel_nr","menge","artikelname"],key:["bestell_nr","artikel_nr"],atomic:true,fds:[[["artikel_nr"],["artikelname"]],[["bestell_nr","artikel_nr"],["menge"]]],rows:combos(o,a,ri(4,5)).map(([x,y])=>[x,y[0],ri(1,5),y[1]]),culprit:"artikelname",why:"Der Primärschlüssel ist (bestell_nr, artikel_nr). artikelname hängt nur von artikel_nr ab (partielle Abhängigkeit).",fix:"artikelname in eine eigene Tabelle artikel(artikel_nr, artikelname) auslagern"}},
+  ()=>{const p=ppl(3),j=shuffle(PRJ).slice(0,2);return{nf:1,name:"projektarbeit",cols:["personal_nr","projekt_nr","stunden","projektname"],key:["personal_nr","projekt_nr"],atomic:true,fds:[[["projekt_nr"],["projektname"]],[["personal_nr","projekt_nr"],["stunden"]]],rows:combos(p,j,ri(4,5)).map(([x,y])=>[x.id,y[0],ri(4,40),y[1]]),culprit:"projektname",why:"Der Primärschlüssel ist (personal_nr, projekt_nr). projektname hängt nur von projekt_nr ab (partielle Abhängigkeit).",fix:"projektname in eine eigene Tabelle projekt(projekt_nr, projektname) auslagern"}},
+  // 2. NF: transitive Abhängigkeit über ein Nicht-Schlüsselattribut
+  ()=>{const p=ppl(ri(4,6)),o=shuffle(PO).slice(0,2);return{nf:2,name:"lernende",cols:["lernende_id","nachname","plz","ort"],key:["lernende_id"],atomic:true,fds:[[["lernende_id"],["nachname","plz"]],[["plz"],["ort"]]],rows:p.map(x=>{const[z,c]=pick(o);return[x.id,x.nachname,z,c]}),culprit:"ort",why:"Der Schlüssel hat nur ein Attribut, also gibt es keine partielle Abhängigkeit. Aber ort hängt von plz ab, und plz ist kein Schlüssel (transitive Abhängigkeit: lernende_id → plz → ort).",fix:"plz und ort in eine eigene Tabelle ort(plz, ort) auslagern, in lernende bleibt plz"}},
+  ()=>{const p=ppl(ri(4,6)),f=shuffle(FIR).slice(0,2);return{nf:2,name:"lernende",cols:["lernende_id","nachname","firma_id","firmenname"],key:["lernende_id"],atomic:true,fds:[[["lernende_id"],["nachname","firma_id"]],[["firma_id"],["firmenname"]]],rows:p.map(x=>{const[i,n]=pick(f);return[x.id,x.nachname,i,n]}),culprit:"firmenname",why:"Der Schlüssel hat nur ein Attribut. Aber firmenname hängt von firma_id ab, und firma_id ist kein Schlüssel (transitive Abhängigkeit).",fix:"firma_id und firmenname in eine eigene Tabelle firma(firma_id, firmenname) auslagern, in lernende bleibt firma_id"}},
+  ()=>{const n=ri(4,5),c=shuffle(KUN).slice(0,2);return{nf:2,name:"bestellung",cols:["bestell_nr","datum","kunden_nr","kundenname"],key:["bestell_nr"],atomic:true,fds:[[["bestell_nr"],["datum","kunden_nr"]],[["kunden_nr"],["kundenname"]]],rows:Array.from({length:n},(_,k)=>{const[i,m]=pick(c);return[5001+k,dat(),i,m]}),culprit:"kundenname",why:"Der Schlüssel hat nur ein Attribut. Aber kundenname hängt von kunden_nr ab, und kunden_nr ist kein Schlüssel (transitive Abhängigkeit).",fix:"kunden_nr und kundenname in eine eigene Tabelle kunde(kunden_nr, kundenname) auslagern, in bestellung bleibt kunden_nr"}},
+  ()=>{const p=ppl(ri(4,6)),a=shuffle(ABT).slice(0,2);return{nf:2,name:"mitarbeitende",cols:["personal_nr","nachname","abteilungs_nr","abteilungsname"],key:["personal_nr"],atomic:true,fds:[[["personal_nr"],["nachname","abteilungs_nr"]],[["abteilungs_nr"],["abteilungsname"]]],rows:p.map(x=>{const[i,m]=pick(a);return[x.id,x.nachname,i,m]}),culprit:"abteilungsname",why:"Der Schlüssel hat nur ein Attribut. Aber abteilungsname hängt von abteilungs_nr ab, und abteilungs_nr ist kein Schlüssel (transitive Abhängigkeit).",fix:"abteilungs_nr und abteilungsname in eine eigene Tabelle abteilung(abteilungs_nr, abteilungsname) auslagern"}},
+  ()=>{const p=ppl(2),k=shuffle(KUR).slice(0,3),ns=shuffle([4,5,6]).slice(0,2),B={4:"genügend",5:"gut",6:"sehr gut"};return{nf:2,hard:true,name:"kursbesuch",cols:["lernende_id","kurs_id","note","bewertung"],key:["lernende_id","kurs_id"],atomic:true,fds:[[["lernende_id","kurs_id"],["note"]],[["note"],["bewertung"]]],rows:combos(p,k,ri(4,5)).map(([x,y])=>{const n=pick(ns);return[x.id,y[0],n,B[n]]}),culprit:"bewertung",why:"note hängt vom ganzen Schlüssel (lernende_id, kurs_id) ab, also keine partielle Abhängigkeit. Aber bewertung hängt von note ab, einem Nicht-Schlüsselattribut (transitive Abhängigkeit).",fix:"note und bewertung in eine eigene Tabelle notenskala(note, bewertung) auslagern"}},
+  // 3. NF
+  ()=>{const p=ppl(ri(4,5));return{nf:3,name:"lernende",cols:["lernende_id","vorname","nachname","plz"],key:["lernende_id"],atomic:true,fds:[[["lernende_id"],["vorname","nachname","plz"]]],rows:p.map(x=>[x.id,x.vorname,x.nachname,pick(PO)[0]]),why:WHY3}},
+  ()=>{const p=ppl(2),k=shuffle(KUR).slice(0,3);return{nf:3,hard:true,name:"kursbesuch",cols:["lernende_id","kurs_id","note"],key:["lernende_id","kurs_id"],atomic:true,fds:[[["lernende_id","kurs_id"],["note"]]],rows:combos(p,k,ri(4,5)).map(([x,y])=>[x.id,y[0],pick(NOTE)]),why:"Der Schlüssel ist zusammengesetzt, aber note hängt vom ganzen Schlüssel ab. Dass lernende_id mehrfach vorkommt, ist keine Redundanz. "+WHY3}},
+  ()=>{const o=[5001,5002,5003].slice(0,ri(2,3)),a=shuffle(ART).slice(0,3);return{nf:3,hard:true,name:"bestellposition",cols:["bestell_nr","artikel_nr","menge"],key:["bestell_nr","artikel_nr"],atomic:true,fds:[[["bestell_nr","artikel_nr"],["menge"]]],rows:combos(o,a,ri(4,5)).map(([x,y])=>[x,y[0],ri(1,5)]),why:"menge hängt von Bestellung und Artikel zusammen ab, also vom ganzen Schlüssel. "+WHY3}},
+  ()=>{const f=shuffle(FIR).slice(0,ri(3,5));return{nf:3,name:"firma",cols:["firma_id","firmenname","plz"],key:["firma_id"],atomic:true,fds:[[["firma_id"],["firmenname","plz"]]],rows:f.map(([i,n])=>[i,n,pick(PO)[0]]),why:WHY3}},
+  ()=>{const a=shuffle(ART).slice(0,ri(3,5));return{nf:3,name:"artikel",cols:["artikel_nr","bezeichnung","preis"],key:["artikel_nr"],atomic:true,fds:[[["artikel_nr"],["bezeichnung","preis"]]],rows:a.map(([i,n])=>[i,n,(ri(5,250)+pick([0,.5,.9])).toFixed(2)]),why:WHY3}},
+  ()=>{const p=ppl(ri(4,5)),a=shuffle(ABT).slice(0,2);return{nf:3,name:"mitarbeitende",cols:["personal_nr","vorname","nachname","abteilungs_nr"],key:["personal_nr"],atomic:true,fds:[[["personal_nr"],["vorname","nachname","abteilungs_nr"]]],rows:p.map(x=>[x.id,x.vorname,x.nachname,pick(a)[0]]),why:"abteilungs_nr kommt mehrfach vor, aber nur als Verweis ohne abhängige Attribute. "+WHY3}}
+];
+function nfPick(f){let s;do{s=pick(NFS)()}while(!f(s));return s}
+function nfTable(s){
+  return '<div class="tbl"><table><caption>Tabelle '+s.name+"</caption><thead><tr>"+s.cols.map(c=>"<th"+(s.key.includes(c)?' class="pk"':"")+">"+c+"</th>").join("")+"</tr></thead><tbody>"+
+    s.rows.map(r=>"<tr>"+r.map(v=>v===""?"<td class=\"emp\">''</td>":"<td>"+esc(v)+"</td>").join("")+"</tr>").join("")+'</tbody></table></div><p class="legend">Unterstrichen = Primärschlüssel'+(s.key.length>1?" (zusammengesetzt aus "+s.key.join(" und ")+")":"")+"</p>";
+}
+const nfEnd=s=>s.nf===3?" Darum ist sie in der 3. NF.":s.nf===0?" Darum ist sie nicht in der 1. NF.":" Darum ist sie in der "+s.nf+". NF, aber nicht in der "+(s.nf+1)+". NF.";
+const nfQ=s=>({q:pick(["In welcher Normalform ist diese Tabelle?","Welche Normalform erfüllt diese Tabelle (die höchste)?","Bestimme die Normalform dieser Tabelle."]),html:nfTable(s),a:NFL[s.nf],v:[String(s.nf)],w:NFL.filter((_,k)=>k!==s.nf),kind:"nf",e:s.why+nfEnd(s)});
+
+const Q=[
+// SELECT-Grundlagen
+V("S",1,"m",()=>mc(pick(["Welche Teile braucht jeder SELECT-Befehl mindestens?","Was ist bei jedem SELECT obligatorisch?","Ohne welche Teile funktioniert ein SELECT nie?"]),"Eine Spaltenliste und FROM mit dem Tabellennamen",["WHERE und ORDER BY","DISTINCT und FROM","Nur das Wort SELECT","WHERE und LIMIT","ORDER BY und FROM","Eine Bedingung und eine Sortierung"],"Minimal: SELECT <Spaltenliste> FROM <Tabelle>. DISTINCT, WHERE, GROUP BY, HAVING und ORDER BY sind optional.")),
+V("S",1,"mi",
+  ()=>mc("Was gibt `SELECT * FROM lernende"+pick([";"," ORDER BY nachname;"," LIMIT 20;"])+"` aus?","Alle Attribute (Spalten) der Tabelle lernende",["Alle Datensätze ohne Duplikate","Nur die erste Spalte","Das Produkt aller Zahlenspalten","Nur die Spalten ohne NULL","Die Anzahl Datensätze"],"Das Zeichen * hat eine Sonderbedeutung: alle Attribute der Tabelle."),
+  ()=>fill("Ergänze, damit alle Attribute der Tabelle ausgegeben werden:","SELECT ___ FROM lernende"+pick([";"," WHERE ort = '"+pick(WO)+"';"," ORDER BY nachname;"]),"*",["ALL","%","EVERY","_","DISTINCT"],"* steht für alle Attribute der Tabelle.")),
+V("S",1,"mi",
+  ()=>mc(pick(["Was steht nach dem Schlüsselwort FROM?","Was folgt im SELECT-Befehl direkt auf FROM?"]),"Genau ein Tabellenname",["Die Spaltenliste","Die Bedingung","Die Sortierung","Ein Attributname","Die Anzahl Zeilen"],"Nach FROM steht jeweils genau ein Tabellenname, in unserem Fall lernende."),
+  ()=>{const[a,b]=attrs(2);return fill("Ergänze:","SELECT "+a+", "+b+" ___ lernende;","FROM",["IN","OF","TABLE","WHERE","INTO"],"Nach der Spaltenliste folgt FROM und dann der Tabellenname.")}),
+K("S",2,"m",()=>{const c=attrs(pick([2,3])),n=c.map(x=>ATT[x]),l=n.length===2?n.join(" und "):n[0]+", "+n[1]+" und "+n[2],k=ri(2,5);
+  return mc("Was gibt `SELECT "+c.join(", ")+" FROM lernende;` aus?","Die Attribute "+l+" aller Lernenden",["Alle Attribute, aber nur von "+c.length+" Lernenden","Nur Lernende, bei denen "+l+" ausgefüllt sind",l+" in einer einzigen Spalte","Nur die ersten "+k+" Datensätze","Alle Attribute ausser "+l],"Die Spaltenliste bestimmt die Attribute. Ohne WHERE kommen alle Datensätze.")}),
+K("S",1,"m",()=>{const[x,yes,ex]=pick([["Schlüsselwörtern wie SELECT",0,"SELECT ist dasselbe wie select."],["Tabellennamen",0,"lernende ist dasselbe wie LERNENDE."],["Attributnamen",0,"vorname ist dasselbe wie VORNAME."],["Werten in der WHERE-Bedingung",1,"WHERE nachname = 'D' ist nicht dasselbe wie WHERE nachname = 'd'."]]);
+  return mc("Unterscheidet SQL bei "+x+" zwischen Gross- und Kleinschreibung?",yes?"Ja":"Nein",[yes?"Nein":"Ja","Nur in SQLite","Nur bei Zahlen","Nur wenn die Tabelle leer ist"],ex+" Nur bei den Werten in der WHERE-Bedingung spielt die Schreibweise eine Rolle.")}),
+V("S",2,"m",
+  ()=>mc("Wo unterscheidet SQL zwischen Gross- und Kleinschreibung?","Bei den Werten in der WHERE-Bedingung",["Bei Tabellennamen","Bei Attributnamen","Bei Schlüsselwörtern","Bei Spaltentiteln nach AS"],"WHERE nachname = 'D' ist nicht dasselbe wie WHERE nachname = 'd'."),
+  ()=>{const o=pick(WO),a=pick(["vorname","ort","nachname"]);return mc("Welches Paar von Abfragen kann verschiedene Resultate liefern?","WHERE ort = '"+o+"' und WHERE ort = '"+o.toUpperCase()+"'",["SELECT "+a.toUpperCase()+" FROM lernende und SELECT "+a+" FROM lernende","select * from lernende und SELECT * FROM lernende","SELECT * FROM LERNENDE und SELECT * FROM lernende"],"Nur Werte in der Bedingung sind von der Schreibweise abhängig: '"+o+"' ist nicht '"+o.toUpperCase()+"'.",{sqlopts:true})}),
+V("S",2,"m",
+  ()=>mc(pick(["Welche Schreibweise entspricht der empfohlenen Konvention?","Wie schreibt man SQL nach der üblichen Konvention?"]),"Schlüsselwörter gross, Tabellen- und Attributnamen klein wie in der Datenbank",["Alles gross","Alles klein","Schlüsselwörter klein, Attributnamen gross","Jedes Wort mit grossem Anfangsbuchstaben"],"Beispiel: SELECT vorname, nachname FROM lernende;"),
+  ()=>{const a=pick(["vorname","nachname","email"]),o=pick(WO);return mc("Welcher Befehl folgt der empfohlenen Schreibweise?","SELECT "+a+" FROM lernende WHERE ort = '"+o+"';",["select "+a+" from lernende where ort = '"+o+"';","SELECT "+a.toUpperCase()+" FROM LERNENDE WHERE ORT = '"+o+"';","Select "+cap(a)+" From Lernende Where Ort = '"+o+"';"],"Schlüsselwörter gross, Namen so, wie sie in der Datenbank stehen. Alle vier laufen, aber nur einer ist gut lesbar.",{sqlopts:true})}),
+K("S",2,"m",()=>{const opt=shuffle(["WHERE …","GROUP BY …","HAVING …","ORDER BY …"]).slice(0,ri(2,4));const ok=["SELECT …","FROM …","WHERE …","GROUP BY …","HAVING …","ORDER BY …"].filter(x=>x==="SELECT …"||x==="FROM …"||opt.includes(x));
+  const s=a=>a.join(" "),w=new Set();let g=0;while(w.size<5&&g++<80){const p=ok.slice(),i=ri(1,p.length-1),j=ri(0,p.length-1);if(i===j)continue;[p[i],p[j]]=[p[j],p[i]];if(s(p)!==s(ok))w.add(s(p))}
+  return mc("Welche Reihenfolge der Klauseln ist richtig?",s(ok),[...w],"Die Syntax: SELECT, FROM, WHERE, GROUP BY, HAVING, ORDER BY. LIMIT kommt in SQLite ganz am Schluss.",{sqlopts:true})}),
+V("S",1,"mi",
+  ()=>{const n=pick([3,5,10,20,25,50]),[a,b]=attrs(2);return fill("Ergänze, damit höchstens "+n+" Datensätze ausgegeben werden:","SELECT "+a+", "+b+" FROM lernende ___ "+n+";","LIMIT",["TOP","FIRST","MAX","ROWS","COUNT"],"LIMIT <Anzahl> begrenzt die Anzahl Zeilen und steht am Ende des SELECT-Befehls.")},
+  ()=>{const n=pick([3,5,7,10,15,20]);return{q:"Wie viele Datensätze liefert diese Abfrage höchstens?",code:"SELECT * FROM lernende"+pick([""," ORDER BY nachname"," WHERE jahrgang > 2004"])+" LIMIT "+n+";",a:String(n),v:[String(n)],w:[n-1,n+1,n*2,n*10].map(String),kind:"num",e:"LIMIT "+n+" gibt höchstens "+n+" Zeilen aus. Passen weniger Datensätze, kommen entsprechend weniger."}}),
+V("S",2,"m",
+  ()=>mc("Wo steht die LIMIT-Klausel?","Ganz am Ende des SELECT-Befehls",["Direkt nach SELECT","Vor FROM","Zwischen WHERE und ORDER BY","Direkt nach FROM","Vor WHERE"],"Beispiel: SELECT vorname, nachname FROM lernende ORDER BY nachname LIMIT 10;"),
+  ()=>{const n=pick([3,5,10]),a=pick(["nachname","jahrgang","vorname"]);return mc("Welcher Befehl ist richtig?","SELECT * FROM lernende ORDER BY "+a+" LIMIT "+n+";",["SELECT LIMIT "+n+" * FROM lernende ORDER BY "+a+";","SELECT * FROM lernende LIMIT "+n+" ORDER BY "+a+";","SELECT * LIMIT "+n+" FROM lernende ORDER BY "+a+";"],"LIMIT steht ganz am Schluss, auch nach ORDER BY.",{sqlopts:true})}),
+V("S",3,"m",
+  ()=>mc("Was gilt für die LIMIT-Klausel?","Sie ist SQLite-spezifisch, andere Datenbanksysteme nennen sie anders",["Sie funktioniert in allen Datenbanksystemen gleich","Sie sortiert die Ausgabe","Sie ist nur mit WHERE erlaubt","Sie entfernt Duplikate","Sie muss direkt nach SELECT stehen"],"Die LIMIT-Klausel gibt es in SQLite. In anderen Datenbanksystemen heisst die Klausel anders."),
+  ()=>mc("Welche zwei Dinge aus dem Kapitel sind SQLite-spezifisch?","LIMIT und das Zusammenfügen mit ||",["DISTINCT und AS","WHERE und ORDER BY","COUNT() und SUM()","BETWEEN und LIKE","ASC und DESC"],"LIMIT und || funktionieren so nur in SQLite, andere Systeme haben dafür eigene Schreibweisen.")),
+
+// DISTINCT & ALL
+V("D",1,"mi",
+  ()=>{const a=pick(["vorname","nachname","ort","firma","jahrgang"]);return fill("Ergänze, damit jeder Wert von "+a+" nur einmal vorkommt:","SELECT ___ "+a+" FROM lernende"+pick([";"," ORDER BY "+a+";"]),"DISTINCT",["ALL","UNIQUE","ONLY","SINGLE","DIFFERENT"],"DISTINCT filtert doppelte Ergebnisse heraus.")},
+  ()=>fill("Ergänze das Gegenstück zu DISTINCT, das alle Datensätze ausgibt, auch doppelte:","SELECT ___ "+pick(["ort","vorname","firma"])+" FROM lernende;","ALL",["EVERY","*","DISTINCT","FULL"],"ALL ist der Standard und kann weggelassen werden.")),
+V("D",1,"m",
+  mc("Was macht DISTINCT?","Doppelte Ergebnisse werden zu einem zusammengefasst",["Es sortiert die Ausgabe","Es gibt alle Datensätze aus, auch doppelte","Es zählt die Datensätze","Es gibt alle Attribute aus","Es begrenzt die Anzahl Zeilen"],"Mit DISTINCT erhältst du nur eindeutige Ergebnisse."),
+  mc("Was macht ALL?","Es gibt alle Datensätze aus, auch doppelte",["Es gibt alle Attribute aus wie *","Es entfernt Duplikate","Es hebt LIMIT auf","Es sortiert alle Datensätze","Es zählt alle Datensätze"],"ALL ist das Gegenstück zu DISTINCT und kann weggelassen werden."),
+  mc("Welches Schlüsselwort ist bei SELECT der Standard und kann deshalb weggelassen werden?","ALL",["DISTINCT","LIMIT","AS","WHERE"],"Auch ohne ALL werden immer alle Datensätze zurückgegeben.")),
+K("D",2,"m",()=>{const[a,b]=attrs(2),A=ATT[a],B=ATT[b];return mc("Was gibt `SELECT DISTINCT "+a+", "+b+" FROM lernende ORDER BY "+a+";` aus?","Jede Kombination von "+A+" und "+B+" einmal, sortiert nach "+A,["Jeden Wert von "+A+" einmal, egal welcher "+B,"Alle Lernenden, sortiert nach "+A,"Nur "+A+"-Werte mit verschiedenen "+B+"-Werten","Jede Kombination einmal, sortiert nach "+B],"Mit DISTINCT und mehreren Attributen kommt jede vorkommende Kombination genau einmal.")}),
+K("D",2,"mi",()=>{const v=shuffle(VOR).slice(0,2),n=shuffle(NACH).slice(0,2),rows=[];for(let k=0;k<5;k++)rows.push([pick(v),pick(n)]);const two=Math.random()<.5,key=r=>two?r[0]+" "+r[1]:r[0],s=[...new Set(rows.map(key))];
+  return{q:"Die Tabelle enthält diese 5 Lernenden: "+rows.map(r=>r[0]+" "+r[1]).join(", ")+". Wie viele Zeilen gibt die Abfrage zurück?",code:"SELECT DISTINCT "+(two?"vorname, nachname":"vorname")+" FROM lernende;",a:String(s.length),v:[String(s.length)],w:numW(s.length,5),kind:"num",e:(two?"Doppelt ist eine Zeile nur, wenn Vor- und Nachname gleich sind. ":"Nur der Vorname zählt. ")+"Verschieden: "+s.join(", ")+"."}}),
+V("D",3,"m",
+  ()=>{const a=pick(["vorname","ort","firma","jahrgang"]);return mc("Wie unterscheiden sich `SELECT "+a+" FROM lernende;` und `SELECT ALL "+a+" FROM lernende;`?","Gar nicht, sie liefern dasselbe",["Die zweite entfernt Duplikate","Die erste entfernt Duplikate","Die zweite gibt alle Attribute aus","Die zweite sortiert die Werte"],"ALL ist der Standard und kann weggelassen werden.")},
+  ()=>{const a=pick(["vorname","ort","firma"]);return mc("Welche Abfrage liefert sicher nie mehr Zeilen als die anderen?","SELECT DISTINCT "+a+" FROM lernende;",["SELECT "+a+" FROM lernende;","SELECT ALL "+a+" FROM lernende;","SELECT * FROM lernende;"],"DISTINCT fasst doppelte Werte zusammen. Die anderen drei geben alle Datensätze aus.",{sqlopts:true})}),
+K("D",2,"mi",()=>{const a=pick(["vorname","nachname","ort","firma"]);return fill("Ergänze, damit jeder Wert nur einmal gezählt wird:","SELECT COUNT(___ "+a+") AS 'Anzahl "+ATT[a]+"' FROM lernende;","DISTINCT",["ALL","UNIQUE","*","ONLY"],"COUNT(DISTINCT <Attribut>) zählt identische Attributwerte nur einmal.")}),
+
+// AS & Verketten
+K("A",1,"mi",()=>{const a=pick(Object.keys(ATT)),t=ATT[a];return fill("Ergänze, damit die Spalte den Titel "+t+" bekommt:","SELECT "+a+" ___ '"+t+"' FROM lernende;","AS",["IS","TITLE","NAME","ALIAS","TO"],"Mit AS änderst du den Spaltentitel.")}),
+V("A",1,"m",
+  ()=>mc(pick(["Wofür wird AS verwendet?","Was kannst du mit AS machen?"]),"Einen Spaltentitel ändern oder einen Alias für eine Tabelle erstellen",["Spalten sortieren","Duplikate entfernen","Zwei Tabellen verbinden","Datensätze filtern"],"AS ändert Spaltentitel und erstellt Aliase für Tabellennamen. Wozu Tabellen-Aliase gut sind, kommt später (spätestens in Modul 164)."),
+  ()=>{const a=pick(Object.keys(ATT));return mc("Was ändert `SELECT "+a+" AS '"+ATT[a]+"' FROM lernende;` in der Datenbank?","Nichts, nur der Titel in der Ausgabe ist anders",["Das Attribut wird in der Tabelle umbenannt","Die alte Spalte wird gelöscht","Es entsteht eine neue Tabelle"],"AS wirkt nur auf die Ausgabe dieser Abfrage.")}),
+V("A",1,"m",
+  ()=>{const t=pick(["Name","Wohnort","Jahrgang","Lehrbetrieb"]);return mc("Wie solltest du einen Spaltentitel nach AS schreiben?","Immer in Hochkommas, z. B. AS '"+t+"'",["Immer ohne Hochkommas","In runden Klammern","In eckigen Klammern","Mit einem Stern davor"],"AS "+t+" funktioniert oft auch ohne Hochkommas, aber nicht immer. Gewöhne dir Hochkommas an.")},
+  ()=>{const t=pick(["Wohnort","Jahrgang","Lehrbetrieb","Name"]);return mc("Welche Schreibweise wird empfohlen?","AS '"+t+"'",["AS "+t,"AS ("+t+")","AS ["+t+"]"],"Ohne Hochkommas klappt es hier zwar, aber nicht bei Leerschlägen, Sonderzeichen oder Schlüsselwörtern. Darum immer Hochkommas.",{sqlopts:true})}),
+K("A",3,"m",()=>{const P=[["voller name","einen Leerschlag"],["Preis in CHF","Leerschläge"],["E-Mail","ein Sonderzeichen (-)"],["Anteil %","ein Sonderzeichen (%)"],["Alter","ein Schlüsselwort (ALTER)"],["Order","ein Schlüsselwort (ORDER)"],["Select","ein Schlüsselwort (SELECT)"]];
+  if(Math.random()<.5){const[t,r]=pick(P);return mc("Warum muss `AS '"+t+"'` in Hochkommas stehen?","Der Titel enthält "+r,["Der Titel ist zu lang","Titel brauchen nur bei Zahlen Hochkommas","Sonst wird AS ignoriert","Der Titel beginnt mit einem Grossbuchstaben"],"Hochkommas braucht es bei Leerschlägen, Sonderzeichen, Schlüsselwörtern und Berechnungen. SQL unterscheidet nicht gross und klein, also ist Alter dasselbe Wort wie ALTER.")}
+  return mc("Welcher Titel funktioniert sicher auch ohne Hochkommas?",pick(["Wohnort","Jahrgang","Lehrbetrieb","Vorname"]),shuffle(P).slice(0,4).map(x=>x[0]),"Ein einfaches Wort ohne Leerschlag, ohne Sonderzeichen und ohne Schlüsselwort geht auch ohne Hochkommas. Trotzdem: Hochkommas sind die bessere Gewohnheit.")}),
+K("A",2,"m",()=>{const[a,b]=shuffle(["vorname","nachname","plz","ort","firma"]).slice(0,2),[sep,sn]=pick([[" ","einem Leerschlag"],[", ","Komma und Leerschlag"],[" - ","einem Bindestrich mit Leerschlägen"]]);
+  return mc("Welcher Befehl gibt "+ATT[a]+" und "+ATT[b]+" in einer Spalte aus, getrennt durch "+sn+"?","SELECT "+a+" || '"+sep+"' || "+b+" FROM lernende;",["SELECT "+a+" || "+b+" FROM lernende;","SELECT "+a+" + '"+sep+"' + "+b+" FROM lernende;","SELECT "+a+", '"+sep+"', "+b+" FROM lernende;","SELECT "+a+" & '"+sep+"' & "+b+" FROM lernende;"],"|| fügt Strings zusammen. Das Trennzeichen '"+sep+"' musst du selbst dazwischensetzen.",{sqlopts:true})}),
+V("A",2,"m",
+  mc("Was bedeutet || in SQLite?","Es fügt Strings zusammen",["Es bedeutet ODER","Es ist ein Kommentar","Es trennt die Spalten in der Spaltenliste","Es teilt zwei Zahlen"],"Beispiel: vorname || ' ' || nachname ergibt den ganzen Namen in einer Spalte."),
+  mc("Funktioniert das Zusammenfügen mit || in jedem Datenbanksystem?","Nein, es ist SQLite-spezifisch",["Ja, überall gleich","Nur zusammen mit AS","Nur bei Zahlen"],"|| zum Zusammenfügen von Strings funktioniert in anderen Datenbanksystemen nicht.")),
+K("A",2,"m",()=>{const ex=pick(["vorname || ' ' || nachname","2026 - jahrgang","plz || ' ' || ort","COUNT(*)","ROUND(AVG(2026 - jahrgang), 2)"]),first=(ex.match(/[a-z]+/)||["Anzahl"])[0];
+  return mc("Welchen Spaltentitel hat `SELECT "+ex+" FROM lernende;`?",ex,["Gar keinen","Spalte1",first,"Resultat"],"Ohne AS steht der ganze Ausdruck im Spaltentitel. Darum gibt man mit AS einen lesbaren Titel.",{sqlopts:true})}),
+
+// Berechnungen & Funktionen
+K("F",1,"mi",()=>{const f=[["SUM","die Summe einer Zahlenspalte","Die Summe aller Werte"],["AVG","den Durchschnitt einer Zahlenspalte","Den Durchschnitt aller Werte"],["COUNT","die Anzahl Datensätze","Die Anzahl Werte bzw. Datensätze"],["MIN","den kleinsten Wert","Den kleinsten Wert"],["MAX","den grössten Wert","Den grössten Wert"]];const[n,d,D]=pick(f);
+  if(Math.random()<.5)return{q:"Welche Funktion berechnet "+d+"?",a:n+"()",v:[n,n+"()"],w:f.filter(x=>x[0]!==n).map(x=>x[0]+"()"),kind:"kw",sql:true,e:"SUM() Summe, AVG() Durchschnitt, COUNT() Anzahl, MIN() Minimum, MAX() Maximum."};
+  const a=n==="COUNT"?"*":pick(["jahrgang","preis","punkte"]);return mc("Was liefert `"+n+"("+a+")`?",D,f.filter(x=>x[0]!==n).map(x=>x[2]),"SUM() Summe, AVG() Durchschnitt, COUNT() Anzahl, MIN() Minimum, MAX() Maximum.")}),
+K("F",1,"m",()=>{const C=[["preis * 1.2","Den Preis mal 1.2, z. B. von Euro in CHF umgerechnet"],["preis * 0.9","Den Preis mit 10 % Rabatt"],["preis * 1.081","Den Preis inklusive 8.1 % Mehrwertsteuer"],["menge * preis","Den Gesamtbetrag pro Artikel (Menge mal Preis)"],["preis / 2","Den halben Preis"]],[x,d]=pick(C);
+  return mc("Was gibt `SELECT artikelname, "+x+" FROM artikel;` neben dem Artikelnamen aus?",d,C.filter(c=>c[0]!==x).map(c=>c[1]).concat(["Nichts, die Preise in der Tabelle werden geändert","Einen Fehler, im SELECT darf man nicht rechnen"]),"Bei numerischen Attributen kannst du im SELECT rechnen. Die Daten in der Tabelle ändern sich dabei nicht.")}),
+K("F",2,"m",()=>{const y=pick([2025,2026,2027]);return mc("Wie berechnest du im Jahr "+y+" das Alter aus dem Jahrgang?",y+" - jahrgang",["jahrgang - "+y,"AGE(jahrgang)",y+" / jahrgang",y+" + jahrgang","jahrgang - 2000"],"Beispiel: SELECT vorname, "+y+" - jahrgang AS 'Alter' FROM lernende;",{sqlopts:true})}),
+V("F",2,"mi",
+  ()=>{const n=ri(0,3);return fill("Ergänze, damit auf "+n+" Stellen nach dem Komma gerundet wird:","SELECT ___(AVG(2026 - jahrgang), "+n+") FROM lernende;","ROUND",["ROUNDUP","FLOOR","CUT","TRUNC"],"ROUND(Wert, Stellen) rundet. Zuerst wird der Durchschnitt berechnet, dann gerundet.")},
+  ()=>{const n=ri(0,2),f=10**n;let x;do{x=ri(10000,999999)/10000}while(/^50*$/.test(x.toFixed(4).split(".")[1].slice(n)));const r=(Math.round(x*f+1e-9)/f).toFixed(n),tr=(Math.floor(x*f)/f).toFixed(n);
+    return{q:"Welchen Wert liefert diese Abfrage?",code:"SELECT ROUND("+x+", "+n+");",a:r,v:[r],w:[tr,(+r+1/f).toFixed(n),x.toFixed(n+1),String(Math.round(x))].filter(v=>v!==r),kind:"num",e:"Auf "+n+" Stellen nach dem Komma runden: Die nächste Ziffer entscheidet, ab 5 wird aufgerundet."}}),
+V("F",2,"m",
+  ()=>mc("Was steht in der Klammer von COUNT() normalerweise?","Ein *, also COUNT(*), es kann aber auch ein Attributname sein",["Immer ein Zahlenwert","Der Tabellenname","Eine Bedingung","Immer DISTINCT"],"COUNT(*) zeigt die Anzahl der ausgegebenen Datensätze an."),
+  ()=>mc("Welche Schreibweise zählt alle Datensätze der Tabelle?","SELECT COUNT(*) FROM lernende;",["SELECT COUNT FROM lernende;","SELECT COUNT(lernende);","SELECT * COUNT FROM lernende;"],"COUNT(*) zählt die ausgegebenen Datensätze.",{sqlopts:true})),
+K("F",2,"mi",()=>{const l=shuffle(NACH).slice(0,ri(4,5)),mx=Math.random()<.5,s=l.slice().sort(),v=mx?s[s.length-1]:s[0];
+  return{q:"Die Tabelle enthält die Nachnamen "+l.join(", ")+". Welchen Wert liefert die Abfrage?",code:"SELECT "+(mx?"MAX":"MIN")+"(nachname) FROM lernende;",a:v,v:[v],w:l.filter(x=>x!==v),kind:"text",e:"MIN() und MAX() gehen auch mit Text: der alphabetisch "+(mx?"letzte":"erste")+" Name."}}),
+K("F",3,"m",()=>{const p=shuffle(VOR).slice(0,ri(3,4)),l=[...p,...Array.from({length:6-p.length},()=>pick(p))],c=new Set(l).size;
+  return mc("6 Lernende heissen "+shuffle(l).join(", ")+". Was liefern `COUNT(*)` und `COUNT(DISTINCT vorname)`?","6 und "+c,[c+" und 6","6 und 6",c+" und "+c,"6 und "+(c+1)],"COUNT(*) zählt alle Datensätze, COUNT(DISTINCT vorname) zählt jeden Vornamen nur einmal: "+[...new Set(l)].join(", ")+".")}),
+K("F",3,"m",()=>{const f=pick(["SUM(2026 - jahrgang)","AVG(2026 - jahrgang)","COUNT(*)","MAX(jahrgang)","MIN(nachname)"]);
+  return mc("Wie viele Zeilen liefert `SELECT "+f+" FROM lernende;`?","Eine einzige Zeile",["Eine Zeile pro Lernenden","So viele, wie es verschiedene Werte gibt","Keine, das gibt einen Fehler","Zwei Zeilen"],"Aggregatfunktionen wie SUM(), AVG(), COUNT(), MIN() und MAX() fassen alle Datensätze zu einem Wert zusammen.")}),
+V("F",1,"m",
+  mc("Was liefert `SELECT MIN(jahrgang), MAX(jahrgang) FROM lernende;`?","Den tiefsten und den höchsten Jahrgang",["Die jüngste und die älteste Person mit Namen","Die Anzahl Jahrgänge","Alle Jahrgänge sortiert"],"MIN() ist das Minimum, MAX() das Maximum."),
+  mc("`SELECT MAX(jahrgang) FROM lernende;` liefert den Jahrgang …","der jüngsten Lernenden",["der ältesten Lernenden","mit den meisten Lernenden","der zuletzt eingefügten Lernenden"],"Der höchste Jahrgang gehört zu den Jüngsten."),
+  mc("`SELECT MIN(jahrgang) FROM lernende;` liefert den Jahrgang …","der ältesten Lernenden",["der jüngsten Lernenden","mit den wenigsten Lernenden","der zuerst eingefügten Lernenden"],"Der tiefste Jahrgang gehört zu den Ältesten.")),
+
+// ORDER BY
+V("O",1,"mi",
+  ()=>mc("Wie sortiert ORDER BY, wenn du nichts dazuschreibst?","Aufsteigend (ASC), mit dem kleinsten Wert zuerst",["Absteigend (DESC)","Zufällig","Gar nicht","Nach dem Primärschlüssel"],"ASC ist der Standard und wird im Normalfall weggelassen."),
+  ()=>fill("Ergänze die Richtung, die der Standard ist und meistens weggelassen wird:","SELECT * FROM lernende ORDER BY "+pick(["nachname","jahrgang","ort"])+" ___;","ASC",["UP","DESC","AZ","FIRST"],"ASC = ascending, aufsteigend.")),
+K("O",1,"mi",()=>{const[a,w]=pick([["nachname","von Z nach A"],["vorname","von Z nach A"],["jahrgang","vom höchsten zum tiefsten Jahrgang"],["ort","von Z nach A"]]);return fill("Ergänze, damit nach "+a+" "+w+" sortiert wird:","SELECT * FROM lernende ORDER BY "+a+" ___;","DESC",["DOWN","ASC","REVERSE","BACK"],"DESC = descending, absteigend. Es muss angegeben werden, weil ASC der Standard ist.")}),
+K("O",2,"m",()=>{const[a,b]=shuffle(["nachname","vorname","jahrgang","ort"]).slice(0,2),da=pick(["","DESC"]),db=pick(["","DESC"]),dir=d=>d?"absteigend":"aufsteigend",inv=d=>d?"":"DESC";
+  const t=(x,dx,y,dy)=>"Zuerst nach "+ATT[x]+" "+dir(dx)+", bei gleichem "+ATT[x]+" nach "+ATT[y]+" "+dir(dy);
+  return mc("Wie sortiert `ORDER BY "+a+(da?" DESC":"")+", "+b+(db?" DESC":"")+"`?",t(a,da,b,db),[t(b,db,a,da),t(a,inv(da),b,db),t(a,da,b,inv(db)),"Nur nach "+ATT[a]+" "+dir(da)],"In erster Linie zählt das erste Attribut, in zweiter Linie das zweite. Jedes hat seine eigene Richtung.")}),
+K("O",2,"m",()=>{const[a,b]=shuffle(["nachname","vorname","jahrgang","ort"]).slice(0,2);const C=[["ORDER BY "+a+" ASC, "+b+" ASC","ORDER BY "+a+", "+b,"Ja, die Sortierung ist identisch"],["ORDER BY "+a+" DESC, "+b,"ORDER BY "+a+" DESC, "+b+" ASC","Ja, die Sortierung ist identisch"],["ORDER BY "+a+", "+b+" DESC","ORDER BY "+a+" DESC, "+b+" DESC","Nein, die Richtung von "+a+" ist anders"],["ORDER BY "+a+", "+b,"ORDER BY "+b+", "+a,"Nein, die Reihenfolge der Attribute ist anders"]],[x,y,r]=pick(C);
+  return mc("Liefern `"+x+"` und `"+y+"` dieselbe Reihenfolge?",r,["Ja, die Sortierung ist identisch","Nein, die Richtung von "+a+" ist anders","Nein, die Reihenfolge der Attribute ist anders","Nein, ASC ist nur in SQLite erlaubt","Nein, die Richtung von "+b+" ist anders"].filter(z=>z!==r),"ASC ist der Standard und darf fehlen. Jedes Attribut hat seine eigene Richtung, und das erste Attribut zählt zuerst.")}),
+K("O",3,"m",()=>{const[a,b]=shuffle(["geschlecht","jahrgang","nachname","ort"]).slice(0,2),da=pick(["ASC","DESC"]),db=pick(["ASC","DESC"]),w=d=>d==="ASC"?"aufsteigend":"absteigend",f=d=>d==="ASC"?"DESC":"ASC";
+  return mc("Alle Lernenden: in erster Linie nach "+a+" "+w(da)+", in zweiter Linie nach "+b+" "+w(db)+". Welche ORDER BY-Klausel stimmt?","ORDER BY "+a+" "+da+", "+b+" "+db,["ORDER BY "+b+" "+db+", "+a+" "+da,"ORDER BY "+a+" "+f(da)+", "+b+" "+db,"ORDER BY "+a+" "+da+", "+b+" "+f(db),"ORDER BY "+a+", "+b],"Die Reihenfolge der Attribute bestimmt, was zuerst zählt. ASC und DESC gelten je nur für das Attribut davor.",{sqlopts:true})}),
+K("O",3,"m",()=>{const[a,b]=shuffle(["jahrgang","nachname","vorname","ort"]).slice(0,2);return mc("Wie wird "+b+" bei `ORDER BY "+a+" DESC, "+b+"` sortiert?","Aufsteigend, das DESC gilt nur für "+a,["Absteigend wie "+a,"Gar nicht","Zufällig","Absteigend, DESC gilt für alle Attribute"],"Jedes Attribut in ORDER BY hat seine eigene Richtung. Ohne Angabe gilt ASC.")}),
+K("O",2,"m",()=>{const n=pick([3,5,10]),D={"jahrgang|":"Die "+n+" Lernenden mit dem tiefsten Jahrgang, also die ältesten","jahrgang|DESC":"Die "+n+" Lernenden mit dem höchsten Jahrgang, also die jüngsten","nachname|":"Die "+n+" Lernenden, deren Nachname im Alphabet zuerst kommt","nachname|DESC":"Die "+n+" Lernenden, deren Nachname im Alphabet zuletzt kommt"},k=pick(Object.keys(D)),[a,d]=k.split("|");
+  return mc("Was liefert `SELECT * FROM lernende ORDER BY "+a+(d?" DESC":"")+" LIMIT "+n+";`?",D[k],Object.keys(D).filter(x=>x!==k).map(x=>D[x]).concat([n+" zufällige Lernende"]),"Zuerst wird sortiert, dann nimmt LIMIT die ersten "+n+" Zeilen.")}),
+
+// WHERE & Vergleiche
+K("W",1,"mi",()=>{const o=pick(WO),y=ri(2003,2009),[c,d]=pick([["ort = '"+o+"'","aus "+o],["jahrgang = "+y,"mit Jahrgang "+y],["firma = 'Post'","mit der Firma Post"],["geschlecht = 'w'","mit Geschlecht w"]]);
+  return fill("Ergänze, damit nur Lernende "+d+" ausgegeben werden:","SELECT * FROM lernende ___ "+c+";","WHERE",["IF","HAVING","FILTER","WHEN","ON"],"Mit der WHERE-Klausel formulierst du Bedingungen. Die Tabelle wird gefiltert.")}),
+V("W",1,"m",
+  ()=>mc(pick(["Was gibt ein SELECT ohne WHERE zurück?","Was passiert, wenn ein SELECT keine WHERE-Klausel hat?"]),"Es kommt immer die ganze Tabelle",["Nur der erste Datensatz","Gar nichts","Nur Datensätze ohne NULL","Ein Fehler"],"Mit WHERE filterst du die Tabelle: Nur die Daten, die die Bedingung erfüllen, kommen durch."),
+  ()=>mc("Wofür ist die WHERE-Klausel da?","Um nur die Datensätze auszugeben, die eine Bedingung erfüllen",["Um die Ausgabe zu sortieren","Um Spaltentitel zu ändern","Um Duplikate zu entfernen","Um die Tabelle zu wählen"],"WHERE ist ein Filter für die Datensätze.")),
+V("W",1,"mi",
+  ()=>fill("Mit welchem Operator prüfst du auf «nicht gleich»?",null,["<>","!="],["=!","><","=/","!<"],"<> ist das Gegenteil von =. != funktioniert auch."),
+  ()=>{const o=pick(WO);return mc("Welche Bedingung liefert alle, die nicht in "+o+" wohnen?","WHERE ort <> '"+o+"'",["WHERE ort = '"+o+"'","WHERE ort =! '"+o+"'","WHERE ort >< '"+o+"'","WHERE NOT ort"],"<> bedeutet nicht gleich.",{sqlopts:true})}),
+K("W",1,"m",()=>{const o=pick(WO),y=ri(2003,2009);return mc("Welche Schreibweise ist richtig?","WHERE ort = '"+o+"' und WHERE jahrgang = "+y,["WHERE ort = "+o+" und WHERE jahrgang = "+y,"WHERE ort = ("+o+") und WHERE jahrgang = ("+y+")","WHERE 'ort' = "+o+" und WHERE 'jahrgang' = "+y],"Zeichenketten stehen immer in Hochkommas, Zahlen nicht.",{sqlopts:true})}),
+K("W",2,"m",()=>{const y=ri(2001,2009);return mc("Was passiert bei `WHERE jahrgang = '"+y+"'`?","Es funktioniert, aber SQL muss die Zeichenkette in eine Zahl umwandeln",["Es gibt einen Fehler","Es findet nie etwas","Es findet alle Jahrgänge","Es findet nur Jahrgänge, die mit "+String(y)[0]+" beginnen"],"Das ist eine Typenkonvertierung von Zeichenkette zu Integer. Zahlen schreibt man darum ohne Hochkommas.")}),
+V("W",1,"m",
+  mc("Bei welchen Werten kannst du die Vergleichsoperatoren verwenden?","Bei Zahlen und bei Zeichenketten",["Nur bei Zahlen","Nur bei Zeichenketten","Nur bei Jahrgängen","Nur bei NULL-Werten"],"Sämtliche Operatoren gehen bei alphanumerischen und numerischen Werten."),
+  mc("Funktioniert `WHERE nachname < 'M'`?","Ja, Vergleiche gehen auch mit Text (alphabetisch)",["Nein, < geht nur mit Zahlen","Nur mit LIKE","Nur in SQLite"],"Alle Operatoren gehen bei Zahlen und Zeichenketten. Text wird alphabetisch verglichen.")),
+K("W",2,"m",()=>{const L=pick("DFGKMRS".split("")),op=pick([">",">="]),pool=shuffle(LIKENAMES),up=pool.filter(n=>n[0]>=L),lo=pool.filter(n=>n[0]<L),same=up.filter(n=>n[0]===L),a=same.length?pick(same):pick(up);
+  return mc("Welcher Nachname ist bei `WHERE nachname "+op+" '"+L+"'` dabei?",a,lo.slice(0,4),"'"+a+"' ist alphabetisch grösser als '"+L+"'"+(a[0]===L?", weil nach dem "+L+" noch Buchstaben folgen.":".")+" Namen mit einem früheren Anfangsbuchstaben sind kleiner.")}),
+K("W",2,"m",()=>{const A=ri(16,22),y=2026-A,young=Math.random()<.4,r=young?"WHERE jahrgang > "+y:"WHERE jahrgang <= "+y;
+  return mc("Du willst alle Lernenden, die 2026 "+(young?"jünger als "+A:A+"-jährig oder älter")+" sind. Welche Bedingung stimmt?",r,["WHERE jahrgang >= "+y,"WHERE jahrgang < "+y,"WHERE jahrgang <= "+y,"WHERE jahrgang > "+y,"WHERE jahrgang >= "+A].filter(x=>x!==r),"2026 − "+A+" = "+y+". Älter heisst früherer Jahrgang (kleiner), jünger heisst späterer Jahrgang (grösser).",{sqlopts:true})}),
+K("W",2,"m",()=>{const L=pick("ABCDEFGHKLMRSTW".split("")),N=String.fromCharCode(L.charCodeAt(0)+1);
+  return mc("Alle Nachnamen, die mit "+L+" beginnen, ohne LIKE. Welche Bedingung stimmt?","WHERE nachname >= '"+L+"' AND nachname < '"+N+"'",["WHERE nachname = '"+L+"'","WHERE nachname >= '"+L+"' AND nachname <= '"+N+"'","WHERE nachname > '"+L+"' OR nachname < '"+N+"'","WHERE nachname BETWEEN '"+L+"%' AND '"+N+"%'"],"Alles ab '"+L+"' und vor '"+N+"'. Mit <= '"+N+"' wäre ein Nachname, der genau '"+N+"' heisst, auch dabei.",{sqlopts:true})}),
+K("W",1,"m",()=>{const o=pick(["Bern","Biel","Thun"]);return mc(Math.random()<.5?"Was findet `WHERE ort = '"+o+"'`?":"Was bedeutet = bei Zeichenketten, z. B. `ort = '"+o+"'`?","Nur Werte, die vom ersten bis zum letzten Zeichen genau "+o+" sind",["Alle Orte, die mit "+o+" beginnen","Auch "+o.toLowerCase()+" in Kleinbuchstaben","Alle Orte, die "+o+" enthalten","Alle Orte ausser "+o],"= bedeutet identisch, bei Strings vom ersten bis zum letzten Zeichen.")}),
+
+// AND, OR, NOT, BETWEEN
+V("B",1,"mi",
+  ()=>{const o=pick(WO),L=pick("KMS".split(""));return fill("Ergänze, damit beide Bedingungen erfüllt sein müssen:","SELECT * FROM lernende WHERE nachname > '"+L+"' ___ ort = '"+o+"';","AND",["OR","NOT","ALSO","PLUS"],"Bei AND müssen beide Bedingungen wahr sein, damit der Datensatz im Resultat ist.")},
+  ()=>{const o=pick(WO),y=ri(2003,2006);return fill("Ergänze, damit mindestens eine der beiden Bedingungen erfüllt sein muss:","SELECT * FROM lernende WHERE ort = '"+o+"' ___ jahrgang < "+y+";","OR",["AND","EITHER","NOT","ELSE"],"Bei OR genügt eine Bedingung, beide dürfen auch stimmen.")}),
+V("B",1,"m",
+  mc("Was gilt bei OR?","Mindestens eine der Bedingungen muss wahr sein",["Genau eine Bedingung muss wahr sein","Beide müssen wahr sein","Keine darf wahr sein"],"Bei OR dürfen auch beide Bedingungen erfüllt sein. Einen gegenseitigen Ausschluss erreicht man mit XOR."),
+  mc("Was gilt bei AND?","Beide Bedingungen müssen wahr sein",["Mindestens eine muss wahr sein","Genau eine muss wahr sein","Die erste genügt"],"AND verbindet zwei Bedingungen, die beide stimmen müssen."),
+  mc("Bei OR sind beide Bedingungen wahr. Kommt der Datensatz ins Resultat?","Ja",["Nein, das wäre XOR","Nur bei Zahlen","Nein, dafür braucht es AND"],"OR heisst: eine oder beide. Ausschliessen, dass beide stimmen, kann man mit XOR.")),
+V("B",2,"m",
+  ()=>mc("Wann solltest du Klammern setzen?","Wenn du mehr als zwei Bedingungen mit AND und OR verknüpfst",["Immer bei WHERE","Nur bei Zahlen","Nie, SQL kennt keine Klammern","Nur bei LIKE"],"Klammern machen klar, welche Bedingung zu welchem Operator gehört."),
+  ()=>{const o=pick(WO),a=ri(2003,2005),b=ri(2007,2009);return mc("Gesucht: Lernende aus "+o+", die vor "+a+" oder nach "+b+" geboren sind. Welche Bedingung stimmt?","WHERE ort = '"+o+"' AND (jahrgang < "+a+" OR jahrgang > "+b+")",["WHERE ort = '"+o+"' AND jahrgang < "+a+" OR jahrgang > "+b,"WHERE (ort = '"+o+"' AND jahrgang < "+a+") AND jahrgang > "+b,"WHERE ort = '"+o+"' OR jahrgang < "+a+" OR jahrgang > "+b],"Ohne Klammern gilt AND vor OR: Dann kämen auch alle mit Jahrgang nach "+b+" aus anderen Orten.",{sqlopts:true})}),
+K("B",2,"m",()=>{const[x,y]=shuffle("BCDFGHKMRST".split("")).slice(0,2).sort(),nx=String.fromCharCode(x.charCodeAt(0)+1),ny=String.fromCharCode(y.charCodeAt(0)+1);
+  return mc("Alle Nachnamen, die mit "+x+" oder "+y+" beginnen, ohne LIKE. Welche Bedingung stimmt?","(nachname >= '"+x+"' AND nachname < '"+nx+"') OR (nachname >= '"+y+"' AND nachname < '"+ny+"')",["nachname >= '"+x+"' AND nachname < '"+nx+"' AND nachname >= '"+y+"' AND nachname < '"+ny+"'","(nachname >= '"+x+"' OR nachname < '"+nx+"') AND (nachname >= '"+y+"' OR nachname < '"+ny+"')","nachname = '"+x+"' OR nachname = '"+y+"'"],"Zwei Bereiche, verbunden mit OR. Ein Name kann nicht gleichzeitig mit "+x+" und mit "+y+" beginnen, darum nicht AND.",{sqlopts:true})}),
+K("B",1,"m",()=>{const a=ri(2000,2005),b=a+ri(1,4),c="jahrgang";return mc("`"+c+" BETWEEN "+a+" AND "+b+"` ist identisch mit …",c+" >= "+a+" AND "+c+" <= "+b,[c+" > "+a+" AND "+c+" < "+b,c+" >= "+a+" AND "+c+" < "+b,c+" > "+a+" AND "+c+" <= "+b,c+" >= "+a+" OR "+c+" <= "+b],"BETWEEN … AND ist identisch mit >= AND <=. Beide Grenzen zählen mit.",{sqlopts:true})}),
+V("B",2,"mi",
+  ()=>mc("Sind die Grenzwerte bei BETWEEN dabei?","Ja, beide Grenzen sind dabei",["Nein, keine","Nur die untere","Nur die obere"],"BETWEEN 2000 AND 2002 findet 2000, 2001 und 2002."),
+  ()=>{const a=ri(2003,2006),b=a+ri(1,3),n=b-a+1;return{q:"Die Tabelle enthält die Jahrgänge 2003 bis 2009, jeden einmal. Wie viele Datensätze liefert die Abfrage?",code:"SELECT * FROM lernende WHERE jahrgang BETWEEN "+a+" AND "+b+";",a:String(n),v:[String(n)],w:[n-1,n-2,n+1].filter(x=>x>0).map(String),kind:"num",e:"Beide Grenzen zählen mit: "+Array.from({length:n},(_,k)=>a+k).join(", ")+"."}}),
+K("B",1,"m",()=>{const o=pick(WO),y=ri(2000,2009),[c,d]=pick([["jahrgang = "+y,"nicht Jahrgang "+y+" haben"],["ort = '"+o+"'","nicht in "+o+" wohnen"]]);
+  return mc("Was liefert `WHERE NOT ("+c+")`?","Alle Lernenden, die "+d,["Nur die Lernenden, bei denen "+c+" stimmt","Gar nichts","Alle ohne Wert in diesem Attribut","Einen Fehler, NOT braucht LIKE"],"NOT kehrt die Bedingung um. Die Klammern zeigen, was negiert wird.")}),
+K("B",2,"m",()=>{const v=pick(VOR.concat(["Antonio"]));return mc("Welche Bedingung liefert dasselbe wie `WHERE NOT (vorname = '"+v+"')`?","WHERE vorname <> '"+v+"'",["WHERE vorname = NOT '"+v+"'","WHERE vorname IS NOT NULL","WHERE NOT vorname LIKE '"+v[0]+"%'"],"NOT (x = y) ist dasselbe wie x <> y (oder x != y).",{sqlopts:true})}),
+K("B",3,"m",()=>{const[lo,hi]=pick([["D","M"],["B","K"],["C","S"],["A","G"],["F","R"]]),n=pick(LIKENAMES.filter(x=>x[0]===hi)),N=String.fromCharCode(hi.charCodeAt(0)+1);
+  return mc("Warum findet `nachname BETWEEN '"+lo+"' AND '"+hi+"'` den Namen "+n+" nicht?",n+" ist alphabetisch grösser als '"+hi+"', die obere Grenze trifft nur genau '"+hi+"'",["BETWEEN funktioniert nur mit Zahlen","Wegen der Gross- und Kleinschreibung","Weil man '"+hi+"%' schreiben müsste","Weil BETWEEN die Grenzen nicht einschliesst"],"Für "+lo+" bis "+hi+" nimmt man nachname >= '"+lo+"' AND nachname < '"+N+"' (oder BETWEEN '"+lo+"' AND '"+N+"', das nur den exakten Namen '"+N+"' zu viel hätte).")}),
+K("B",3,"m",()=>{const[lo,hi]=pick([["D","M"],["B","K"],["C","S"]]);return mc("Funktioniert `nachname BETWEEN '"+lo+"%' AND '"+hi+"%'` als «"+lo+" bis "+hi+"»?","Nein, % ist nur bei LIKE ein Platzhalter, hier ist es ein normales Zeichen",["Ja, genau so geht es","Ja, aber nur in SQLite","Nein, BETWEEN geht nur mit Zahlen"],"Platzhalter funktionieren ausschliesslich mit LIKE. Bei BETWEEN wird % einfach als Zeichen verglichen.")}),
+
+// LIKE & Platzhalter
+V("L",1,"mi",
+  ()=>fill("Welches Zeichen steht bei LIKE für beliebig viele Zeichen?",null,"%",["*","?","_","#"],"% entspricht dem * bei Windows und Linux. 'M%' heisst: alles, was mit M beginnt."),
+  ()=>fill("Welches Zeichen steht bei LIKE für genau ein Zeichen?",null,"_",["?","%","*","."],"_ (Underscore) entspricht dem ? bei Windows und Linux."),
+  ()=>mc("Was bedeutet % bei LIKE?","Beliebig viele Zeichen, auch gar keines",["Genau ein Zeichen","Das Prozentzeichen","Einen Leerschlag","Eine Ziffer"],"'M%' findet M, Meier und Moser."),
+  ()=>mc("Was bedeutet _ bei LIKE?","Genau ein beliebiges Zeichen",["Beliebig viele Zeichen","Einen Leerschlag","Das Ende des Textes","Eine Ziffer"],"'Ju_er' findet Juker und Jufer."),
+  ()=>{const w=Math.random()<.5;return fill("Bei Windows steht "+(w?"*":"?")+" für "+(w?"beliebige Zeichen":"ein Zeichen")+". Welches Zeichen ist das in SQL?",null,w?"%":"_",w?["_","?","*"]:["%","*","?"],"* in Windows/Linux = % in SQL, ? in Windows/Linux = _ in SQL.")}),
+K("L",1,"m",()=>{const x=pick("abeilmnorst".split("")),X=x.toUpperCase(),P=[[X+"%","beginnen mit "+X],["%"+x,"enden mit "+x],["%"+x+"%","ein "+x+" enthalten"],["_"+x+"%",x+" als zweites Zeichen haben"]],[p,d]=pick(P);
+  return mc("Was findet `WHERE nachname LIKE '"+p+"'`?","Alle Nachnamen, die "+d,P.filter(z=>z[0]!==p).map(z=>"Alle Nachnamen, die "+z[1]).concat(["Nur den Nachnamen "+p]),"% steht für beliebig viele Zeichen, _ für genau eines.")}),
+K("L",2,"m",()=>{const b=pick(LIKENAMES.filter(n=>n.length>=4)),t=ri(0,3),p=t===0?b.slice(0,ri(2,3))+"%":t===1?"%"+b.slice(-2):t===2?b[0]+"_".repeat(b.length-2)+b.slice(-1):"_"+b[1]+"%";
+  const re=likeRe(p),hit=LIKENAMES.filter(n=>re.test(n)),miss=shuffle(LIKENAMES.filter(n=>!re.test(n))).sort((x,y)=>(y[0]===b[0])-(x[0]===b[0])||Math.abs(x.length-b.length)-Math.abs(y.length-b.length));
+  return mc("Welcher Nachname passt zu `LIKE '"+p+"'`?",pick(hit),miss.slice(0,5),"'"+p+"': "+({0:"beginnt mit "+p.slice(0,-1),1:"endet mit "+p.slice(1),2:"beginnt mit "+b[0]+", hat genau "+(b.length-2)+" Zeichen dazwischen und endet mit "+b.slice(-1),3:"hat "+b[1]+" als zweites Zeichen"})[t]+". Passend wären z. B. "+hit.slice(0,4).join(", ")+".")}),
+V("L",2,"m",
+  ()=>mc("Was gilt für die Platzhalter % und _ ?","Sie funktionieren nur mit LIKE",["Sie funktionieren auch mit =","Sie funktionieren auch mit BETWEEN","Sie funktionieren nur bei Zahlen"],"Platzhalter können ausschliesslich mit der LIKE-Klausel verwendet werden."),
+  ()=>{const L=pick("BKMS".split(""));return mc("Was findet `WHERE nachname = '"+L+"%'`?","Nur einen Nachnamen, der wirklich "+L+"% heisst",["Alle Nachnamen, die mit "+L+" beginnen","Alle Nachnamen, die ein "+L+" enthalten","Einen Fehler"],"Mit = ist % ein ganz normales Zeichen. Für Platzhalter braucht es LIKE.")}),
+K("L",2,"m",()=>{const p=pick(["Bra","Ste","Kel","Mo","Sch","Hu","Ba"]);return mc("Alle Lernenden, deren Nachname mit «"+p+"» beginnt?","WHERE nachname LIKE '"+p+"%'",["WHERE nachname = '"+p+"%'","WHERE nachname LIKE '"+p+"_'","WHERE nachname LIKE '%"+p+"'","WHERE nachname LIKE '"+p+"'"],"Platzhalter gehen nur mit LIKE. '"+p+"_' fände nur Namen mit genau einem Zeichen nach "+p+", '%"+p+"' Namen, die auf "+p+" enden.",{sqlopts:true})}),
+K("L",3,"m",()=>{const f=pick("BKRST".split("")),l=pick("aeinr".split("")),n=ri(2,4),u=k=>f+"_".repeat(k)+l;
+  return mc("Gesucht: Nachnamen mit "+f+" am Anfang, genau "+n+" beliebigen Zeichen dazwischen und "+l+" am Schluss. Welche Bedingung stimmt?","WHERE nachname LIKE '"+u(n)+"'",["WHERE nachname LIKE '"+f+"%"+l+"'","WHERE nachname LIKE '"+u(n-1)+"'","WHERE nachname LIKE '"+u(n+1)+"'","WHERE nachname LIKE '"+f+"*".repeat(1)+l+"'"],"Für genau "+n+" Zeichen braucht es "+n+" Underscores. '"+f+"%"+l+"' fände auch längere und kürzere Namen.",{sqlopts:true})}),
+
+// NULL & leere Werte
+V("N",1,"m",
+  mc("Was ist NULL?","Ein leerer, unbestimmter Wert",["Die Zahl 0","Eine leere Zeichenkette ''","Ein Fehler in der Datenbank","Ein Leerschlag"],"NULL ist leer und unbestimmt. Eine leere Zeichenkette ist zwar leer, aber bestimmt."),
+  mc("Was ist eine leere Zeichenkette ''?","Ein leerer, aber bestimmter Wert",["Dasselbe wie NULL","Die Zahl 0","Ein Leerschlag","Ein Fehler"],"SQL unterscheidet zwischen '' (leer, bestimmt) und NULL (unbestimmt).")),
+K("N",1,"mi",()=>{const a=pick(["firma","email","strasse","plz"]),not=Math.random()<.35;
+  return fill("Ergänze, um Datensätze zu finden, bei denen "+a+" "+(not?"nicht NULL":"NULL")+" ist:","SELECT * FROM lernende WHERE "+a+" ___ NULL;",not?["IS NOT"]:["IS"],not?["<>","!=","NOT","IS"]:["=","==","LIKE","IS NOT"],"Bei Abfragen muss immer IS NULL bzw. IS NOT NULL verwendet werden, = NULL ist falsch.")}),
+K("N",2,"m",()=>{const a=pick(["firma","email","strasse"]);return mc("Was ist an `WHERE "+a+" = NULL` falsch?","Auf NULL prüft man mit IS NULL, mit = NULL findet die Abfrage nichts",["Nichts, das ist richtig","NULL muss in Hochkommas stehen","Es fehlt ein NOT","Es müsste == heissen"],"Bei Abfragen muss immer IS NULL verwendet werden.")}),
+K("N",2,"m",()=>{const csv=Math.random()<.5,a=pick(["firma","email","strasse"]);
+  return mc(csv?"Daten werden aus einer CSV-Datei importiert, bei "+a+" fehlt ein Wert. Was steht danach im Attribut?":"Ein Datensatz wird mit INSERT eingefügt, "+a+" wird nicht angegeben. Was steht danach im Attribut?",csv?"Eine leere Zeichenkette ''":"NULL",[csv?"NULL":"Eine leere Zeichenkette ''","Die Zahl 0","Das Wort leer","Ein Leerschlag"],"INSERT ohne Wert: NULL. CSV-Import mit fehlendem Wert: leere Zeichenkette.")}),
+K("N",2,"m",()=>{const a=pick(["firma","email","strasse"]);return mc("`WHERE "+a+" IS NULL` liefert nichts, `WHERE "+a+" = ''` liefert viele Datensätze. Warum?","Die fehlenden Werte sind leere Zeichenketten, zum Beispiel vom CSV-Import, nicht NULL",["IS NULL funktioniert in SQLite nicht","Alle Lernenden haben einen Wert","= '' findet auch NULL-Werte","IS NULL braucht Hochkommas"],"SQL unterscheidet zwischen '' und NULL. Man weiss meistens nicht, was in den Daten steckt.")}),
+K("N",3,"m",()=>{const a=pick(["firma","email","strasse","plz"]);return mc("Wie fragst du korrekt nach Lernenden ohne Wert in "+a+", wenn du nicht weisst, ob leere Zeichenketten oder NULL in den Daten sind?","WHERE "+a+" = '' OR "+a+" IS NULL",["WHERE "+a+" = '' AND "+a+" IS NULL","WHERE "+a+" = NULL","WHERE "+a+" IS ''","WHERE "+a+" = '' OR "+a+" = NULL"],"Beide Fälle mit OR verbinden. Mit AND fände die Abfrage nie etwas, und = NULL findet nie etwas.",{sqlopts:true})}),
+V("N",3,"m",
+  mc("Wie unterscheiden sich '' und NULL?","'' ist leer, aber bestimmt; NULL ist unbestimmt",["Es gibt keinen Unterschied","NULL ist eine leere Zeichenkette","'' ist die Zahl 0"],"Beide kann man beim UPDATE angeben, um einen bestehenden Wert zu entfernen."),
+  mc("Wie kannst du beim UPDATE einen bestehenden Attributwert entfernen?","Mit NULL oder mit '' (leere Zeichenkette)",["Nur mit DELETE","Nur mit 0","Gar nicht","Nur mit DROP"],"Beim UPDATE kann man NULL oder '' angeben, um einen Wert zu entfernen.")),
+
+// Normalisierung: Normalform bestimmen
+K("Z",1,"mi",()=>nfQ(nfPick(s=>s.nf===0||(s.nf===3&&!s.hard)))),
+K("Z",2,"mi",()=>nfQ(nfPick(s=>(s.nf===1||s.nf===2)&&!s.hard))),
+K("Z",2,"mi",()=>nfQ(nfPick(()=>true))),
+K("Z",3,"mi",()=>nfQ(nfPick(s=>s.hard||s.nf===1||s.nf===2))),
+K("Z",2,"m",()=>{const s=nfPick(x=>x.nf<3);return{q:s.nf===0?"Welches Attribut verletzt hier die 1. NF?":"Welches Attribut verhindert, dass diese Tabelle in der "+(s.nf+1)+". NF ist?",html:nfTable(s),a:s.culprit,w:s.cols.filter(c=>!s.culprit.includes(c)),e:s.why}}),
+K("Z",3,"m",()=>{const s=nfPick(x=>x.nf<3),o=new Set();let g=0;while(o.size<4&&g++<60){const t=pick(NFS)();if(t.nf<3&&t.fix!==s.fix)o.add(t.fix)}
+  return{q:"Wie bringst du diese Tabelle in die "+(s.nf+1)+". NF?",html:nfTable(s),a:s.fix,w:[...o,"Einen zusammengesetzten Primärschlüssel aus allen Attributen bilden","Die doppelten Zeilen mit DISTINCT entfernen"],e:s.why}}),
+V("Z",1,"mi",
+  ()=>{const D=[[1,"Alle Werte sind atomar: keine Listen in einer Zelle und keine Wiederholungsgruppen wie kurs1, kurs2, kurs3"],[2,"Die Tabelle ist in der 1. NF, und jedes Nicht-Schlüsselattribut hängt vom ganzen Primärschlüssel ab"],[3,"Die Tabelle ist in der 2. NF, und kein Nicht-Schlüsselattribut hängt von einem anderen Nicht-Schlüsselattribut ab"]],[n,d]=pick(D);
+    return{q:"Welche Normalform verlangt: «"+d+"»?",a:n+". NF",v:[String(n)],w:["1. NF","2. NF","3. NF","Nicht in der 1. NF"].filter(x=>x!==n+". NF"),kind:"nf",e:"1. NF: atomar. 2. NF: keine partielle Abhängigkeit. 3. NF: keine transitive Abhängigkeit."}},
+  ()=>{const D=[[1,"Alle Werte sind atomar (keine Listen in einer Zelle, keine Wiederholungsgruppen)"],[2,"1. NF und keine partielle Abhängigkeit vom Primärschlüssel"],[3,"2. NF und keine transitive Abhängigkeit"]],[n,d]=pick(D);
+    return mc("Was verlangt die "+n+". NF?",d,D.filter(x=>x[0]!==n).map(x=>x[1]).concat(["Jede Tabelle hat genau einen Fremdschlüssel","Alle Attribute sind Zahlen","Die Tabelle hat höchstens 3 Attribute"]),"1. NF: atomar. 2. NF: keine partielle Abhängigkeit. 3. NF: keine transitive Abhängigkeit.")}),
+K("Z",2,"mi",()=>{const P=[[1,"In einer Zelle stehen mehrere Werte, z. B. «"+tel()+", "+tel()+"»"],[1,"Es gibt die Spalten "+pick(["kurs1, kurs2, kurs3","telefon1, telefon2","sprache1, sprache2, sprache3"])],[1,"Das Feld "+pick(["adresse","name"])+" enthält mehrere Informationen, z. B. «"+pick(["Bahnhofstrasse 5, 3000 Bern","Lena Keller"])+"»"],[2,"Ein Attribut hängt nur von einem Teil des zusammengesetzten Primärschlüssels ab"],[2,"Im Schlüssel ("+pick(["lernende_id, kurs_id","bestell_nr, artikel_nr"])+") bestimmt schon der erste Teil allein ein anderes Attribut"],[3,"Ein Attribut hängt von einem anderen Nicht-Schlüsselattribut ab, z. B. "+pick(["ort von plz","firmenname von firma_id","abteilungsname von abteilungs_nr"])],[3,"Es gibt eine transitive Abhängigkeit"]],[n,d]=pick(P);
+  return{q:"Welche Normalform ist verletzt? "+d+".",a:"Die "+n+". NF",v:[String(n)],w:["Die 1. NF","Die 2. NF","Die 3. NF","Keine"].filter(x=>x!=="Die "+n+". NF"),kind:"nf",e:"Nicht atomare Werte verletzen die 1. NF, partielle Abhängigkeiten die 2. NF, transitive Abhängigkeiten die 3. NF."}}),
+V("Z",3,"m",
+  mc("Eine Tabelle in der 1. NF hat einen Primärschlüssel aus nur einem Attribut. Was gilt?","Sie ist automatisch auch in der 2. NF",["Sie ist automatisch in der 3. NF","Sie kann nie in der 2. NF sein","Sie braucht einen zusammengesetzten Schlüssel","Sie ist nicht in der 1. NF"],"Eine partielle Abhängigkeit braucht einen zusammengesetzten Schlüssel. Ob sie in der 3. NF ist, hängt von transitiven Abhängigkeiten ab."),
+  mc("Ab welcher Normalform spielt es eine Rolle, ob der Primärschlüssel zusammengesetzt ist?","Ab der 2. NF",["Ab der 1. NF","Erst ab der 3. NF","Nie"],"Die 2. NF verbietet partielle Abhängigkeiten, also Abhängigkeiten von einem Teil des Schlüssels. Das geht nur bei zusammengesetzten Schlüsseln.")),
+V("Z",1,"m",
+  ()=>mc(pick(["Warum normalisiert man eine Datenbank?","Was ist das Ziel der Normalisierung?"]),"Redundanz und Anomalien beim Einfügen, Ändern und Löschen vermeiden",["Damit Abfragen weniger Tabellen brauchen","Damit die Datenbank mehr Daten speichern kann","Damit man kein WHERE mehr braucht","Damit alle Attribute Zahlen sind"],"Redundante Daten führen zu Widersprüchen, wenn man sie nicht überall gleich ändert."),
+  ()=>{const A=[["Änderungsanomalie","Der Ort einer PLZ ist bei mehreren Lernenden gespeichert. Ändert er sich, muss man alle diese Zeilen ändern, sonst widersprechen sich die Daten."],["Einfügeanomalie","Ein neuer Kurs kann erst gespeichert werden, wenn sich jemand dafür angemeldet hat, weil der Schlüssel aus Lernenden und Kurs besteht."],["Löschanomalie","Wird der letzte Lernende einer Firma gelöscht, geht auch der Firmenname verloren."]],[n,d]=pick(A);
+    return mc("Welche Anomalie ist das? "+d,n,A.filter(x=>x[0]!==n).map(x=>x[0]).concat(["Redundanzanomalie","Abfrageanomalie"]),"Einfügeanomalie: Man kann etwas nicht speichern. Änderungsanomalie: Man muss an mehreren Stellen ändern. Löschanomalie: Man verliert ungewollt Informationen.")}),
+
+// Auswertungsaufgaben mit Beispieltabelle
+K("W",1,"mi",()=>{const r=mkTable(),o=pick(r).ort;return countQ(r,"SELECT * FROM lernende WHERE ort = '"+o+"';",x=>x.ort===o)}),
+K("W",1,"mi",()=>{const r=mkTable(),y=ri(2004,2008);return countQ(r,"SELECT * FROM lernende WHERE jahrgang < "+y+";",x=>x.jahrgang<y,"Kleiner als "+y+", "+y+" selbst zählt nicht.")}),
+K("W",2,"mi",()=>{const r=mkTable(),o=pick(r).ort;return countQ(r,"SELECT * FROM lernende WHERE ort <> '"+o+"';",x=>x.ort!==o)}),
+K("W",2,"mi",()=>{const r=mkTable(),y=ri(2004,2008);return countQ(r,"SELECT * FROM lernende WHERE jahrgang >= "+y+";",x=>x.jahrgang>=y,y+" selbst zählt mit.")}),
+K("B",2,"mi",()=>{const r=mkTable(),ys=[...new Set(r.map(x=>x.jahrgang))].sort();let a=ys[0],b=ys[ys.length-1];if(ys.length>2){a=ys[1];b=ys[ys.length-2]}if(a===b)b=a+1;
+  return countQ(r,"SELECT * FROM lernende WHERE jahrgang BETWEEN "+a+" AND "+b+";",x=>x.jahrgang>=a&&x.jahrgang<=b,"Beide Grenzen ("+a+" und "+b+") zählen mit.")}),
+K("B",2,"mi",()=>{const r=mkTable(),o=pick(r).ort,y=ri(2004,2007);return countQ(r,"SELECT * FROM lernende WHERE jahrgang >= "+y+" AND ort = '"+o+"';",x=>x.jahrgang>=y&&x.ort===o,"Beide Bedingungen müssen stimmen.")}),
+K("B",3,"mi",()=>{const r=mkTable(),o=pick(r).ort,y=ri(2004,2007);return countQ(r,"SELECT * FROM lernende WHERE ort = '"+o+"' OR jahrgang < "+y+";",x=>x.ort===o||x.jahrgang<y,"Eine Bedingung genügt, beide dürfen auch stimmen.")}),
+K("B",3,"mi",()=>{const r=mkTable(),o=pick(r).ort,y=ri(2005,2008);return countQ(r,"SELECT * FROM lernende WHERE NOT (ort = '"+o+"') AND jahrgang <= "+y+";",x=>x.ort!==o&&x.jahrgang<=y,"Nicht aus "+o+" und Jahrgang bis und mit "+y+".")}),
+K("B",3,"mi",()=>{const[lo,hi,add]=pick([["D","M",["Marti","Meier","Moser"]],["B","K",["Keller","Koch"]],["C","S",["Schmid","Steiner","Suter"]],["A","G",["Gerber","Graf"]]]);const r=mkTable();const free=add.filter(n=>!r.some(x=>x.nachname===n));if(free.length&&!r.some(x=>x.nachname[0]===hi))r[ri(0,r.length-1)].nachname=pick(free);
+  return countQ(r,"SELECT * FROM lernende WHERE nachname BETWEEN '"+lo+"' AND '"+hi+"';",x=>x.nachname>=lo&&x.nachname<=hi,"Achtung: Namen mit "+hi+" sind grösser als '"+hi+"' und fallen raus.")}),
+K("L",2,"mi",()=>{const r=mkTable(),c=pick(r).nachname[0];return countQ(r,"SELECT * FROM lernende WHERE nachname LIKE '"+c+"%';",x=>x.nachname[0]===c)}),
+K("L",3,"mi",()=>{const r=mkTable(),[p,f,d]=pick([["_a%",x=>x.vorname[1]==="a","a als zweites Zeichen"],["_e%",x=>x.vorname[1]==="e","e als zweites Zeichen"],["_i%",x=>x.vorname[1]==="i","i als zweites Zeichen"],["%a",x=>x.vorname.endsWith("a"),"a am Schluss"],["___",x=>x.vorname.length===3,"genau drei Zeichen"]]);
+  const o=countQ(r,"SELECT * FROM lernende WHERE vorname LIKE '"+p+"';",f,"Gesucht: Vornamen mit "+d+".");o.e=o.e.replace(/Treffer: .*/,"Treffer: "+(r.filter(f).map(x=>x.vorname+" "+x.nachname).join(", ")||"keine")+".");return o}),
+K("D",1,"mi",()=>{const r=mkTable(),s=[...new Set(r.map(x=>x.ort))];return{q:"Wie viele Zeilen gibt diese Abfrage zurück?",code:"SELECT DISTINCT ort FROM lernende;",table:r,a:String(s.length),v:[String(s.length)],w:numW(s.length,r.length),kind:"num",e:"Jeder Ort nur einmal: "+s.join(", ")+"."}}),
+K("D",3,"mi",()=>{const r=mkTable(),s=[...new Set(r.map(x=>x.vorname))];return valQ(r,"SELECT COUNT(DISTINCT vorname) FROM lernende;",s.length,numW(s.length,r.length),"Verschiedene Vornamen: "+s.join(", ")+".")}),
+K("F",1,"mi",()=>{const r=mkTable();return valQ(r,"SELECT COUNT(*) FROM lernende;",r.length,numW(r.length,5),"COUNT(*) zählt alle Datensätze, ohne WHERE also die ganze Tabelle.")}),
+K("F",2,"mi",()=>{const r=mkTable(),mx=Math.random()<.5,j=r.map(x=>x.jahrgang),v=mx?Math.max(...j):Math.min(...j);const w=[...new Set(j)].filter(x=>x!==v).map(String);
+  return valQ(r,"SELECT "+(mx?"MAX":"MIN")+"(jahrgang) FROM lernende;",v,w.length>=2?w:[v+1,v-1,v+2].map(String),(mx?"Höchster":"Tiefster")+" Jahrgang in der Tabelle.")}),
+K("F",2,"mi",()=>{const r=mkTable(),mx=Math.random()<.5,s=r.slice().sort(byName),v=(mx?s[s.length-1]:s[0]).nachname;
+  return valQ(r,"SELECT "+(mx?"MAX":"MIN")+"(nachname) FROM lernende;",v,otherNames(r,v),(mx?"MAX":"MIN")+"() geht auch mit Text: der alphabetisch "+(mx?"letzte":"erste")+" Nachname.","text")}),
+K("F",3,"mi",()=>{const r=mkTable(),s=r.reduce((a,x)=>a+age(x),0);return valQ(r,"SELECT SUM(2026 - jahrgang) FROM lernende;",s,numW(s,s+7).concat([String(r.reduce((a,x)=>a+x.jahrgang,0))]),"Alter einzeln: "+r.map(age).join(" + ")+" = "+s+".")}),
+K("F",3,"mi",()=>{const r=mkTable(),s=r.reduce((a,x)=>a+age(x),0),v=Math.round(s/r.length*10+1e-9)/10;
+  return valQ(r,"SELECT ROUND(AVG(2026 - jahrgang), 1) FROM lernende;",v,[v+.1,v-.1,Math.round(v),s].map(x=>String(Math.round(x*10)/10)),"Summe der Alter "+s+" geteilt durch "+r.length+" = "+(s/r.length).toFixed(3)+", gerundet auf 1 Stelle: "+v+".")}),
+K("O",1,"mi",()=>{const r=mkTable(),v=r.slice().sort(byName)[0].nachname;return{q:"Welcher Nachname steht bei dieser Abfrage in der ersten Zeile?",code:"SELECT * FROM lernende ORDER BY nachname;",table:r,a:v,v:[v],w:otherNames(r,v),kind:"text",e:"Ohne Angabe wird aufsteigend (ASC) sortiert, also alphabetisch von A nach Z."}}),
+K("O",2,"mi",()=>{const r=mkTable(),s=r.slice().sort(byName),v=s[s.length-1].nachname;return{q:"Welchen Nachnamen liefert diese Abfrage?",code:"SELECT nachname FROM lernende ORDER BY nachname DESC LIMIT 1;",table:r,a:v,v:[v],w:otherNames(r,v),kind:"text",e:"DESC sortiert von Z nach A, LIMIT 1 nimmt die erste Zeile."}}),
+K("O",3,"mi",()=>{const r=mkTable();const y=Math.max(...r.map(x=>x.jahrgang));const c=r.filter(x=>x.jahrgang===y);if(c.length<2){const o=r.find(x=>x.jahrgang!==y);o.jahrgang=y}
+  const s=r.slice().sort((a,b)=>b.jahrgang-a.jahrgang||byName(a,b)),v=s[0].nachname,tie=r.filter(x=>x.jahrgang===y).map(x=>x.nachname).sort();
+  return{q:"Welchen Nachnamen liefert diese Abfrage?",code:"SELECT nachname FROM lernende ORDER BY jahrgang DESC, nachname LIMIT 1;",table:r,a:v,v:[v],w:otherNames(r,v),kind:"text",e:"Jahrgang "+y+" ist der höchste: "+tie.join(", ")+". Bei gleichem Jahrgang entscheidet der Nachname aufsteigend."}}),
+K("N",2,"mi",()=>{const r=mkTable();return countQ(r,"SELECT * FROM lernende WHERE firma IS NULL;",x=>x.firma===null,"Nur echte NULL-Werte, leere Zeichenketten zählen nicht.")}),
+K("N",2,"mi",()=>{const r=mkTable();return countQ(r,"SELECT * FROM lernende WHERE firma = '';",x=>x.firma==="","Nur leere Zeichenketten, NULL zählt nicht.")}),
+K("N",3,"mi",()=>{const r=mkTable();return countQ(r,"SELECT * FROM lernende WHERE firma = '' OR firma IS NULL;",x=>x.firma===""||x.firma===null,"Leere Zeichenketten und NULL zusammen.")})
+];
+
+const $=id=>document.getElementById(id);
+const COUNTS=[10,20,40,0];
+const TYPES={mix:"Gemischt",mc:"Nur Multiple Choice",in:"Nur Eingabe"};
+let sel=new Set(Object.keys(T)),lv=new Set(["1","2","3"]),type="mix",count=20;
+let deck=[],i=0,score=0,wrong=[],stats={},answered=false,cur=null;
+
+let lastQuizView="setup";
+function show(id){for(const s of ["setup","play","end","lab"])$(s).hidden=s!==id;if(id!=="lab")lastQuizView=id;
+  $("tabQuiz").setAttribute("aria-pressed",id!=="lab");$("tabLab").setAttribute("aria-pressed",id==="lab");window.scrollTo({top:0})}
+const fitsLT=q=>lv.has(String(q.l))&&(type==="mix"||(type==="mc"?q.mc:q.inp));
+const pool=()=>Q.filter(q=>sel.has(q.t)&&fitsLT(q));
+
+function chip(html,on,fn){const b=document.createElement("button");b.className="chip";b.setAttribute("aria-pressed",on);b.innerHTML=html;b.onclick=()=>{$("setupErr").hidden=true;fn();renderSetup()};return b}
+function renderSetup(){
+  const lw=$("levels");lw.innerHTML="";
+  for(const k in L)lw.appendChild(chip(L[k]+' <span class="dots">'+"●".repeat(+k)+"○".repeat(3-k)+"</span>",lv.has(k),()=>{lv.has(k)?lv.delete(k):lv.add(k)}));
+  const tw=$("types");tw.innerHTML="";
+  for(const k in TYPES)tw.appendChild(chip(TYPES[k],type===k,()=>{type=k}));
+  const tp=$("topics");tp.innerHTML="";
+  for(const k in T){const n=Q.filter(q=>q.t===k&&fitsLT(q)).length;tp.appendChild(chip(esc(T[k])+' <span class="n">'+n+"</span>",sel.has(k),()=>{sel.has(k)?sel.delete(k):sel.add(k)}))}
+  const cw=$("counts");cw.innerHTML="";
+  for(const c of COUNTS)cw.appendChild(chip(c?c+" Fragen":"Jede Aufgabe 1×",count===c,()=>{count=c}));
+  const n=pool().length;
+  $("avail").textContent=n?n+" Aufgaben passen zu deiner Auswahl":"Keine Aufgaben passen zu deiner Auswahl";
+}
+$("all").onclick=()=>{sel=new Set(Object.keys(T));renderSetup()};
+$("none").onclick=()=>{sel.clear();renderSetup()};
+$("go").onclick=()=>{
+  const e=$("setupErr");
+  if(!lv.size){e.textContent="Wähle mindestens eine Schwierigkeit.";e.hidden=false;return}
+  if(!sel.size){e.textContent="Wähle mindestens ein Thema.";e.hidden=false;return}
+  const p=pool();
+  if(!p.length){e.textContent="Zu dieser Auswahl gibt es keine Aufgaben. Wähle mehr Themen oder eine andere Schwierigkeit.";e.hidden=false;return}
+  let d=shuffle(p);
+  if(count){while(d.length<count)d=d.concat(shuffle(p));d=d.slice(0,count)}
+  start(d.map(t=>({t})));
+};
+function start(items){deck=items;i=0;score=0;wrong=[];stats={};show("play");ask()}
+
+const normKw=s=>String(s).trim().replace(/;+$/,"").replace(/\(\s*\)$/,"").replace(/\s+/g," ").toUpperCase();
+function isRight(o,val){
+  if(o.kind==="num"){const x=Number(String(val).trim().replace(",","."));return o.v.some(v=>!isNaN(x)&&Math.abs(x-Number(v))<1e-9)}
+  if(o.kind==="text")return o.v.some(v=>v.toLowerCase()===String(val).trim().toLowerCase());
+  if(o.kind==="nf"){const s=String(val).toLowerCase().replace(/erst/,"1").replace(/zweit/,"2").replace(/dritt/,"3");return(/nicht|kein|un|^\s*0/.test(s)?"0":(s.match(/[123]/)||[""])[0])===o.v[0]}
+  return o.v.some(v=>normKw(v)===normKw(val));
+}
+function build(item){
+  if(item.o)return item.o;
+  const t=item.t;let o,mode;
+  for(let tries=0;tries<30;tries++){
+    o=t.g();const seen=new Set([String(o.a)]);o.opts=[];
+    for(const w of shuffle(o.w||[])){const k=String(w);if(!seen.has(k)&&o.opts.length<3){seen.add(k);o.opts.push(k)}}
+    mode=type==="mc"?"mc":type==="in"?"in":(t.mc&&t.inp?(Math.random()<.5?"mc":"in"):t.mc?"mc":"in");
+    if(mode==="in"&&!o.v){if(type==="in")continue;mode="mc"}
+    if(mode==="mc"&&o.opts.length<2){if(type==="mc"||!o.v)continue;mode="in"}
+    break}
+  o.mode=mode;o.t=t.t;o.l=t.l;return item.o=o;
+}
+const KW=new Set("SELECT DISTINCT ALL FROM WHERE AND OR NOT BETWEEN LIKE IS NULL ORDER BY ASC DESC LIMIT AS GROUP HAVING COUNT SUM AVG MIN MAX ROUND".split(" "));
+function hl(s){return esc(s).replace(/(___)|('[^']*')|(\b\d+(?:\.\d+)?\b)|(\b[A-Za-z_]+\b)/g,(m,b,str,num,w)=>b?'<span class="slot">___</span>':str?'<span class="s">'+str+"</span>":num?'<span class="n2">'+num+"</span>":KW.has(w.toUpperCase())?'<span class="k">'+w+"</span>":w)}
+const qHTML=s=>esc(s).replace(/`([^`]+)`/g,"<code>$1</code>");
+const plainQ=s=>s.replace(/`/g,"");
+
+function ask(){
+  const o=cur=build(deck[i]);answered=false;
+  $("tag").textContent=T[o.t];
+  const l=$("lvl");l.textContent=L[o.l];l.className="tag lv"+o.l;
+  $("prog").textContent="Frage "+(i+1)+" von "+deck.length;
+  $("bar").style.width=(i/deck.length*100)+"%";
+  let q=o.q;if(o.mode==="mc"&&o.kind==="kw"&&o.code)q=q.replace(/:$/,". Was gehört in die Lücke?");
+  $("q").innerHTML=qHTML(q);
+  $("tblBox").hidden=!(o.html||o.table);$("tblBox").innerHTML=o.html||(o.table?tableHTML(o.table):"");
+  $("code").hidden=!o.code;$("code").innerHTML=o.code?hl(o.code):"";
+  $("fb").hidden=true;$("next").hidden=true;$("tryIt").hidden=true;$("inErr").hidden=true;
+  $("score").textContent=score+" richtig";
+  const box=$("opts");box.innerHTML="";
+  const mc=o.mode==="mc";box.hidden=!mc;$("inForm").hidden=mc;
+  if(mc){
+    shuffle([{t:String(o.a),c:true},...o.opts.map(t=>({t,c:false}))]).forEach((x,n)=>{
+      const b=document.createElement("button");b.className="opt"+(o.sqlopts||o.sql?" sqlopt":"");b.type="button";b.dataset.c=x.c?"1":"";
+      b.innerHTML='<span class="key">'+(n+1)+"</span><span></span>";
+      if(o.sqlopts||o.sql)b.lastChild.innerHTML=hl(x.t);else b.lastChild.textContent=x.t;
+      b.onclick=()=>pickMC(b);box.appendChild(b);
+    });
+  }else{
+    $("field").className="field";$("inp").value="";$("inp").disabled=false;$("check").hidden=false;
+    $("inHint").textContent=o.kind==="nf"?"Nummer der Normalform eingeben (1, 2 oder 3), 0 für «nicht in der 1. NF».":o.kind==="num"?"Nur die Zahl eingeben, Dezimalpunkt oder Komma.":o.kind==="text"?"Den Nachnamen eingeben, Gross- und Kleinschreibung egal.":"Schlüsselwort oder Zeichen eingeben, Gross- und Kleinschreibung egal.";
+    $("inp").focus({preventScroll:true});
+  }
+}
+function record(ok){
+  const o=cur;answered=true;
+  stats[o.t]=stats[o.t]||{r:0,n:0};stats[o.t].n++;
+  if(ok){score++;stats[o.t].r++}else wrong.push(deck[i]);
+  const fb=$("fb");fb.hidden=false;fb.className="fb "+(ok?"ok":"bad");
+  fb.innerHTML="<b></b>";fb.firstChild.textContent=ok?"Richtig":"Leider falsch. Richtig ist: "+o.a;
+  fb.appendChild(document.createTextNode(o.e));
+  $("score").textContent=score+" richtig";
+  $("tryIt").hidden=!o.code;
+  $("next").hidden=false;$("next").textContent=i===deck.length-1?"Resultat anzeigen":"Weiter";$("next").focus({preventScroll:true});
+}
+function pickMC(b){
+  if(answered)return;
+  [...$("opts").children].forEach(x=>{x.disabled=true;if(x.dataset.c)x.classList.add("ok")});
+  const ok=!!b.dataset.c;if(!ok)b.classList.add("bad");record(ok);
+}
+$("inp").addEventListener("input",()=>{$("inErr").hidden=true});
+$("inForm").addEventListener("submit",e=>{
+  e.preventDefault();if(answered)return;
+  const v=$("inp").value;
+  if(!v.trim()){$("inErr").textContent="Gib zuerst eine Antwort ein.";$("inErr").hidden=false;return}
+  if(cur.kind==="num"&&isNaN(Number(v.trim().replace(",",".")))){$("inErr").textContent="Die Antwort muss eine Zahl sein.";$("inErr").hidden=false;return}
+  const ok=isRight(cur,v);
+  $("field").className="field "+(ok?"ok":"bad");$("inp").disabled=true;$("check").hidden=true;
+  record(ok);
+});
+$("next").onclick=()=>{i++;i<deck.length?ask():finish()};
+$("quit").onclick=()=>{renderSetup();show("setup")};
+document.addEventListener("keydown",e=>{
+  if($("play").hidden||e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA")return;
+  if(!answered&&cur&&cur.mode==="mc"&&/^[1-4]$/.test(e.key)){const b=$("opts").children[+e.key-1];if(b)pickMC(b)}
+});
+
+function finish(){
+  show("end");
+  const n=deck.length,r=score/n;
+  $("final").textContent=score+" / "+n;
+  $("msg").textContent=r===1?"Alles richtig. Probier es mit der Stufe Schwer.":r>=.8?"Sehr gut. Schau dir die wenigen Fehler noch an.":r>=.6?"Gut. Bei den roten Themen lohnt sich noch Übung.":"Da lohnt sich noch Übung. Wiederhole die Fehler und probier es nochmals.";
+  $("bars").innerHTML="";
+  for(const k in T){if(!stats[k])continue;const s=stats[k],p=s.r/s.n;
+    const row=document.createElement("div");row.className="bar";
+    const col=p>=.8?"var(--ok)":p>=.5?"var(--acc)":"var(--bad)";
+    row.innerHTML='<span></span><span class="t"><i style="width:'+Math.round(p*100)+"%;background:"+col+'"></i></span><span class="v">'+s.r+"/"+s.n+"</span>";
+    row.firstChild.textContent=T[k];$("bars").appendChild(row)}
+  const ul=$("wrong");ul.innerHTML="";$("wrongBox").hidden=!wrong.length;$("retryWrong").hidden=!wrong.length;
+  for(const it of wrong){const o=it.o,li=document.createElement("li");
+    li.innerHTML='<span></span><span class="a"></span><span class="hint"></span>';
+    li.children[0].textContent=plainQ(o.q)+(o.code?"  "+o.code:"");li.children[1].textContent="Richtig: "+o.a;li.children[2].textContent=o.e;ul.appendChild(li)}
+}
+$("retryWrong").onclick=()=>start(shuffle(wrong).map(x=>({t:x.t,o:Object.assign(x.o,{})})));
+$("restart").onclick=()=>{renderSetup();show("setup")};
+
+// Testdatenbank: SQLite im Browser (sql.js, asm.js-Version ohne WebAssembly-Download)
+const SQLJS="https://cdn.jsdelivr.net/npm/sql.js@1.10.3/dist/sql-asm.js";
+let SQL=null,db=null,labMini=false;
+function rng(seed){return()=>{seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+// Immer dieselben 80 Übungsdatensätze, damit Resultate vergleichbar bleiben
+function fullRows(){
+  const r=rng(162),p=a=>a[Math.floor(r()*a.length)];
+  const VW=["Lena","Mia","Sara","Nina","Lara","Alina","Elena","Laura","Anna","Julia","Chiara","Lea"],VM=["Noah","Luca","Leon","Jan","Tim","Elias","David","Nico","Antonio","Levin","Jonas","Ben"];
+  const NN=NACH.concat(["Bachmann","Fischer","Wyss","Zimmermann","Hofer","Kunz","Rohrer","Stucki","Brand","Juker","Jufer","Rinke","Rippe","Rogge","Rose","Steffen","Braun","Bratschi"]);
+  const ORTE=[["3000","Bern"],["3600","Thun"],["2502","Biel"],["3400","Burgdorf"],["4900","Langenthal"],["8001","Zürich"],["10115","Berlin"]];
+  const STR=["Bahnhofstrasse","Hauptstrasse","Dorfstrasse","Schulweg","Lindenweg","Kirchgasse"];
+  const FI=["Swisscom","Post","SBB","BKW","Mobiliar","Ruag","Migros","Coop","Bernmobil","Inselspital"];
+  const rows=[];
+  for(let k=0;k<80;k++){const g=r()<.5?"w":"m",v=p(g==="w"?VW:VM),n=p(NN),[plz,ort]=p(ORTE),x=r();
+    rows.push([k+1,v,n,g,p(STR)+" "+(1+Math.floor(r()*80)),plz,ort,(v+"."+n).toLowerCase()+"@lernende.ch",2002+Math.floor(r()*8),x<.09?"":x<.13?null:p(FI)])}
+  return rows;
+}
+const FULL_COLS="id INTEGER PRIMARY KEY, vorname TEXT, nachname TEXT, geschlecht TEXT, strasse TEXT, plz TEXT, ort TEXT, email TEXT, jahrgang INTEGER, firma TEXT";
+const EXAMPLES=[["Erste 10","SELECT * FROM lernende LIMIT 10;"],["Orte","SELECT DISTINCT ort FROM lernende ORDER BY ort;"],["Anzahl","SELECT COUNT(*) AS 'Anzahl Lernende' FROM lernende;"],
+  ["Name & Alter","SELECT vorname || ' ' || nachname AS 'Name', 2026 - jahrgang AS 'Alter'\nFROM lernende\nORDER BY jahrgang, nachname;"],["LIKE R___e","SELECT * FROM lernende WHERE nachname LIKE 'R___e';"],
+  ["BETWEEN","SELECT vorname, nachname, jahrgang FROM lernende\nWHERE jahrgang BETWEEN 2004 AND 2006;"],["Ohne Firma","SELECT * FROM lernende WHERE firma = '' OR firma IS NULL;"],
+  ["Durchschnittsalter","SELECT ROUND(AVG(2026 - jahrgang), 2) AS 'Durchschnittsalter' FROM lernende;"]];
+function loadSql(){
+  if(window.initSqlJs)return initSqlJs();
+  return new Promise((res,rej)=>{const s=document.createElement("script");s.src=SQLJS;s.onload=()=>initSqlJs().then(res,rej);s.onerror=()=>rej(new Error("load"));document.head.appendChild(s)});
+}
+function makeDb(rows){
+  if(db)db.close();db=new SQL.Database();labMini=!!rows;
+  if(rows){db.run("CREATE TABLE lernende (vorname TEXT, nachname TEXT, ort TEXT, jahrgang INTEGER, firma TEXT)");
+    const st=db.prepare("INSERT INTO lernende VALUES (?,?,?,?,?)");rows.forEach(x=>st.run(COLS.map(c=>x[c])));st.free()}
+  else{db.run("CREATE TABLE lernende ("+FULL_COLS+")");const st=db.prepare("INSERT INTO lernende VALUES (?,?,?,?,?,?,?,?,?,?)");fullRows().forEach(x=>st.run(x));st.free()}
+  $("labInfo").textContent=rows?"Beispieltabelle aus der Quizfrage geladen ("+rows.length+" Datensätze).":"Tabelle lernende mit 80 Übungsdatensätzen. Änderungen mit UPDATE, INSERT oder DELETE bleiben bis zum Zurücksetzen.";
+  $("schemaTxt").textContent=rows?"vorname, nachname, ort, jahrgang, firma":"id, vorname, nachname, geschlecht ('m' oder 'w'), strasse, plz, ort, email, jahrgang, firma (leer oder NULL möglich)";
+  $("labReset").textContent=rows?"Ganze Testdatenbank laden":"Datenbank zurücksetzen";
+}
+async function openLab(code,rows,fresh){
+  show("lab");
+  if(!SQL){$("run").disabled=true;
+    try{SQL=await loadSql()}catch(e){$("labInfo").textContent="";$("labErr").textContent="Die Datenbank-Engine konnte nicht geladen werden. Prüfe die Internetverbindung und öffne die Testdatenbank nochmals.";$("labErr").hidden=false;return}
+    finally{$("run").disabled=false}}
+  if(!db||fresh)makeDb(rows||null);
+  if(code){$("sqlIn").value=code;runSql()}
+}
+function cell(v){return v===null?'<td class="nul">NULL</td>':v===""?"<td class=\"emp\">''</td>":"<td>"+esc(v)+"</td>"}
+function runSql(){
+  const err=$("labErr"),out=$("labOut");err.hidden=true;
+  if(!db)return;
+  const sql=$("sqlIn").value.trim();
+  if(!sql){err.textContent="Schreib zuerst eine Abfrage.";err.hidden=false;return}
+  let res;try{res=db.exec(sql)}catch(e){err.textContent="Fehler: "+e.message;err.hidden=false;out.innerHTML="";return}
+  if(!res.length){const n=db.getRowsModified();out.innerHTML='<p class="hint" style="margin:0">Ausgeführt. Keine Zeilen zurückgegeben'+(n?", "+n+" Datensätze geändert.":".")+"</p>";return}
+  const r=res[res.length-1],max=300,rows=r.values.slice(0,max);
+  out.innerHTML='<div class="tbl res"><table><caption>'+r.values.length+(r.values.length===1?" Zeile":" Zeilen")+(r.values.length>max?", die ersten "+max+" werden angezeigt":"")+"</caption><thead><tr>"+r.columns.map(c=>"<th>"+esc(c)+"</th>").join("")+"</tr></thead><tbody>"+rows.map(v=>"<tr>"+v.map(cell).join("")+"</tr>").join("")+"</tbody></table></div>";
+}
+for(const[l,c]of EXAMPLES){const b=document.createElement("button");b.className="chip";b.textContent=l;b.title=c;b.onclick=()=>{$("sqlIn").value=c;runSql()};$("examples").appendChild(b)}
+$("run").onclick=runSql;
+$("sqlIn").addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();runSql()}});
+$("labReset").onclick=()=>{if(SQL){makeDb(null);runSql()}};
+$("tabLab").onclick=()=>openLab();
+$("tabQuiz").onclick=()=>show(lastQuizView);
+$("tryIt").onclick=()=>{const o=cur;let c=o.code;if(o.kind==="kw")c=c.replace("___",o.v[0]);openLab(c,o.table||null,true)};
+
+renderSetup();
+</script>
+
+</body></html>

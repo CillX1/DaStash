@@ -163,6 +163,13 @@ function start({ uiDir, dataDir, secret, openUrl, notify = () => {} }) {
       if (req.headers.host !== `127.0.0.1:${port}`) return send(403, 'forbidden', 'text/plain');
       if (p === '/') return send(200, fs.readFileSync(path.join(uiDir, 'dashboard.html')), 'text/html; charset=utf-8');
       if (p === '/logo.svg') return send(200, fs.readFileSync(path.join(uiDir, 'logo.svg')), 'image/svg+xml');
+      const qm = /^\/quiz\/((?:quizzes\/)?[a-z0-9][a-z0-9.-]*\.(js|css|json|html))$/.exec(p);
+      if (qm) {   // QuizDesk files (quiz/ next to the dashboard)
+        const file = path.join(uiDir, 'quiz', qm[1]);
+        if (!fs.existsSync(file)) return send(404, 'not found', 'text/plain');
+        const type = { js: 'text/javascript', css: 'text/css', json: 'application/json', html: 'text/html' }[qm[2]];
+        return send(200, fs.readFileSync(file), type + '; charset=utf-8');
+      }
       if (p === '/api/spotify/art' && q.get('t') === token) {
         if (!P.art.bytes) return send(404, '', 'text/plain');
         res.writeHead(200, { 'Content-Type': P.art.type, 'Cache-Control': 'max-age=3600' }); return res.end(P.art.bytes);

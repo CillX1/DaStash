@@ -637,6 +637,16 @@ function Handle($ctx) {
     if ($path -eq '/logo.svg') {
         return Send $ctx 200 ([IO.File]::ReadAllText((Join-Path $root 'logo.svg'))) 'image/svg+xml'
     }
+    if ($path -cmatch '^/quiz/((?:quizzes/)?[a-z0-9][a-z0-9.-]*\.(js|css|json|html))$') {
+        # QuizDesk files (quiz/ next to the app). Sent as raw bytes so the quizzes' checksums stay valid.
+        $file = Join-Path $root ('quiz/' + $Matches[1])
+        if (-not (Test-Path -LiteralPath $file -PathType Leaf)) { return Send $ctx 404 'not found' 'text/plain' }
+        $bytes = [IO.File]::ReadAllBytes($file)
+        $ctx.Response.ContentType = @{ js = 'text/javascript'; css = 'text/css'; json = 'application/json'; html = 'text/html' }[$Matches[2]] + '; charset=utf-8'
+        $ctx.Response.Headers['Cache-Control'] = 'no-store'
+        $ctx.Response.OutputStream.Write($bytes, 0, $bytes.Length)
+        return $ctx.Response.Close()
+    }
     if ($path -eq '/api/spotify/art' -and $req.QueryString['t'] -eq $token) {
         # Album cover for <img>, which cannot send the X-Token header, so it takes the token in the URL.
         if (-not $script:spArt.bytes) { return Send $ctx 404 '' 'text/plain' }

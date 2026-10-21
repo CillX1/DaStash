@@ -2,7 +2,7 @@
 ; Build:  ISCC.exe installer\GameDesk.iss  (optionally /DAppVersion=1.2.3)
 
 #ifndef AppVersion
-  #define AppVersion "1.7.0"
+  #define AppVersion "1.8.0"
 #endif
 #define AppSrc "..\GameDesk"
 #define PS "{sys}\WindowsPowerShell\v1.0\powershell.exe"
@@ -39,6 +39,7 @@ Source: "{#AppSrc}\logo.svg"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#AppSrc}\logo.png"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#AppSrc}\GameDesk.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#AppSrc}\README.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#AppSrc}\quiz\*"; DestDir: "{app}\quiz"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "Stop-GameDesk.ps1"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]

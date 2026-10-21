@@ -475,6 +475,15 @@
   </section>
 
   <!-- Row 5 -->
+  <section class="card" data-w="quiz" data-name="Quizzes" style="--c:var(--accent)">
+    <div class="card-h"><div class="badge"><svg class="i" data-i="layers"></svg></div><h2>Quizzes</h2><div class="meta"><button class="link" id="qdOpen">Open QuizDesk</button></div></div>
+    <div class="qd-wlist" id="qdWidgetList"><div class="muted small">Loading quizzes…</div></div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn solid" id="qdDuel"><svg class="i" data-i="zap"></svg>Duel</button>
+      <button class="btn" id="qdBrowse"><svg class="i" data-i="download"></svg>Browse</button>
+    </div>
+  </section>
+
   <section class="card full" data-w="links" data-name="Quick links" style="--c:var(--accent-2)">
     <div class="card-h"><div class="badge"><svg class="i" data-i="globe"></svg></div><h2>Quick links</h2><div class="meta"><button class="link" id="linkEdit">Edit links</button></div></div>
     <div class="tiles" id="linkTiles" style="--cols:9"></div>
@@ -1233,5 +1242,8 @@ document.addEventListener('click', e => { if (!e.target.closest('#drawer')) $('d
   applyHidden(); renderTodos(); renderLinks(); loadWeather(); loadApps(); initAi();
 })();
 </script>
+<link rel="stylesheet" href="/quiz/quizdesk.css">
+<script src="/quiz/peerjs.min.js"></script>
+<script src="/quiz/quizdesk.js"></script>
 </body>
 </html>

@@ -1,0 +1,718 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Netzwerkgrundlagen-Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,500..800&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: Quizkarte links, Lernziel-Balken rechts; auf dem Handy untereinander. Themenfarben nach den T568B-Adernpaaren. */
+:root{
+  --bg:#E8ECEF; --surface:#F8FAFB; --surface-2:#EEF2F5; --ink:#15202A; --muted:#566573; --line:#C9D2DA;
+  --c-ip:#2D5BC9; --c-net:#1F8253; --c-pro:#C4621A; --c-hw:#86593A; --c-basis:#6A4BC0; --c-wlan:#A83472;
+  --good:#1C7F46; --good-bg:#DDF2E5; --bad:#B8322A; --bad-bg:#F8E1DF;
+  --f-display:"Archivo", "Arial Narrow", system-ui, sans-serif;
+  --f-body:"Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F151B; --surface:#18212A; --surface-2:#1F2A35; --ink:#E4EAF0; --muted:#94A3B0; --line:#2D3A46;
+  --c-ip:#7FA0F4; --c-net:#4EBF88; --c-pro:#F09450; --c-hw:#C79A78; --c-basis:#B19BF4; --c-wlan:#EE7DB7;
+  --good:#5ACB8A; --good-bg:#16352A; --bad:#F2776E; --bad-bg:#3E1E1C; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0F151B; --surface:#18212A; --surface-2:#1F2A35; --ink:#E4EAF0; --muted:#94A3B0; --line:#2D3A46;
+  --c-ip:#7FA0F4; --c-net:#4EBF88; --c-pro:#F09450; --c-hw:#C79A78; --c-basis:#B19BF4; --c-wlan:#EE7DB7;
+  --good:#5ACB8A; --good-bg:#16352A; --bad:#F2776E; --bad-bg:#3E1E1C; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 var(--f-body)}
+.wrap{max-width:1120px;margin:0 auto;padding-inline:16px;padding-block:28px 48px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;margin-bottom:20px}
+h1{font:800 clamp(28px,5vw,42px)/1.02 var(--f-display);font-stretch:78%;letter-spacing:-.01em;margin:0;text-wrap:balance;hyphens:auto}
+.sub{color:var(--muted);margin:6px 0 0;font-size:15px}
+.score{font:600 14px var(--f-mono);font-variant-numeric:tabular-nums;color:var(--muted);display:flex;gap:16px}
+.score b{color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.chip{font:600 14px var(--f-body);padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.chip .dot{width:9px;height:9px;border-radius:50%;background:var(--cat,var(--muted))}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.chip:focus-visible,button:focus-visible,input:focus-visible,.goal:focus-visible{outline:3px solid var(--c-ip);outline-offset:2px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;align-items:start}
+@media (max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;border-top:5px solid var(--cat);padding:22px clamp(16px,3vw,30px) 24px;min-width:0}
+.meta{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:baseline;margin-bottom:4px}
+.tag{font:700 12px var(--f-body);text-transform:uppercase;letter-spacing:.08em;color:var(--cat)}
+.qno{font:12px var(--f-mono);color:var(--muted)}
+.goal-de{font-size:13px;color:var(--muted);margin:0 0 16px}
+.q{font:700 clamp(19px,2.4vw,23px)/1.35 var(--f-body);margin:0 0 20px;text-wrap:pretty;hyphens:auto}
+code,.mono{font-family:var(--f-mono);font-size:.92em}
+.q code{background:var(--surface-2);padding:1px 6px;border-radius:4px;white-space:nowrap}
+.opts{display:grid;gap:10px}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;font:16px/1.4 var(--f-body);color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:12px 14px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--cat)}
+.opt .k{font:600 13px var(--f-mono);color:var(--muted);min-width:1.2em;padding-top:2px}
+.opt.right{background:var(--good-bg);border-color:var(--good)}
+.opt.wrong{background:var(--bad-bg);border-color:var(--bad)}
+.opt:disabled{cursor:default}
+.opt:disabled:not(.right):not(.wrong){opacity:.6}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.field label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-bottom:4px}
+.field input{width:100%;font:16px var(--f-mono);padding:10px 12px;border:1px solid var(--line);border-radius:7px;background:var(--surface-2);color:var(--ink)}
+.field input.right{border-color:var(--good);background:var(--good-bg)}
+.field input.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.field .fix{font:13px var(--f-mono);color:var(--bad);margin-top:4px;min-height:1em}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:20px}
+.btn{font:700 15px var(--f-body);padding:10px 18px;border-radius:8px;border:1px solid var(--ink);background:var(--ink);color:var(--surface);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.hint{font-size:13px;color:var(--muted)}
+.fb{margin-top:20px;padding:14px 16px;border-radius:8px;border:1px solid var(--line);background:var(--surface-2)}
+.fb.ok{border-color:var(--good)}
+.fb.no{border-color:var(--bad)}
+.fb h3{margin:0 0 6px;font:800 18px var(--f-display);font-stretch:85%}
+.fb.ok h3{color:var(--good)} .fb.no h3{color:var(--bad)}
+.fb p{margin:0;max-width:68ch;hyphens:auto}
+.fb .bin{font:13px/1.6 var(--f-mono);margin-top:8px;color:var(--muted);overflow-x:auto;white-space:pre}
+aside{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 18px 14px}
+aside h2{font:800 20px var(--f-display);font-stretch:82%;margin:0 0 4px}
+aside .note{font-size:13px;color:var(--muted);margin:0 0 14px}
+.cat-h{font:700 12px var(--f-body);text-transform:uppercase;letter-spacing:.08em;color:var(--cat);margin:14px 0 6px}
+.goal{display:grid;grid-template-columns:1fr auto;gap:2px 10px;width:100%;text-align:left;background:none;border:0;padding:6px 4px;border-radius:6px;cursor:pointer;color:var(--ink);font:14px var(--f-body)}
+.goal:hover{background:var(--surface-2)}
+.goal[aria-pressed="true"]{background:var(--surface-2);box-shadow:inset 3px 0 0 var(--cat)}
+.goal .pct{font:600 12px var(--f-mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{grid-column:1/-1;height:5px;border-radius:3px;background:var(--surface-2);overflow:hidden;border:1px solid var(--line)}
+.bar i{display:block;height:100%;background:var(--cat);width:0;transition:width .3s}
+.reset{margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.reset .btn{font-size:13px;padding:6px 12px}
+.empty{color:var(--muted)}
+.foot{font-size:12px;color:var(--muted);margin-top:22px}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+
+<div class="wrap" lang="de">
+  <header>
+    <div>
+      <h1>Netzwerkgrundlagen-Quiz</h1>
+      <p class="sub">Telematik: Grundlagen, Zahlensysteme, Subnetting, Netzwerkgeräte, Protokolle, WLAN und Werkzeuge. Rechenaufgaben werden jedes Mal neu erzeugt.</p>
+    </div>
+    <div class="score" aria-live="polite"><span>Runde <b id="s-score">0/0</b></span><span>Serie <b id="s-streak">0</b></span></div>
+  </header>
+
+  <nav class="chips" id="chips" aria-label="Thema wählen"></nav>
+
+  <div class="grid">
+    <main class="card" id="card"></main>
+    <aside>
+      <h2>Lernziele</h2>
+      <p class="note">Trefferquote pro Lernziel, in diesem Browser gespeichert. Tippe auf ein Lernziel, um nur dieses zu üben.</p>
+      <div id="goals"></div>
+      <div class="reset" id="reset"></div>
+    </aside>
+  </div>
+  <p class="foot">Tasten: <span class="mono">1–4</span> Antwort wählen · <span class="mono">Enter</span> prüfen / nächste Frage. Inhalte: Lernziel-Liste und Telematik-Zusammenfassung (Kapitel 1–10).</p>
+</div>
+
+<script>
+const CATS = {
+  basis:{name:'Grundlagen & Zahlensysteme', color:'var(--c-basis)'},
+  ip:  {name:'IP-Adressierung & Subnetting', color:'var(--c-ip)'},
+  net: {name:'Netzwerkkomponenten & Topologien', color:'var(--c-net)'},
+  pro: {name:'Referenzmodelle & Protokolle', color:'var(--c-pro)'},
+  hw:  {name:'Hardware-Adressierung & Medien', color:'var(--c-hw)'},
+  wlan:{name:'WLAN, Netzplan & Werkzeuge', color:'var(--c-wlan)'}
+};
+const GOALS = [
+  {id:'b1',cat:'basis',name:'Kommunikation & Netzausdehnung',de:'Kap. 1: Übertragungsmedien, Kommunikationsrichtung (Simplex, Duplex), Zielpublikum (Unicast, Multicast, Broadcast) und Netzausdehnung (PAN bis GAN).'},
+  {id:'b2',cat:'basis',name:'Bits, Bytes & Präfixe',de:'Kap. 2.1–2.3: Bit, Byte, Nibble, Anzahl Zustände (2^n) sowie SI- und Binärpräfixe (kB vs. KiB).'},
+  {id:'b3',cat:'basis',name:'Zahlensysteme umrechnen',de:'Kap. 2.4–2.5: Zahlen zwischen dezimal, binär und hexadezimal umrechnen.'},
+  {id:'b4',cat:'basis',name:'Bool’sche Operationen',de:'Kap. 2.6: UND, ODER, NICHT, Wahrheitstabellen und Anwendung in Python und SQL.'},
+  {id:'ip6',cat:'ip',name:'Maskenregeln & Supernetting',de:'Kap. 3.1–3.4: Netz- und Hostteil, Regeln für gültige Subnetzmasken, Subnetting und Supernetting.'},
+  {id:'ip7',cat:'ip',name:'DHCP & IP-Konzept',de:'Kap. 3.6: IP-Konzept, DHCP (DORA, Lease-Time), statische Adressen und DHCP-Reservierung.'},
+  {id:'ip8',cat:'ip',name:'Subnetze planen',de:'Kap. 3.4 und 10: Subnetze planen, inklusive Gateway-Adresse und Reserve für Wachstum.'},
+  {id:'net4',cat:'net',name:'NIC, Hub, Switch, Router, AP',de:'Kap. 5.1–5.4: NIC, Hub, Switch (Ports, PoE, SFP), Router und Access Point vs. Repeater.'},
+  {id:'net5',cat:'net',name:'Firewall & DMZ',de:'Kap. 5.5: Firewall-Grundsatz, Blacklist und Whitelist, mehrstufige Firewall und DMZ.'},
+  {id:'pro4',cat:'pro',name:'Kapselung & HTTP-Request',de:'Kap. 4.2 und 4.5: Kapselung und Entkapselung, Reise eines HTTP-Requests.'},
+  {id:'pro5',cat:'pro',name:'TCP-Details, Ports & Sockets',de:'Kap. 8.3–8.5: TCP-Header und Verbindungsabbau, Portbereiche, Sockets und die Socket-API in Python.'},
+  {id:'w1',cat:'wlan',name:'WLAN-Technik & Standards',de:'Kap. 7.1–7.4: Drahtlose Technologien, Frequenzbänder, IEEE-802.11-Standards und Betriebsarten.'},
+  {id:'w2',cat:'wlan',name:'WLAN-Performance & Sicherheit',de:'Kap. 7.5–7.6: Kanäle, Störungen, Standort des AP und WLAN-Sicherheit.'},
+  {id:'w3',cat:'wlan',name:'Netzplan',de:'Kap. 6: Schematischer und geografischer Netzplan, Symbole und Regeln.'},
+  {id:'w4',cat:'wlan',name:'Kommandozeile & Wireshark',de:'Kap. 3.8 und 9: ping-Optionen, Befehle nach Schicht und Wireshark.'},
+  {id:'ip1',cat:'ip',name:'CIDR-Analyse',de:'Netzwerke anhand von CIDR-Notation analysieren (Netzadresse, Broadcast, erster Host, Hosts, Netzmaske).'},
+  {id:'ip2',cat:'ip',name:'Präfix ↔ Netzmaske',de:'Zusammenhänge zwischen CIDR-Präfixen und Netzmasken verstehen und anwenden.'},
+  {id:'ip3',cat:'ip',name:'Anzahl Subnetze',de:'Die Anzahl möglicher Subnetze bei Änderung der Subnetzmaske berechnen.'},
+  {id:'ip4',cat:'ip',name:'Broadcast eines Subnetzes',de:'Die Broadcast-Adresse eines spezifischen Subnetzes ermitteln.'},
+  {id:'ip5',cat:'ip',name:'Spezielle Adressen',de:'Spezifische IP-Adressen (Loopback, Netz-, Broadcast-Adressen, Standardmasken) identifizieren.'},
+  {id:'net1',cat:'net',name:'Switch, Router, Firewall',de:'Funktion von Switch, Router, Firewall innerhalb und zwischen Netzen unterscheiden.'},
+  {id:'net2',cat:'net',name:'Topologien & Ausfallsicherheit',de:'Netzwerktopologien (Baum, Stern), Ausfallsicherheit und Anforderungen bewerten.'},
+  {id:'net3',cat:'net',name:'NAT',de:'Die Rolle von NAT bei der Verbindung privater Netze mit dem Internet erklären.'},
+  {id:'pro1',cat:'pro',name:'OSI- & TCP/IP-Modell',de:'ISO/OSI- und TCP/IP-Modell beschreiben und Protokolle den Schichten zuordnen.'},
+  {id:'pro2',cat:'pro',name:'TCP vs. UDP',de:'Unterschiede von TCP und UDP (Zuverlässigkeit, Verbindungsorientierung) erläutern.'},
+  {id:'pro3',cat:'pro',name:'DNS, DHCP, ICMP, ARP …',de:'Hauptaufgaben von DNS, DHCP, HTTP, ICMP, ARP, FTP benennen und bei Problemen (Ping) anwenden.'},
+  {id:'hw1',cat:'hw',name:'MAC vs. IP vs. Port',de:'Aufbau, Syntax und Funktion von MAC-Adressen von IP-Adressen und Ports unterscheiden.'},
+  {id:'hw2',cat:'hw',name:'ipconfig /all',de:'Befehle auf der Windows-Kommandozeile zur Ermittlung der eigenen MAC-Adresse nutzen.'},
+  {id:'hw3',cat:'hw',name:'Übertragungsmedien',de:'Übertragungsmedien (LWL, Twisted-Pair, WLAN) nach Bandbreite und Störanfälligkeit vergleichen.'}
+];
+const goalById = Object.fromEntries(GOALS.map(g=>[g.id,g]));
+
+/* Multiple-Choice-Fragen. Die erste Option ist immer die richtige; die Reihenfolge wird beim Anzeigen gemischt. */
+const Q = [
+// ip1 / ip3 Konzepte
+['ip1','Warum zieht man bei der Anzahl nutzbarer Hosts 2 ab?',['Netzadresse und Broadcast-Adresse können keinem Host zugewiesen werden','Router und Switch brauchen je eine Adresse','Eine Adresse ist für DNS, eine für DHCP','Die erste und letzte Adresse sind für IPv6 reserviert'],'Der Hostteil mit lauter Nullen ist die Netzadresse, der Hostteil mit lauter Einsen die Broadcast-Adresse. Beide kann man keinem Gerät geben.'],
+['ip3','Was passiert jedes Mal, wenn du ein Bit mehr für die Subnetzmaske «ausleihst»?',['Die Anzahl Subnetze verdoppelt sich, die Hosts pro Subnetz halbieren sich ungefähr','Die Subnetze halbieren sich, die Hosts verdoppeln sich','Es gibt 2 Subnetze mehr','Nichts ändert sich, bis ein ganzes Oktett ausgeliehen ist'],'Subnetze = 2^(ausgeliehene Bits). Jedes zusätzliche Bit verdoppelt die Subnetze und halbiert den Adressblock pro Subnetz.'],
+['ip1','Wie viele nutzbare Hosts hat ein <code>/30</code>-Netz?',['2','4','0','6'],'2^(32−30) = 4 Adressen, minus Netz- und Broadcast-Adresse = 2. Deshalb nutzt man /30 für Punkt-zu-Punkt-Verbindungen zwischen Routern.'],
+// ip5 spezielle Adressen
+['ip5','Was ist <code>127.0.0.1</code>?',['Die Loopback-Adresse: der eigene Rechner','Das Standard-Gateway','Die Broadcast-Adresse des lokalen Netzes','Die erste Adresse des privaten Klasse-A-Bereichs'],'127.0.0.0/8 ist für Loopback reserviert. Pakete verlassen den Rechner nie; ping 127.0.0.1 testet den eigenen TCP/IP-Stack.'],
+['ip5','Welche dieser Adressen ist eine private IPv4-Adresse (RFC 1918)?',['172.20.5.1','172.32.1.1','192.169.1.1','11.0.0.1'],'Private Bereiche: 10.0.0.0/8, 172.16.0.0/12 (172.16.x.x bis 172.31.x.x) und 192.168.0.0/16. 172.32.x.x liegt knapp ausserhalb.'],
+['ip5','Ein PC zeigt die Adresse <code>169.254.12.7</code>. Was ist wahrscheinlich passiert?',['Er hat keine Antwort vom DHCP-Server bekommen und sich selbst eine APIPA-Adresse (Link-Local) gegeben','Er ist direkt mit dem Internet verbunden','Er benutzt seine Loopback-Adresse','Sein DNS-Server ist nicht erreichbar'],'169.254.0.0/16 ist Link-Local. Windows wählt so eine Adresse, wenn DHCP fehlschlägt. Also Kabel, WLAN oder DHCP-Server prüfen.'],
+['ip5','Welche Adresse kann in <code>192.168.1.0/24</code> keinem Host zugewiesen werden?',['192.168.1.255','192.168.1.1','192.168.1.254','192.168.1.128'],'.255 ist die Broadcast-Adresse dieses /24-Netzes (und .0 die Netzadresse). .128 ist in einem /24 eine normale Host-Adresse.'],
+['ip5','Was bedeutet <code>0.0.0.0/0</code> in einer Routing-Tabelle?',['Die Default-Route: jedes Ziel, das sonst nirgends passt','Das Loopback-Netz','Ein Broadcast an alle Netze','Einen ungültigen Eintrag'],'Ein /0-Präfix passt auf jede Adresse. Darum steht er für die Default-Route, meist Richtung Internet-Router.'],
+['ip5','Wofür wird <code>255.255.255.255</code> verwendet?',['Limited Broadcast an alle Hosts im lokalen Netz','Standard-Subnetzmaske für /24','Loopback-Adresse','Adresse des Standard-Gateways'],'Sie erreicht alle Hosts im lokalen Segment und wird von Routern nie weitergeleitet. DHCP Discover nutzt sie zum Beispiel.'],
+['ip2','Welche Standard-Subnetzmaske gehört zu einem Klasse-B-Netz (<code>/16</code>)?',['255.255.0.0','255.0.0.0','255.255.255.0','255.255.255.255'],'Klassische Standardmasken: Klasse A /8 = 255.0.0.0, Klasse B /16 = 255.255.0.0, Klasse C /24 = 255.255.255.0.'],
+// net1
+['net1','Welches Gerät leitet Frames innerhalb desselben Netzes anhand einer MAC-Adresstabelle weiter?',['Switch','Router','Firewall','DNS-Server'],'Ein Switch arbeitet auf Schicht 2. Er lernt, welche MAC-Adresse an welchem Port hängt, und schickt Frames nur dorthin.'],
+['net1','PC A <code>192.168.1.10/24</code> will PC B <code>192.168.2.20/24</code> erreichen. Welches Gerät ist zwingend nötig?',['Ein Router','Ein Switch','Ein Hub','Eine zweite Netzwerkkarte in PC A'],'Mit /24 sind die Netze 192.168.1.0 und 192.168.2.0, also verschiedene Netze. Verkehr zwischen Netzen braucht ein Schicht-3-Gerät: einen Router.'],
+['net1','Worauf stützt ein Router seine Weiterleitungsentscheidung?',['Auf die Ziel-IP-Adresse und seine Routing-Tabelle','Auf die Ziel-MAC-Adresse','Auf die Quell-Portnummer','Auf den Kabeltyp'],'Router arbeiten auf Schicht 3. Sie suchen das Zielnetz in der Routing-Tabelle und wählen den nächsten Hop.'],
+['net1','Was ist die Hauptaufgabe einer Firewall?',['Datenverkehr anhand von Regeln (IP-Adressen, Ports, Protokolle) erlauben oder blockieren','IP-Adressen vergeben','Namen in IP-Adressen übersetzen','Schwache Signale verstärken'],'Eine Firewall sitzt an einer Netzgrenze und filtert nach Regeln. Viele Router enthalten eine Firewall, aber es sind getrennte Funktionen.'],
+['net1','Ein PC sendet Daten an einen Host in einem anderen Netz. Welche Ziel-MAC-Adresse steht im Frame?',['Die MAC des Standard-Gateways','Die MAC des Ziel-Hosts','Die Broadcast-MAC FF-FF-FF-FF-FF-FF','Die MAC des DNS-Servers'],'MAC-Adressen gelten nur im lokalen Netz. Bei einem entfernten Ziel geht der Frame an das Gateway, das weiterroutet. Die Ziel-IP bleibt die des entfernten Hosts.'],
+['net1','Auf welcher OSI-Schicht arbeitet ein klassischer Switch?',['Schicht 2: Sicherungsschicht (Data Link)','Schicht 1: Bitübertragungsschicht','Schicht 3: Vermittlungsschicht','Schicht 4: Transportschicht'],'Ein Switch liest MAC-Adressen in Ethernet-Frames, also Schicht 2. (Layer-3-Switches können auch routen, der klassische Switch ist aber Schicht 2.)'],
+// net2
+['net2','Welcher einzelne Ausfall legt in einer Sterntopologie das ganze Netz lahm?',['Der zentrale Switch','Das Kabel zu einem PC','Ein PC','Ein unbenutzter Switch-Port'],'Alle Geräte hängen am Zentrum. Ein defektes Kabel trennt nur ein Gerät ab, ein ausgefallener zentraler Switch trennt alle ab.'],
+['net2','In einer Baumtopologie fällt ein Verteiler-Switch aus. Was ist betroffen?',['Alle Geräte im Ast unterhalb dieses Switches','Nur dieser Switch','Das ganze Netz inklusive Core','Nichts, Baumtopologien sind voll redundant'],'Ein Baum ist eine Hierarchie von Sternen. Ein Ausfall trennt den ganzen Teilbaum darunter ab, die anderen Äste laufen weiter.'],
+['net2','Welche Topologie bietet die höchste Ausfallsicherheit?',['Vollvermascht','Stern','Baum','Bus'],'Bei voller Vermaschung ist jeder Knoten mit jedem verbunden, es gibt also viele alternative Wege. Der Preis sind viele Leitungen und hohe Kosten.'],
+['net2','Warum muss der Wurzel-Switch (Core) einer Baumtopologie besonders leistungsfähig und zuverlässig sein?',['Der ganze Verkehr zwischen den Ästen läuft über ihn','Er vergibt die IP-Adressen an alle Geräte','Er ist das einzige Gerät mit Stromversorgung','Er übersetzt private in öffentliche Adressen'],'Der Core bündelt alle Äste. Er braucht hohen Durchsatz (schnelle Uplinks) und oft Redundanz, z. B. einen zweiten Switch oder ein zweites Netzteil.'],
+['net2','Wie macht man ein Sternnetz an seiner Schwachstelle ausfallsicherer?',['Einen redundanten zentralen Switch mit Backup-Verbindungen einsetzen','Längere Kabel verwenden','Jedem PC zwei IP-Adressen geben','Von Glasfaser auf WLAN wechseln'],'Der Single Point of Failure ist das Zentrum. Redundante Switches und Verbindungen beseitigen ihn.'],
+// net3
+['net3','Was macht NAT auf einem Heimrouter?',['Es ersetzt private Quell-IPs durch die öffentliche IP des Routers und macht das bei Antworten rückgängig','Es vergibt private IPs an die Clients','Es verschlüsselt den ganzen Verkehr','Es löst Domainnamen auf'],'NAT schreibt Adressen an der Grenze zwischen privatem LAN und Internet um. IP-Adressen verteilen ist die Aufgabe von DHCP.'],
+['net3','Warum ist ein Host mit <code>192.168.0.15</code> nicht direkt aus dem Internet erreichbar?',['Private Adressen werden im Internet nicht geroutet; unzählige Netze verwenden dieselben Bereiche','Die Adresse ist zu lang','192.168.x.x ist für Router reserviert','Er hat keine MAC-Adresse'],'Private Bereiche sind weltweit nicht eindeutig, darum verwerfen Internet-Router sie. NAT gibt privaten Hosts eine öffentliche Identität.'],
+['net3','Wie können viele Geräte gleichzeitig eine einzige öffentliche IP nutzen (PAT / NAT Overload)?',['Der Router unterscheidet die Verbindungen anhand der Quell-Portnummern','Die Geräte wechseln sich beim Surfen ab','Jedes Gerät bekommt im Internet eine eigene MAC','DNS gibt jedem Gerät eine Subdomain'],'Port Address Translation ordnet jedem internen IP:Port-Paar einen eindeutigen öffentlichen Port zu, damit Antworten beim richtigen Gerät ankommen.'],
+['net3','Ein Webserver im Heimnetz soll von aussen erreichbar sein. Was konfigurierst du auf dem Router?',['Eine Portweiterleitung (statische NAT-Regel) auf die private IP des Servers','Eine neue Subnetzmaske','Einen grösseren DHCP-Bereich','Einen zweiten Switch'],'Eingehende Verbindungen haben noch keinen NAT-Eintrag. Eine Portweiterleitung erstellt einen, z. B. öffentlicher Port 443 → 192.168.1.20:443.'],
+['net3','Welches Problem sollte NAT vor allem entschärfen?',['Den Mangel an öffentlichen IPv4-Adressen','Langsame DNS-Abfragen','Störungen auf Kabeln','Zu viele MAC-Adressen'],'IPv4 hat etwa 4,3 Milliarden Adressen. Mit NAT teilen sich ganze Netze eine öffentliche Adresse. IPv6 behebt den Mangel.'],
+// pro1
+['pro1','Was ist die richtige Reihenfolge der OSI-Schichten von 1 bis 7?',['Bitübertragung, Sicherung, Vermittlung, Transport, Sitzung, Darstellung, Anwendung','Bitübertragung, Vermittlung, Sicherung, Transport, Sitzung, Darstellung, Anwendung','Bitübertragung, Sicherung, Vermittlung, Transport, Darstellung, Sitzung, Anwendung','Anwendung, Darstellung, Sitzung, Transport, Vermittlung, Sicherung, Bitübertragung'],'Englische Eselsbrücke von Schicht 1 aufwärts: «Please Do Not Throw Sausage Pizza Away» (Physical, Data Link, Network, Transport, Session, Presentation, Application).'],
+['pro1','Zu welcher OSI-Schicht gehört HTTP?',['7: Anwendungsschicht','4: Transportschicht','5: Sitzungsschicht','3: Vermittlungsschicht'],'HTTP, FTP, DNS, DHCP und SMTP sind Anwendungsprotokolle (Schicht 7; im TCP/IP-Modell: Anwendungsschicht).'],
+['pro1','Zu welcher OSI-Schicht gehören TCP und UDP?',['4: Transportschicht','3: Vermittlungsschicht','2: Sicherungsschicht','7: Anwendungsschicht'],'Die Transportschicht sorgt für die Ende-zu-Ende-Übertragung zwischen Anwendungen, die über Portnummern unterschieden werden.'],
+['pro1','Zu welcher OSI-Schicht gehören IP und Router?',['3: Vermittlungsschicht','2: Sicherungsschicht','4: Transportschicht','1: Bitübertragungsschicht'],'Schicht 3 ist für logische Adressierung (IP) und das Routing zwischen Netzen zuständig.'],
+['pro1','Welche OSI-Schicht kümmert sich um Datenformate, Zeichenkodierung und Verschlüsselung?',['6: Darstellungsschicht','5: Sitzungsschicht','7: Anwendungsschicht','4: Transportschicht'],'Die Darstellungsschicht bringt Daten in ein gemeinsames Format, z. B. Kodierung, Kompression und Verschlüsselung.'],
+['pro1','Zu welcher OSI-Schicht gehören Kabel, Stecker und Signale (Bits)?',['1: Bitübertragungsschicht','2: Sicherungsschicht','3: Vermittlungsschicht','0: Hardwareschicht'],'Schicht 1 überträgt rohe Bits als elektrische, optische oder Funksignale. Hubs und Repeater gehören auch hierhin.'],
+['pro1','Wie viele Schichten hat das TCP/IP-Modell?',['4: Netzzugang, Internet, Transport, Anwendung','7: gleich wie OSI','5: Physik, Link, Internet, Transport, Anwendung','3: Link, Netz, Anwendung'],'Übliche Schulversion: Netzzugang (OSI 1–2), Internet (3), Transport (4), Anwendung (5–7).'],
+['pro1','ARP findet die MAC-Adresse zu einer IP. Wo wird ARP im OSI-Modell meist eingeordnet?',['Zwischen Schicht 2 und 3: es verknüpft IP- mit MAC-Adressen','Schicht 7','Schicht 4','Schicht 1'],'ARP arbeitet im lokalen Netz und verbindet Schicht-3- mit Schicht-2-Adressen. Lehrmittel ordnen es Schicht 2 oder «2/3» zu.'],
+// pro2
+['pro2','Welche Aussage passt zu TCP?',['Verbindungsorientiert; nutzt Bestätigungen und sendet verlorene Segmente erneut','Verbindungslos; keine Bestätigungen','Arbeitet auf Schicht 3','Ist immer schneller als UDP'],'TCP garantiert vollständige Übertragung in richtiger Reihenfolge durch Sequenznummern, ACKs und Neuübertragung. Der Preis sind Overhead und Verzögerung.'],
+['pro2','In welcher Reihenfolge läuft der TCP-Three-Way-Handshake ab?',['SYN → SYN-ACK → ACK','ACK → SYN → FIN','SYN → ACK → SYN-ACK','HELLO → OK → START'],'Der Client sendet SYN, der Server antwortet mit SYN-ACK, der Client bestätigt mit ACK. Danach fliessen die Daten.'],
+['pro2','Ein Videoanruf braucht ein Transportprotokoll. Welches und warum?',['UDP: ein neu gesendetes Paket käme zu spät, geringe Verzögerung ist wichtiger','TCP: jedes Bild muss ankommen, egal wie spät','TCP: UDP kann kein Audio übertragen','UDP: es verschlüsselt automatisch'],'Bei Echtzeit-Medien ist ein kurzer Aussetzer besser als ein Stocken, während auf eine Neuübertragung gewartet wird. Gespeicherte Videos (Streaming) laufen dagegen oft über TCP.'],
+['pro2','Welche Anwendung nutzt typischerweise TCP?',['Herunterladen einer Datei über HTTP oder FTP','Live-Telefonie (VoIP)','Positionsdaten in einem Online-Game','Eine einzelne DNS-Abfrage'],'Ein Download muss bitgenau ankommen und braucht deshalb die Zuverlässigkeit von TCP. Die anderen setzen auf Geschwindigkeit und nutzen UDP.'],
+['pro2','Was bietet UDP nicht?',['Garantierte Zustellung und richtige Reihenfolge','Portnummern','Eine Prüfsumme','Nutzdaten'],'UDP hat Ports und eine Prüfsumme, aber keinen Verbindungsaufbau, keine Bestätigungen und keine Neuübertragung. «Fire and forget».'],
+// pro3
+['pro3','Was macht DNS?',['Es übersetzt Domainnamen in IP-Adressen','Es vergibt IP-Adressen an Clients','Es findet MAC-Adressen zu IPs','Es verschlüsselt Webverkehr'],'DNS (Port 53) beantwortet Fragen wie «Welche IP hat example.com?».'],
+['pro3','Was macht DHCP?',['Es vergibt automatisch IP-Adresse, Subnetzmaske, Gateway und DNS-Server','Es übersetzt Namen in IP-Adressen','Es testet, ob ein Host erreichbar ist','Es überträgt Dateien'],'DHCP läuft nach DORA ab: Discover, Offer, Request, Acknowledge.'],
+['pro3','In welcher Reihenfolge läuft ein DHCP-Austausch ab?',['Discover → Offer → Request → Acknowledge','Request → Offer → Discover → Acknowledge','Offer → Discover → Acknowledge → Request','SYN → SYN-ACK → ACK'],'Merke «DORA». Der Client sendet Discover als Broadcast, weil er noch keine IP hat.'],
+['pro3','Welches Protokoll verwendet <code>ping</code>?',['ICMP (Echo Request / Echo Reply)','TCP','UDP','ARP'],'ICMP transportiert Steuer- und Fehlermeldungen. Ping sendet Echo Requests und wartet auf Echo Replies; auch tracert nutzt ICMP.'],
+['pro3','Was macht ARP?',['Es findet zu einer bekannten IP im lokalen Netz die passende MAC-Adresse','Es findet die IP-Adresse eines Domainnamens','Es vergibt IP-Adressen','Es routet Pakete zwischen Netzen'],'ARP fragt per Broadcast «Wer hat 192.168.1.1?», und der Besitzer antwortet mit seiner MAC. Ergebnisse werden zwischengespeichert (siehe arp -a).'],
+['pro3','<code>ping 8.8.8.8</code> funktioniert, aber <code>ping www.google.com</code> meldet, der Host sei nicht gefunden worden. Was ist die wahrscheinliche Ursache?',['DNS: die Namensauflösung schlägt fehl','Das Netzwerkkabel ist ausgesteckt','Das Standard-Gateway ist ausgefallen','Die Netzwerkkarte ist defekt'],'Eine Internet-IP zu erreichen beweist, dass Kabel, Gateway und Routing funktionieren. Nur die Namensauflösung klappt nicht, also die DNS-Einstellung prüfen.'],
+['pro3','Du kannst dein Standard-Gateway nicht anpingen, obwohl <code>ipconfig</code> eine gültige IP zeigt. Wo liegt das Problem?',['Im lokalen Netz: Kabel, WLAN, Switch oder das Gateway selbst','Im Internet','Beim DNS','Im Webbrowser'],'Fehlersuche von innen nach aussen: 127.0.0.1 → eigene IP → Gateway → externe IP → Domainname. Der erste fehlschlagende Schritt zeigt, wo das Problem liegt.'],
+['pro3','Welchen Port verwendet HTTPS standardmässig?',['443','80','21','53'],'HTTP 80, HTTPS 443, FTP 20/21, DNS 53, SSH 22, SMTP 25.'],
+['pro3','Wofür wird FTP verwendet und was ist seine Schwachstelle?',['Dateiübertragung; Zugangsdaten werden im Klartext gesendet','Namensauflösung; es ist langsam','Adressvergabe; es braucht Broadcasts','Fehlermeldungen; es kommt nicht durch Router'],'FTP nutzt Port 21 (Steuerung) und 20 (Daten) ohne Verschlüsselung. Sichere Alternativen sind SFTP oder FTPS.'],
+// hw1
+['hw1','Wie lang ist eine MAC-Adresse?',['48 Bit (6 Byte), geschrieben als 12 Hex-Ziffern','32 Bit, geschrieben als 4 Dezimalzahlen','128 Bit, geschrieben in Hex-Blöcken','16 Bit'],'Beispiel: 3C-52-82-1A-F0-07. 32 Bit ist IPv4, 128 Bit ist IPv6, 16 Bit ist eine Portnummer.'],
+['hw1','Welche dieser Angaben ist eine gültige MAC-Adresse?',['3C-52-82-1A-F0-07','192.168.1.1','3C-52-82-1G-F0-07','fe80::1'],'Hex-Ziffern gehen nur von 0–9 und A–F, «1G» ist also ungültig. 192.168.1.1 ist IPv4, fe80::1 ist IPv6.'],
+['hw1','Was geben die ersten 3 Byte einer MAC-Adresse an?',['Den Hersteller (OUI)','Das Netz, in dem das Gerät ist','Die Portnummer des Geräts','Die Subnetzmaske'],'Der Organizationally Unique Identifier wird dem Hersteller zugeteilt; die letzten 3 Byte sind gerätespezifisch.'],
+['hw1','Was identifiziert eine Portnummer?',['Die Anwendung bzw. den Dienst auf einem Host, z. B. 443 für HTTPS','Die Netzwerkkarte','Das Netz, zu dem ein Host gehört','Den Switch-Port, in dem das Kabel steckt'],'Die IP bringt das Paket zum richtigen Host, der Port zum richtigen Programm. Portnummern sind 16 Bit gross: 0–65535.'],
+['hw1','Welche Zuordnung stimmt?',['MAC: Schicht 2 · IP: Schicht 3 · Port: Schicht 4','MAC: Schicht 3 · IP: Schicht 2 · Port: Schicht 4','MAC: Schicht 1 · IP: Schicht 4 · Port: Schicht 7','MAC: Schicht 2 · IP: Schicht 4 · Port: Schicht 3'],'Physische Adresse auf Schicht 2, logische Adresse auf Schicht 3, Adresse der Anwendung auf Schicht 4.'],
+['hw1','Dein Laptop wechselt vom WLAN zu Hause ins WLAN der Schule. Welche Adresse ändert sich?',['Die IP-Adresse; die MAC-Adresse bleibt gleich','Die MAC-Adresse; die IP bleibt gleich','Beide ändern sich immer','Keine von beiden'],'Die MAC ist in der Netzwerkkarte gespeichert (manche Betriebssysteme wählen aus Datenschutzgründen pro WLAN eine zufällige). Die IP hängt vom Netz ab, in dem du bist.'],
+['hw1','Kommt deine MAC-Adresse bei einem Webserver im Internet an?',['Nein: jeder Router ersetzt den Schicht-2-Header bei jedem Hop','Ja, sie bleibt in jedem Paket','Nur bei HTTPS','Nur wenn NAT ausgeschaltet ist'],'MAC-Adressen gelten nur in einem lokalen Netzsegment. Die IP-Adressen bleiben von Ende zu Ende erhalten (abgesehen von NAT).'],
+// hw2
+['hw2','Welcher Windows-Befehl zeigt deine MAC-Adresse an?',['ipconfig /all','ipconfig /release','ping -t','tracert'],'Ein einfaches ipconfig zeigt sie nicht; /all listet die physische Adresse jedes Adapters. getmac funktioniert auch.'],
+['hw2','Wie ist die MAC-Adresse in der Ausgabe von <code>ipconfig /all</code> beschriftet?',['Physische Adresse («Physical Address»)','IPv4-Adresse','Standardgateway','DHCP-Server'],'Zum Beispiel: Physische Adresse . . . : 3C-52-82-1A-F0-07.'],
+['hw2','Was zeigt <code>arp -a</code>?',['Den ARP-Cache: die IP-zu-MAC-Zuordnungen, die dein PC gelernt hat','Alle MAC-Adressen der Welt','Deine Routing-Tabelle','Die offenen Ports deines PCs'],'Praktisch, um die MAC deines Gateways zu prüfen. route print zeigt die Routing-Tabelle, netstat die Verbindungen.'],
+['hw2','Mit welchem Befehl forderst du beim DHCP-Server eine neue IP-Adresse an?',['ipconfig /renew','ipconfig /all','ipconfig /flushdns','getmac'],'ipconfig /release gibt die Adresse ab, /renew fordert eine neue an. /flushdns leert den DNS-Cache.'],
+// hw3
+['hw3','Welches Übertragungsmedium ist unempfindlich gegen elektromagnetische Störungen?',['Lichtwellenleiter (Glasfaser)','Ungeschirmtes Twisted-Pair (UTP)','WLAN','Koaxialkabel'],'Glasfaser überträgt Licht statt Strom, darum können Motoren, Stromleitungen und Funk sie nicht stören.'],
+['hw3','Zwei Gebäude 2 km voneinander entfernt brauchen eine 10-Gbit/s-Verbindung. Welches Medium passt?',['Singlemode-Glasfaser','Cat6-Twisted-Pair','WLAN','Cat5e-Twisted-Pair'],'Twisted-Pair-Ethernet ist auf 100 m pro Segment begrenzt. Singlemode-Glasfaser schafft Kilometer bei hoher Bandbreite.'],
+['hw3','Wie lang darf ein Twisted-Pair-Ethernet-Segment maximal sein?',['100 m','10 m','500 m','2 km'],'90 m feste Verkabelung + 10 m Patchkabel. Für grössere Distanzen braucht es dazwischen einen Switch oder Glasfaser.'],
+['hw3','Warum sind die Adern in einem Twisted-Pair-Kabel verdrillt?',['Um Übersprechen und Störungen von aussen zu verringern','Damit das Kabel biegsamer ist','Um Kupfer zu sparen','Damit mehrere IP-Adressen möglich sind'],'Störungen treffen beide Adern eines Paares gleich stark und heben sich beim Empfänger auf.'],
+['hw3','Was ist der Unterschied zwischen STP und UTP?',['STP hat eine zusätzliche Schirmung und ist dadurch störfester','UTP ist schneller','STP ist Glasfaser, UTP ist Kupfer','Es gibt keinen Unterschied'],'Shielded Twisted Pair hat eine Folien- oder Geflechtschirmung um die Paare oder das ganze Kabel. Gut in der Nähe von Maschinen oder Stromleitungen.'],
+['hw3','Warum ist WLAN störanfälliger als ein Kabel?',['Es ist ein geteiltes Funkmedium: Wände, Distanz und andere Netze stören','Es nutzt Licht, das von Wänden ganz blockiert wird','Es hat keine MAC-Adressen','Es kann kein TCP verwenden'],'Alle Geräte auf einem Kanal teilen sich die Bandbreite, und Nachbarnetze, Mikrowellen und Baumaterialien senken den Durchsatz.'],
+['hw3','Welche Reihenfolge passt zur typischen Bandbreite und Stabilität im Alltag, das Beste zuerst?',['Glasfaser > Twisted-Pair > WLAN','WLAN > Glasfaser > Twisted-Pair','Twisted-Pair > WLAN > Glasfaser','Alle drei sind gleich'],'Glasfaser führt bei Bandbreite und Distanz, Kupfer ist stabil und günstig für Arbeitsplätze, WLAN tauscht Stabilität gegen Mobilität.']
+].map((r,i)=>({id:'q'+i,obj:r[0],cat:goalById[r[0]].cat,q:r[1],opts:r[2],correct:r[2][0],ex:r[3]}));
+
+/* Fragen aus der Telematik-Zusammenfassung (eigene IDs, damit gespeicherter Fortschritt gültig bleibt). */
+const Q2 = [
+// b1 Kommunikation & Netzausdehnung
+['b1','Walkie-Talkie: Beide können senden, aber nie gleichzeitig. Wie heisst diese Kommunikationsrichtung?',['Halbduplex','Simplex','Vollduplex','Multicast'],'Halbduplex: beide Richtungen, aber es sendet immer nur einer. Simplex = nur eine Richtung (Radio), Vollduplex = gleichzeitig in beide Richtungen (Telefon).'],
+['b1','Welches Beispiel ist Simplex?',['Radio','Telefon','Walkie-Talkie','Kommunikation zwischen zwei Servern'],'Beim Radio fliessen die Daten nur in eine Richtung; der Empfänger kann nicht antworten.'],
+['b1','Beim Telefonieren können beide gleichzeitig sprechen und hören. Das ist …',['Vollduplex','Halbduplex','Simplex','Broadcast'],'Vollduplex (Duplex): Beide senden und empfangen gleichzeitig. Auch Maschinen kommunizieren meist so.'],
+['b1','IPTV: Nur wer einen Sender schaut, erhält dessen Daten. Welches Prinzip ist das?',['Multicast','Unicast','Broadcast','Simplex'],'Multicast = einer an eine Gruppe. Unicast = einer an einen, Broadcast = einer an alle.'],
+['b1','Warum ist Multicast effizienter als mehrfacher Unicast?',['Dieselbe Information muss nicht mehrmals verschickt werden','Multicast ist automatisch verschlüsselt','Multicast braucht keine IP-Adressen','Multicast funktioniert nur über Glasfaser'],'Bei mehrfachem Unicast geht derselbe Datenstrom einzeln an jeden Empfänger. Multicast schickt ihn einmal an die Gruppe.'],
+['b1','Du rufst eine Webseite auf. Welches Prinzip ist das?',['Unicast','Multicast','Broadcast','Halbduplex'],'Einer an einen. Der grösste Teil der Kommunikation im Netz ist Unicast.'],
+['b1','AirPods, Smartphone und Smartwatch bilden ein …',['PAN (Personal Area Network)','LAN','MAN','CAN'],'PAN / WPAN: wenige Meter, wenige Teilnehmer.'],
+['b1','Mehrere Gebäude eines Schulcampus werden verbunden. Welcher Begriff passt?',['CAN (Campus Area Network)','PAN','GAN','BAN'],'Ein CAN verbindet mehrere Gebäude eines Campus, z. B. zwei Schulstandorte. (CAN kann auch Controller Area Network im Auto heissen, das ist hier nicht gemeint.)'],
+['b1','Was ist beim WAN entscheidend?',['Die grosse geografische Ausdehnung','Die Anzahl Teilnehmer','Dass es kabellos ist','Dass es genau einen Router hat'],'Ein WAN verbindet mehrere LANs über grosse Distanzen, meist bereitgestellt vom ISP. Oft meint man damit «alles hinter dem Router».'],
+['b1','Wofür steht BAN?',['Body Area Network: ein Netz am Körper','Broadband Access Network','Backbone Area Network','Basic Area Network'],'Ein BAN verbindet Geräte am Körper, z. B. Sensoren. Es ist noch kleiner als ein PAN.'],
+['b1','Welches Medium wird für Unterseekabel verwendet?',['Lichtwellenleiter (Glasfaser)','Kupferkabel','Funk','Infrarot'],'Glasfaser ist sehr schnell über grosse Distanzen und unempfindlich gegen elektrische Störungen.'],
+['b1','Welcher Nachteil von Glasfaser wird in der Zusammenfassung genannt?',['Sie ist empfindlich und bricht bei zu starker Biegung','Sie ist anfällig für elektrische Störungen','Sie ist langsamer als Kupfer','Sie reicht nur wenige Meter'],'Glasfaser überträgt Licht. Elektrische Störungen machen ihr nichts, mechanisch ist sie aber empfindlich.'],
+['b1','Warum muss Funkübertragung verschlüsselt werden?',['Alle in Reichweite können mithören','Funk ist sonst zu langsam','Ohne Verschlüsselung gibt es keine IP-Adressen','Weil Funk über Glasfaser läuft'],'Das Medium ist die Luft. Jeder Empfänger in Reichweite bekommt die Signale mit.'],
+['b1','Wofür eignet sich ein klassisches Kupfer-Netzwerkkabel typischerweise?',['Serverräume und Bürogebäude','Unterseekabel','Verbindungen zwischen Städten','Mobile Geräte'],'Kupferkabel (8 Adern) ist zuverlässig und bewährt. Nachteil: Das Verlegen ist teuer und aufwändig, besonders nachträglich.'],
+// net2 zusätzliche Topologien
+['net2','Bei welcher Topologie betrifft eine Störung am gemeinsamen Kabel alle Geräte?',['Bus','Stern','Vollmasche','Baum'],'Beim Bus hängen alle am selben Kabel. Mehr Geräte machen das Netz zudem langsamer.'],
+['net2','Ring-Topologie ohne Redundanz: Was passiert, wenn ein Gerät ausfällt?',['Der ganze Ring fällt aus','Nur dieses Gerät ist betroffen','Die Daten laufen automatisch über das Internet','Der Switch übernimmt'],'Im Ring leitet jedes Gerät fremde Daten weiter und braucht mindestens 2 Anschlüsse. Zum Erweitern muss der Ring unterbrochen werden.'],
+['net2','Welche Topologie ist heute der Standard im LAN?',['Stern mit einem Switch in der Mitte','Bus','Ring','Vollmasche'],'Neue Geräte sind einfach hinzuzufügen, und der Ausfall eines Teilnehmers stört den Rest nicht.'],
+['net2','Was ist eine Hybrid-Topologie?',['Eine Mischung mehrerer Topologien','Eine Topologie nur für WLAN','Ein Ring aus Glasfaser','Ein Netz ohne Router'],'Hybrid kombiniert Vorteile und erfüllt Anforderungen am besten, ist aber komplex und hat Fehlerpotenzial an den Schnittstellen.'],
+['net2','Was ist ein Vorteil der Baumtopologie?',['Sie vereinfacht die Fehlersuche und ist sehr gut skalierbar','Sie braucht keine Switches','Sie ist vollständig ausfallsicher','Alle Geräte hängen an einem Kabel'],'Der Baum ist hierarchisch in Untergruppen unterteilt; wichtige Geräte wie Server liegen weiter oben.'],
+// b2 Bits, Bytes & Präfixe
+['b2','Wie viele Werte kann ein Byte darstellen?',['256 (0 bis 255)','255','128','8'],'1 Byte = 8 Bit, 2^8 = 256 Zustände. Weil die 0 mitzählt, ist der Höchstwert 255.'],
+['b2','Was ist ein Nibble?',['4 Bit, also genau eine Hexadezimalstelle','8 Bit','Ein einzelnes Bit','2 Byte'],'Ein Nibble (Halbbyte) hat 16 Zustände, genau so viele wie eine Hexstelle (0 bis F).'],
+['b2','Wie nennt man ein einzelnes Bit, das eine Ja/Nein-Information speichert?',['Flag','Nibble','Oktett','Frame'],'Flag heisst Fahne, wie der Hebel am amerikanischen Briefkasten, der anzeigt, ob Post da ist.'],
+['b2','1 KiB entspricht …',['1024 Byte','1000 Byte','1024 Bit','1000 Bit'],'Binärpräfixe arbeiten in 1024er-Schritten (Kibi, Mebi, Gibi …), SI-Präfixe in 1000er-Schritten (kilo, Mega, Giga …).'],
+['b2','Warum zeigt das Betriebssystem bei einer «1-TB-Festplatte» nur rund 931 GiB an?',['Der Hersteller rechnet in 1000er-Schritten (TB), das System in 1024er-Schritten (GiB)','Ein Teil der Festplatte ist defekt','Das Betriebssystem belegt 69 GB','Die Festplatte ist komprimiert'],'10^12 Byte geteilt durch 1024³ ergibt rund 931 GiB. Es fehlt kein Byte, nur die Einheit ist eine andere.'],
+['b2','Wie viele Farben ergeben je ein Byte für Rot, Grün und Blau?',['256 × 256 × 256, rund 16,8 Millionen','3 × 256 = 768','65 536','24'],'Jeder Kanal hat 256 Stufen. Beispiel: 238 39 245 ist ein kräftiges Pink-Violett.'],
+['b2','Im ASCII-Code steht der Bytewert 32 für …',['das Leerzeichen','den Buchstaben A','die Ziffer 3','das Zeilenende'],'72 97 108 108 111 32 87 101 108 116 ergibt «Hallo Welt». Das A ist 65.'],
+['b2','Welches Binärpräfix gehört zu «Mega»?',['Mebi (MiB)','Megi (MgB)','Mibi (MbB)','Mega2 (M2B)'],'Erste Buchstaben des SI-Präfixes plus «bi»: Kibi, Mebi, Gibi, Tebi, Pebi.'],
+['b2','Warum arbeiten Computer mit Bits?',['Der Zustand Ein/Aus lässt sich elektronisch am einfachsten speichern','Bits sind schneller als Bytes','Weil Strom nur zwei Farben hat','Weil Hexadezimal zu kompliziert ist'],'Ein Bit ist wie ein Lichtschalter: Ein/Aus, True/False, 1/0.'],
+['b2','1 048 576 Byte sind genau …',['1 MiB (= 1024 KiB)','1 MB','1000 KiB','1 GiB'],'1024 × 1024 = 1 048 576. In SI sind das rund 1,05 MB.'],
+// b3 Zahlensysteme
+['b3','Welche Angabe ist eine gültige Hexadezimalzahl?',['AFFE','AFGE','12Z4','HEX9'],'Hex-Ziffern: 0 bis 9 und A bis F. AFFE = 45 054 dezimal.'],
+['b3','Wie viele Werte lassen sich mit 3 Hexstellen darstellen?',['4096 (0 bis 4095)','48','3000','256'],'Werte pro Stelle hoch Anzahl Stellen: 16³ = 4096.'],
+['b3','Bei der Umrechnung binär → hex gruppierst du die Bits …',['von rechts in 4er-Gruppen (Nibbles)','von links in 4er-Gruppen','in 8er-Gruppen','in 3er-Gruppen'],'Fehlende Stellen links mit Nullen auffüllen. Jede 4er-Gruppe ist genau eine Hexstelle.'],
+['b3','Was ergibt in Python hex(255)?',["'0xff'","'255'","'0b11111111'","'FF16'"],'bin(x) liefert Binär mit 0b-Präfix, hex(x) Hex mit 0x-Präfix.'],
+['b3',"Was ergibt in Python int('F0', 16)?",['240','15','160','F0'],'int(s, basis) wandelt aus einer beliebigen Basis in dezimal. F0 = 15 × 16 = 240.'],
+['b3','Wie viele Werte lassen sich mit 3 Binärstellen darstellen?',['8 (0 bis 7)','3','9','6'],'2³ = 8. Der Höchstwert ist immer eins tiefer als die Anzahl Werte, weil die 0 mitzählt.'],
+['b3','Woran erkennst du sofort, dass 0110\'0011 kleiner als 128 und ungerade ist?',['Erstes Bit 0 → kleiner als 128; letztes Bit 1 → ungerade','Am Nibble in der Mitte','Gar nicht, man muss rechnen','Weil es 8 Stellen hat'],'Das ist die Eingrenzung aus der Zusammenfassung. 0110\'0011 = 64 + 32 + 2 + 1 = 99.'],
+['b3','Was ergibt in Python ord(\'A\')?',['65','1','41','97'],'ord(c) liefert den ASCII-Wert eines Zeichens. Kleines a wäre 97.'],
+// b4 Bool
+['b4','Was gilt für UND (AND)?',['Der Ausgang ist nur 1, wenn alle Eingänge 1 sind','Der Ausgang ist 1, wenn mindestens ein Eingang 1 ist','Der Ausgang ist das Gegenteil des Eingangs','Der Ausgang ist immer 1'],'Beispiel: Die LED leuchtet nur, wenn alle Fenster geschlossen sind.'],
+['b4','Für den Lernfahrausweis braucht man Sehtest und Nothelferkurs. Welche Verknüpfung ist das?',['UND','ODER','NICHT','Keine'],'Beide Bedingungen müssen erfüllt sein. Glace mit Geld ODER Gutschein wäre ein ODER.'],
+['b4','Welches Zeichen steht für ODER?',['∨','∧','&','!'],'ODER = ∨ (ein V). UND = ∧ (ein A ohne Querstrich, A wie AND).'],
+['b4','Warum ergibt ~1 in Python den Wert -2 und nicht 0?',['~ invertiert alle Bits der Ganzzahl, nicht nur eines','Das ist ein Fehler in Python','~ ist der Minus-Operator','~ rechnet in Hexadezimal'],'Für ein einzelnes Bit verwendest du not oder 1 - x.'],
+['b4','Welcher Python-Operator ist das bitweise UND?',['&','and','&&','∧'],'Logisch: and, or, not. Bitweise: &, |, ~. In SQL: AND, OR, NOT.'],
+['b4','Wie zeigt ein Schaltbild die Negation (NICHT) an?',['Mit einem kleinen Kreis am Ausgang','Mit einem Pfeil','Mit einem doppelten Strich','Mit einem Stern'],'In der Funktionsgleichung steht ein Querstrich über der Variablen, in Python not bzw. !.'],
+// ip6 Maskenregeln & Supernetting
+['ip6','Welche Werte darf ein Oktett einer Subnetzmaske haben?',['0, 128, 192, 224, 240, 248, 252, 254, 255','Jeden Wert von 0 bis 255','Nur 0 und 255','Nur gerade Zahlen'],'Alle Einsen stehen links am Stück. Deshalb sind nur diese neun Werte möglich.'],
+['ip6','Welche Subnetzmaske ist ungültig?',['255.255.0.255','255.255.254.0','255.255.255.252','255.0.0.0'],'Nach einer 0 darf keine 1 mehr folgen. 255.255.0.255 hat wieder Einsen nach den Nullen.'],
+['ip6','Was ist Supernetting?',['Weniger Einsen in der Maske: ein grösseres Netz mit mehr Hosts','Mehr Einsen in der Maske: mehr, kleinere Netze','Ein Netz mit IPv6','Mehrere Router hintereinander'],'Subnetting = mehr Einsen, mehr Netze. Supernetting = weniger Einsen, grössere Netze.'],
+['ip6','Aus 192.168.0.0/24 wird 192.168.0.0/23. Welcher Host-Bereich gilt jetzt?',['192.168.0.1 bis 192.168.1.254','192.168.0.1 bis 192.168.0.254','192.168.0.1 bis 192.168.2.254','192.168.0.1 bis 192.168.0.127'],'Ein Maskenbit weniger verdoppelt das Netz: 512 Adressen, Maske 255.255.254.0.'],
+['ip6','Was ist die einzige Aufgabe der Subnetzmaske?',['Sie zeigt, wo der Netzteil endet und der Hostteil beginnt','Sie verschlüsselt die IP-Adresse','Sie legt die MAC-Adresse fest','Sie bestimmt den DNS-Server'],'Bits mit 1 in der Maske gehören zum Netzteil, Bits mit 0 zum Hostteil.'],
+['ip6','Wann können zwei Geräte direkt (ohne Router) kommunizieren?',['Wenn ihr Netzteil gleich und ihr Hostteil verschieden ist','Wenn ihr Hostteil gleich ist','Wenn sie dieselbe MAC-Adresse haben','Wenn sie dieselbe IP-Adresse haben'],'Netzteil = Ort/Strasse, Hostteil = Hausnummer. Gleiche Strasse, verschiedene Hausnummern.'],
+['ip6','172.16.42.37 mit Maske 255.255.0.0: Was ist der Hostteil?',['42.37','172.16','37','16.42.37'],'Die Maske hat die ersten 2 Oktette auf 255, also ist 172.16 der Netzteil und 42.37 der Hostteil.'],
+['ip6','Ein Restaurant teilt 192.168.1.0/24 in Kunden- und Betriebsnetz. Welche zwei Netze entstehen mit /25?',['192.168.1.0/25 und 192.168.1.128/25','192.168.1.0/25 und 192.168.2.0/25','192.168.0.0/25 und 192.168.1.0/25','192.168.1.0/25 und 192.168.1.127/25'],'Hosts .1 bis .126 und .129 bis .254. Durch das Aufteilen «verliert» man Adressen für Netz-ID und Broadcast.'],
+['ip5','Welcher Bereich ist für Multicast reserviert?',['224.0.0.0/4','240.0.0.0/4','169.254.0.0/16','127.0.0.0/8'],'Multicast-Adressen dürfen nicht als Adresse eines einzelnen Geräts verwendet werden. 240.0.0.0/4 ist für zukünftige Zwecke reserviert.'],
+['ip5','Welche dieser Adressen ist öffentlich?',['192.169.3.3','192.168.2.22','10.10.5.9','172.16.5.9'],'192.169.x.x liegt knapp ausserhalb von 192.168.0.0/16 und ist deshalb öffentlich.'],
+['ip1','Welche Python-Anweisung liefert die nutzbaren Hosts eines Netzes net?',['list(net.hosts())','net.broadcast_address','net.subnets(new_prefix=26)','ipaddress.ip_address(net)'],'Das Modul ipaddress kennt network_address, broadcast_address, hosts() (ohne Netz-ID und Broadcast) und subnets().'],
+// ip7 DHCP & IP-Konzept
+['ip7','Was ist die Lease-Time bei DHCP?',['Die Gültigkeitsdauer einer vergebenen IP-Adresse','Die Zeit bis zur ersten Ping-Antwort','Die Dauer des TCP-Handshakes','Die Zeit, bis der DNS-Cache leer ist'],'Geräte verlängern die Lease automatisch. Ungenutzte Adressen werden spätestens nach Ablauf wieder frei.'],
+['ip7','Ein Drucker soll immer dieselbe IP bekommen, aber weiterhin per DHCP. Welche Methode passt?',['DHCP-Reservierung (IP-MAC-Bindung)','Eine längere Lease-Time','Ein zweiter DHCP-Server','NAT'],'Der DHCP-Server gibt einer bestimmten MAC-Adresse immer dieselbe IP.'],
+['ip7','Was liefert DHCP neben der IP-Adresse typischerweise?',['Subnetzmaske, Gateway und DNS-Server','MAC-Adresse und Portnummer','Nur die Uhrzeit','Das WLAN-Passwort'],'Das Gateway ist der Router, über den das Gerät ins Internet kommt.'],
+['ip7','Welche Adresse braucht der DHCP-Server selbst?',['Eine feste (statische) IP-Adresse','Eine Adresse per DHCP','Eine APIPA-Adresse','Gar keine'],'Der DHCP-Server ist meist ein Dienst auf einem Router oder Server und muss immer unter derselben Adresse erreichbar sein.'],
+['ip7','Warum lohnt sich ein IP-Konzept vor der Adressvergabe?',['Nachträgliche Änderungen an statischen Konzepten sind sehr aufwändig','DHCP funktioniert sonst nicht','Sonst gibt es keine Broadcasts','Ohne Konzept ist NAT verboten'],'Geräte nach Funktion, Benutzergruppe oder Standort gruppieren und Reserve für Wachstum einplanen.'],
+['ip7','Der DHCP-Server verteilt nur .100 bis .254. Wofür sind .1 bis .99?',['Für statische Adressen, die von Hand vergeben werden','Für Broadcasts','Für IPv6','Für das Gäste-WLAN'],'Nachteil dieser Methode: manueller Aufwand an jedem Gerät.'],
+['ip7','Welchen Vorteil hat DHCP neben der automatischen Vergabe?',['Es verhindert doppelt vergebene Adressen','Es verschlüsselt den Verkehr','Es ersetzt den Router','Es macht DNS überflüssig'],'Der Server weiss, welche Adressen schon vergeben sind.'],
+// ip8 Planung
+['ip8','Firma 200.100.50.0/24: pro Büro 14 Geräte plus Gateway. Welches Präfix und wie viele Büros sind möglich?',['/27 mit 30 Hosts, 8 Büros','/28 mit 14 Hosts, 16 Büros','/26 mit 62 Hosts, 4 Büros','/29 mit 6 Hosts, 32 Büros'],'14 Geräte + Gateway = 15 Adressen. /28 hat nur 14 Hosts, also braucht es /27 mit 30 Hosts. 2^3 = 8 solche Netze in einem /24.'],
+['ip8','Was musst du bei der Subnetzplanung immer einrechnen?',['Die Adresse fürs Gateway und Reserve für Wachstum','Die MAC-Adressen der Geräte','Die Portnummern','Die Grösse des DNS-Caches'],'Netz-ID und Broadcast sind nie für Geräte nutzbar, und das Gateway braucht in jedem Subnetz eine eigene Adresse.'],
+// hw1 MAC zusätzlich
+['hw1','Ein Laptop hat einen LAN- und einen WLAN-Adapter. Wie viele MAC-Adressen hat er?',['Zwei: jeder Netzwerkadapter hat eine eigene','Eine pro Gerät','Keine, nur IP-Adressen','So viele wie offene Ports'],'Die MAC-Adresse gehört zum Adapter, nicht zum Gerät.'],
+['hw1','Warum verwenden Smartphones randomisierte MAC-Adressen?',['Um Tracking zu verhindern','Um schneller zu surfen','Weil es zu wenige MAC-Adressen gibt','Damit NAT funktioniert'],'Beim Aufbau einer WLAN-Verbindung sendet das Gerät seine MAC ständig aus. Apps dürfen die echte MAC zudem nicht auslesen.'],
+['hw1','Wie findest du heraus, von welchem Hersteller eine Netzwerkkarte stammt?',['Über die OUI (erste 3 Bytes), z. B. mit macvendors.com','Mit ping -a','Über die letzten 3 Bytes','Mit nslookup'],'Das hilft bei der Fehlersuche, wenn ein unbekanntes Gerät im Netz auftaucht.'],
+['hw1','Was passiert bei doppelten MAC-Adressen im selben Netz?',['Es entstehen schwer auffindbare Fehler','Nichts, das ist normal','Der Router vergibt automatisch eine neue','Das WLAN wird schneller'],'Der Switch weiss nicht mehr, an welchen Port er Frames schicken soll.'],
+['hw1','Welche Schreibweise einer MAC-Adresse ist gültig?',['11:22:33:44:55:66','11.22.33.44','11-22-33','1122:3344'],'Üblich sind 11-22-33-44-55-66 und 11:22:33:44:55:66, selten 11.22.33.44.55.66 oder 112233445566. Immer 6 Bytes.'],
+['hw1','Wie wird eine IP-Adresse vergeben, wie eine MAC-Adresse?',['IP: logisch (statisch oder per DHCP) · MAC: vom Hersteller fest','IP: vom Hersteller · MAC: per DHCP','Beide per DHCP','Beide vom Hersteller'],'IP-Adressen gelten netzübergreifend (Routing), MAC-Adressen nur im lokalen Netz.'],
+// net4 Komponenten
+['net4','Was macht ein Hub?',['Er gibt alles an allen Ports aus, wie eine Steckdosenleiste (Schicht 1)','Er leitet Daten nur an den richtigen Port','Er verbindet verschiedene Netzwerke','Er filtert nach Ports'],'Hubs sind veraltet. Ein Switch bietet mehr Datenschutz, schnellere Netze und weniger unnötigen Verkehr.'],
+['net4','Auf welchen OSI-Schichten arbeitet eine Netzwerkkarte (NIC)?',['1 bis 2','Nur 3','Nur 4','Nur 7'],'Die NIC kennt Stecker, Pinbelegung und Spannungspegel und hat die MAC-Adresse. WNIC = WLAN-Karte, z. B. als USB-Stick.'],
+['net4','Was bedeutet PoE?',['Power over Ethernet: Strom und Daten über dasselbe Kabel','Port over Ethernet','Ein Glasfaser-Modul','Priorität für E-Mails'],'Praktisch für IP-Telefone und Access Points. PoE-Switches sind teurer und lohnen sich nur mit PoE-Geräten.'],
+['net4','Wofür wird ein SFP-Port typischerweise genutzt?',['Für Module, z. B. Glasfaser zwischen Switches','Für USB-Sticks','Für die Stromversorgung','Für die Konsole'],'RJ-45 ist der normale Ethernet-Anschluss, SFP nimmt Module auf.'],
+['net4','Ein Non-Blocking-Switch hat 16 Ports à 1 Gbit/s im Vollduplex. Welche Gesamtleistung braucht er?',['32 Gbit/s','16 Gbit/s','1 Gbit/s','8 Gbit/s'],'16 Ports × 1 Gbit/s × 2 Richtungen = 32 Gbit/s, damit alle Ports gleichzeitig voll laufen können.'],
+['net4','Was unterscheidet einen managed von einem unmanaged Switch?',['Ein managed Switch lässt sich konfigurieren','Ein unmanaged Switch ist schneller','Nur managed Switches haben eine MAC-Tabelle','Ein unmanaged Switch braucht eine IP-Adresse'],'In Firmen sind managed Switches Standard. Unmanaged funktioniert einfach nach dem Einstecken.'],
+['net4','Welche Switch-Geschwindigkeit ist heute Standard zuhause und in kleinen Firmen?',['1 Gbit/s','10 Mbit/s','100 Gbit/s','400 Gbit/s'],'10 Gbit/s für Verbindungen zwischen Switches, 25 bis 400 Gbit/s in Rechenzentren und bei ISPs.'],
+['net4','Access Point oder WLAN-Repeater: Was stimmt?',['Ein AP hängt per Kabel am LAN und ist stabiler; ein Repeater empfängt das WLAN und sendet es weiter','Ein Repeater ist stabiler als ein AP','Ein AP braucht kein Kabel','Beide arbeiten auf Schicht 3'],'Repeater eher temporär oder privat (Gartenhäuschen), APs professionell, oft zentral über einen Wireless Controller verwaltet.'],
+['net4','Ab wie vielen Netzwerk-Ports ist ein Router sinnvoll?',['2','1','8','24'],'Mit 2 Ports verbindet er zwei Netze. USB, Console oder AUX sind keine Netzwerkanschlüsse.'],
+['net4','Was steckt in einem typischen Heimrouter?',['Router, Switch, Access Point und Modem, dazu DHCP und Firewall','Nur ein Router','Ein Server und ein Drucker','Nur ein Modem'],'Solche Kombigeräte vereinen mehrere Komponenten in einem Gehäuse.'],
+['net4','Merksatz: Switches verbinden …, Router verbinden …',['Geräte · Netzwerke','Netzwerke · Geräte','Kabel · Funk','Ports · Sockets'],'Daten für ein anderes Netz schickt der Switch an den Router.'],
+['net4','Woher kennt ein Switch die Ziel-MAC-Adresse eines Frames?',['Aus dem Ethernet-Header','Aus dem IP-Header','Vom DNS-Server','Aus der Portnummer'],'Er vergleicht sie mit seiner MAC-Adresstabelle und schickt den Frame nur an den passenden Port.'],
+// net5 Firewall
+['net5','Was ist der Grundsatz einer Firewall?',['Verkehr nach draussen erlauben, Verkehr von aussen nach innen blockieren','Alles erlauben','Alles blockieren','Nur UDP erlauben'],'Ausnahmen werden über Ports, IP-Adressen oder kombinierte Bedingungen definiert.'],
+['net5','Was bedeutet Whitelist?',['Alles Aufgelistete ist erlaubt, der Rest verboten','Alles Aufgelistete ist verboten, der Rest erlaubt','Alle IP-Adressen sind erlaubt','Nur weisse Kabel sind erlaubt'],'Blacklist ist das Gegenteil: Aufgelistetes verboten, Rest erlaubt.'],
+['net5','Für welche Richtung setzt man typischerweise eine Whitelist ein?',['Von unsicher (Internet) nach sicher','Von sicher nach unsicher','Innerhalb des LANs','Nur für WLAN'],'Von aussen kommt nur durch, was ausdrücklich erlaubt ist. Für sicher nach unsicher genügt meist eine Blacklist.'],
+['net5','Wozu dient eine DMZ?',['Eine weniger geschützte Zone, z. B. für einen Webserver, während das interne Netz geschützt bleibt','Sie verschlüsselt das WLAN','Sie ersetzt den DHCP-Server','Sie beschleunigt das Routing'],'Mehrstufige Firewalls schaffen unterschiedlich stark geschützte Zonen. Kleinere Firmen nutzen eine Firewall mit DMZ-Anschluss.'],
+['net5','Auf welchen OSI-Schichten arbeitet eine Firewall typischerweise?',['3 bis 4 (teils bis 7)','Nur 1','Nur 2','Nur 7'],'Sie filtert nach IP-Adressen (Layer 3) und Ports (Layer 4), moderne Firewalls auch nach Anwendung.'],
+['net5','Wo steht eine Firewall meistens?',['Zwischen zwei Netzen, meist direkt nach dem Router','Zwischen PC und Bildschirm','Im DNS-Server','Hinter jedem Switch-Port'],'Sie überwacht den Verkehr zwischen dem schützenswerten Bereich und dem unsicheren Internet.'],
+// pro1 zusätzlich
+['pro1','Deutsche Eselsbrücke für die OSI-Schichten von 7 nach 1?',['Alle Deutschen Studenten Trinken Verschiedene Sorten Bier','Please Do Not Throw Sausage Pizza Away','Alle Pinguine Sind Total Nett','Der Router Sendet Immer Pakete'],'Englisch von 7 nach 1: All People Seem To Need Data Processing.'],
+['pro1','Wie heissen die Dateneinheiten auf Layer 2, 3 und 4?',['Frame · Paket · Segment','Paket · Frame · Segment','Segment · Paket · Frame','Bit · Byte · Frame'],'Layer 1 überträgt Bits, Layer 2 Frames (MAC), Layer 3 Pakete (IP), Layer 4 Segmente (Port).'],
+['pro1','Ein typisches Problem auf Layer 1 ist …',['ein defektes Kabel','ein blockierter Port','ein Fehler in der Applikation','ein Router-Ausfall'],'Layer 2: defekter Switch. Layer 3: Router-Ausfall. Layer 4: blockierter Port. Layer 7: Fehler in der Applikation.'],
+['pro1','Ein blockierter Port ist ein typisches Problem auf …',['Layer 4','Layer 1','Layer 2','Layer 7'],'Ports gehören zur Transportschicht. Das passende Gerät ist die Firewall.'],
+['pro1','Wer übernimmt in modernen Protokollen oft die Aufgaben von Layer 5 und 6?',['Layer 7, also die Applikation','Layer 1','Der Switch','Der Router'],'Darstellung (Kodierung, Verschlüsselung) und Sitzungsverwaltung erledigt heute oft die Anwendung selbst.'],
+['pro1','Wie gehst du bei der Fehlersuche mit dem OSI-Modell vor?',['Systematisch, von unten nach oben oder von oben nach unten','Wahllos verschiedene Ideen ausprobieren','Immer zuerst den Router neu starten','Nur Layer 7 prüfen'],'Zum Beispiel Kabel, dann Switch, dann Router, oder zuerst Browser bzw. Applikation.'],
+// pro4 Kapselung & HTTP
+['pro4','Was ist Kapselung?',['Beim Sender fügt jede Schicht von 7 nach 1 ihren Header hinzu','Beim Empfänger entfernt jede Schicht ihren Header','Die Verschlüsselung der Daten','Die Komprimierung der Daten'],'Beim Empfänger läuft es umgekehrt von 1 nach 7: Entkapselung.'],
+['pro4','Was fügt Layer 3 hinzu?',['Quell- und Ziel-IP-Adresse','Die Portnummern','Die MAC-Adressen','Die HTTP-Header'],'Daraus entsteht ein IP-Paket. Der Header ist 20 bis 60 Byte gross und enthält u. a. Version, Länge, TTL, Protokoll und Prüfsumme.'],
+['pro4','Was fügt Layer 2 hinzu?',['MAC-Adressen im Header und eine Prüfsumme im Trailer','IP-Adressen','Portnummern','Sequenznummern'],'Daraus entsteht ein Ethernet- oder WLAN-Frame.'],
+['pro4','Was fügt Layer 4 hinzu?',['Die Portnummern','Die IP-Adressen','Die MAC-Adressen','Nichts'],'Daraus entsteht ein TCP-Segment.'],
+['pro4','Im IP-Header steht beim Feld «Protokoll» eine 6. Was steckt im Paket?',['TCP','UDP','ICMP','HTTP'],'6 = TCP, 17 = UDP.'],
+['pro4','Bis zu welcher Schicht liest ein Router ein Paket?',['Bis Layer 3, um die Ziel-IP zu kennen','Nur Layer 2','Bis Layer 7','Nur Layer 1'],'Netzwerkgeräte lesen nur so tief wie nötig. Ein Switch liest nur den Ethernet-Header.'],
+['pro4','Jede Schicht liest nur die Informationen …',['ihrer Partnerschicht; den Rest behandelt sie als Nutzdaten','aller Schichten','der Schicht darüber','der Schicht darunter'],'So bleiben die Schichten unabhängig voneinander.'],
+['pro4','Du gibst eine URL ein. Was passiert zuerst?',['Die DNS-Abfrage: Name → IP-Adresse','Der TCP-Handshake','Die HTTP-Anfrage','Der Browser rendert HTML'],'Danach folgen TCP-Handshake, HTTP-Anfrage in TCP-Segmenten, IP-Paket, Frame, Routing bis zum Server und die Antwort, z. B. 200 OK.'],
+['pro4','Womit enden die Zeilen einer HTTP-Anfrage?',['\\r\\n (Carriage Return und Line Feed)','; (Semikolon)','\\0 (Nullbyte)','</end>'],'\\r = Wagenrücklauf, \\n = Zeilenvorschub. Eine einfache Anfrage: GET / HTTP/1.1 mit Host-Header.'],
+['pro4','Warum ist bei Loopback-Verkehr (127.0.0.1) in Wireshark keine MAC-Adresse sichtbar?',['Die Daten verlassen den Rechner nie und werden in keinen Ethernet-Frame verpackt','HTTP braucht keine MAC-Adresse','Wireshark blendet MAC-Adressen aus','Loopback läuft immer über IPv6'],'Zum Mitschneiden wählst du in Wireshark den Loopback-Adapter.'],
+['pro4','Welcher HTTP-Header nennt Browser und Betriebssystem?',['User-Agent','Accept-Language','Accept-Encoding','Host'],'Accept = akzeptierte Inhaltstypen, Accept-Encoding = Kompression (z. B. gzip), Accept-Language = bevorzugte Sprache.'],
+// pro2 zusätzlich
+['pro2','Was bedeutet «gesichert» bei TCP?',['Man weiss sicher, ob die Daten angekommen sind; verschlüsselt ist nichts','Die Daten sind verschlüsselt','Die Daten sind komprimiert','Die Verbindung hat ein Passwort'],'TCP garantiert Zustellung und Reihenfolge, nicht Vertraulichkeit.'],
+['pro2','Welche Felder hat der UDP-Header?',['Quellport, Zielport, Länge, Checksumme','Sequenz- und Quittierungsnummer','Quell- und Ziel-MAC','Nur die Ziel-IP'],'Der kleine Header macht UDP schnell. TCP hat einen grossen Header mit vielen Feldern.'],
+['pro2','Welcher Python-Socket-Typ steht für TCP?',['socket.SOCK_STREAM','socket.SOCK_DGRAM','socket.SOCK_TCP','socket.AF_INET'],'SOCK_DGRAM (Datagramm) steht für UDP. AF_INET bedeutet IPv4.'],
+['pro2','Welche Anwendung nutzt laut Zusammenfassung UDP?',['DNS und Echtzeitanwendungen wie Cursor-Positionen','E-Mail','Dokumente herunterladen','Webseiten laden'],'Webseiten, Bilder, Dokumente und E-Mail laufen über TCP.'],
+// pro5 TCP-Details, Ports, Sockets
+['pro5','Wie wird eine TCP-Verbindung abgebaut?',['Jede Seite sendet FIN und bestätigt das FIN der anderen mit ACK','Mit einem einzigen SYN','Mit SYN-ACK','Gar nicht, sie läuft einfach ab'],'Gleiches Prinzip wie der Aufbau, aber mit FIN statt SYN.'],
+['pro5','Wozu dient die Sequenznummer im TCP-Header?',['Sie nummeriert die Pakete, damit die Reihenfolge wiederhergestellt werden kann','Sie ordnet die Daten einer Applikation zu','Sie verschlüsselt die Daten','Sie enthält die MAC-Adresse'],'Die Quittierungsnummer bestätigt beim ACK den Empfang einer bestimmten Sequenznummer.'],
+['pro5','Was ist eine halboffene TCP-Verbindung?',['Eine Seite ist abgestürzt, die andere hält die Verbindung noch für offen','Eine Verbindung mit nur einem SYN','Eine UDP-Verbindung','Eine verschlüsselte Verbindung'],'Keep-Alive-Pakete prüfen, ob die Gegenseite noch da ist. Darum Verbindungen immer sauber schliessen.'],
+['pro5','Warum braucht es beim TCP-Aufbau drei Schritte?',['Daten müssen nachweislich in beide Richtungen fliessen können','Damit die Verbindung verschlüsselt ist','Weil es drei Schichten gibt','Damit DNS funktioniert'],'SYN, SYN/ACK, ACK: Jede Seite meldet sich an und bestätigt die andere.'],
+['pro5','Was passiert mit den Ports in der Antwort des Servers?',['Quell- und Zielport werden vertauscht','Beide werden auf 80 gesetzt','Sie werden gelöscht','Sie bleiben gleich'],'Der Client schickt von seinem dynamischen Port an z. B. Port 80; die Antwort geht von 80 an diesen dynamischen Port.'],
+['pro5','Was ist ein Socket?',['IP-Adresse + Portnummer','MAC-Adresse + IP-Adresse','Ein Netzwerkkabel','Ein DNS-Eintrag'],'Eine Applikation registriert beim Betriebssystem einen Socket, um Daten zu empfangen.'],
+['pro5','Fehlermeldung «Port already in use». Was ist los?',['Ein anderes Programm oder dein eigenes doppelt belegt diesen Socket schon','Das Kabel ist defekt','Der DNS-Server antwortet nicht','Die Firewall blockiert alles'],'Ein Socket kann nicht mehrfach belegt werden. Lösung: anderes Programm beenden oder anderen Port wählen.'],
+['pro5','Welche Ports sind die Well-known Ports?',['0 bis 1023','1024 bis 49151','49152 bis 65535','0 bis 255'],'Ports ab 49152 sind dynamische Ports.'],
+['pro5','Welchen Port wählst du für einen eigenen Testserver?',['Einen über 1023, z. B. 5000 oder 9999','80','22','0'],'Die Ports bis 1023 sind für bekannte Dienste reserviert.'],
+['pro5','Welcher Socket-Aufruf löst beim Client den Three-Way-Handshake aus?',['.connect()','.bind()','.listen()','.recv()'],'Client: socket(), connect(), send()/recv(), close().'],
+['pro5','Welche Reihenfolge gilt beim Server?',['socket() → bind() → listen() → accept()','socket() → connect() → send()','bind() → socket() → accept() → listen()','listen() → bind() → socket() → accept()'],'Danach recv()/send() und zum Schluss close().'],
+['pro5','Welchen Quellport verwendet ein Client meistens?',['Einen zufälligen dynamischen Port aus einem freien Vorrat','Immer 80','Immer denselben wie den Zielport','Port 0'],'Den Zielport muss der Client kennen; den eigenen Quellport wählt das Betriebssystem.'],
+['pro5','IP-Adresse = Hausadresse. Was ist dann der Port?',['Die Wohnungsnummer im Hochhaus','Die Postleitzahl','Der Briefträger','Die Strasse'],'Der Port ordnet ankommende Daten dem richtigen Prozess bzw. der richtigen Applikation zu.'],
+['pro5','Warum arbeitet ein Chat-Client mit zwei Threads?',['Er muss gleichzeitig Eingaben senden und Nachrichten empfangen','TCP braucht zwei Verbindungen','Einer für IPv4, einer für IPv6','Damit die Firewall offen bleibt'],'Der Server startet für jeden Client einen eigenen Thread. Echt gleichzeitig läuft es nur mit mehreren CPU-Kernen.'],
+['pro5','Ein Kollege erreicht deinen Python-Server nicht. Was ist die richtige Lösung?',['In der Firewall gezielt den TCP-Port freigeben','Die Firewall ganz abschalten','Den Router neu starten','Die MAC-Adresse ändern'],'Ob der Server läuft, prüfst du mit netstat -an | find "TCP".'],
+// pro3 zusätzlich
+['pro3','Welchen Port nutzt Telnet und warum gilt es als veraltet?',['TCP 23; Befehle laufen unverschlüsselt als Text','TCP 22; zu langsam','UDP 53; nur für DNS','TCP 443; zu teuer'],'Die sichere Alternative ist SSH auf TCP 22.'],
+['pro3','Welchen Port nutzen SSH und SFTP?',['TCP 22','TCP 21','TCP 23','UDP 53'],'SFTP = verschlüsselte Dateiübertragung über SSH.'],
+['pro3','Woher bekommt ein Rechner meist die Adresse seines DNS-Servers?',['Per DHCP','Vom Switch','Aus der MAC-Adresse','Von Wireshark'],'DHCP liefert IP, Maske, Gateway und DNS-Server.'],
+['pro3','Warum funktioniert Surfen mit der blossen IP-Adresse oft nur bedingt?',['Auf einem Server können mehrere Webseiten liegen; er braucht den Domänennamen','IP-Adressen sind im Browser verboten','Ohne Namen läuft kein TCP','Weil der DNS-Cache leer ist'],'Der Server erkennt anhand des Namens, welche Webseite er ausliefern soll.'],
+['pro3','Was macht ein DNS-Server, der eine Anfrage nicht selbst beantworten kann?',['Er fragt einen übergeordneten Server','Er gibt eine zufällige IP zurück','Er startet neu','Er fragt den DHCP-Server'],'Bereits aufgelöste Adressen werden zwischengespeichert (Cache).'],
+['pro3','Mit welchem Befehl testest du die DNS-Auflösung direkt?',['nslookup google.ch','tracert google.ch','arp -a','netstat -an'],'Die Antwort kann eine IPv4- und eine IPv6-Adresse enthalten.'],
+['pro3','Was ist ein Protokoll?',['Eine Festlegung, in welcher Form und Struktur Daten ausgetauscht werden','Ein Netzwerkkabel','Eine Liste aller IP-Adressen','Ein Programm, das nur unter Windows läuft'],'Protokolle sind unabhängig von Betriebssystem und Programmiersprache.'],
+// w1 WLAN-Technik
+['w1','Welche Frequenzbänder nutzt WLAN?',['2,4 GHz, 5 GHz und 6 GHz','900 MHz und 1,8 GHz','Nur 2,4 GHz','60 Hz'],'802.11ad nutzt zusätzlich 60 GHz, mit sehr geringer Reichweite.'],
+['w1','Was gilt für höhere Frequenzen?',['Mehr Datendurchsatz, aber weniger Reichweite','Mehr Reichweite, aber weniger Durchsatz','Mehr von beidem','Kein Unterschied'],'Deshalb braucht 5G-Mobilfunk mehr Antennen.'],
+['w1','Welcher WLAN-Standard nutzte erstmals 5 GHz?',['802.11a','802.11b','802.11g','802.11n'],'802.11a: 5 GHz, 54 Mbit/s brutto. 802.11b und g nutzen 2,4 GHz.'],
+['w1','802.11ax ist besser bekannt als …',['WiFi 6','WiFi 5','WiFi 7','WiFi 4'],'802.11ac = WiFi 5, 802.11be = WiFi 7 (2,4 / 5 / 6 GHz), 802.11bn = WiFi 8.'],
+['w1','Was gilt für 802.11ad (60 GHz)?',['Sehr schnell, aber sehr geringe Reichweite','Langsam mit grosser Reichweite','Ein Bluetooth-Standard','Der erste WLAN-Standard von 1997'],'Hohe Frequenz bedeutet viel Durchsatz und wenig Reichweite.'],
+['w1','Welche drahtlose Technologie hat die kürzeste Reichweite?',['NFC (wenige Zentimeter)','Bluetooth','WLAN','Mobilfunk'],'NFC/RFID: Einstempeln, kontaktlos bezahlen. Bluetooth: mehrere Meter. Infrarot: kurz, Sichtverbindung nötig.'],
+['w1','Welche Betriebsart ist der WLAN-Standard?',['Infrastruktur: ein Access Point sendet eine SSID aus','Ad-hoc','Simplex','Bus'],'Die gesamte Kommunikation läuft über den AP.'],
+['w1','Wofür nutzt man den Ad-hoc-Modus?',['Selten, z. B. für die Ersteinrichtung eines Druckers','Für Firmennetze','Für Mobilfunk','Für Glasfaserverbindungen'],'Zwei Geräte verbinden sich direkt, ohne Infrastruktur.'],
+['w1','Was ist die SSID?',['Der Name des WLAN-Netzes','Das WLAN-Passwort','Die MAC des Access Points','Der Funkkanal'],'Der Access Point sendet sie im Infrastruktur-Modus aus.'],
+['w1','Wofür eignet sich BLE (Bluetooth Low Energy) besonders?',['Für stromsparende Geräte wie medizinische Messgeräte','Für Unterseekabel','Für Internet über Satellit','Für TV-Fernbedienungen'],'TV-Fernbedienungen nutzen Infrarot.'],
+['w1','Worin wird die Sendeleistung angegeben?',['In Watt','In Hertz','In Bit/s','In Dezibel pro Byte'],'Die Frequenz misst man in Hertz (Schwingungen pro Sekunde). Weniger Leistung bedeutet meist weniger Reichweite.'],
+// w2 WLAN-Performance & Sicherheit
+['w2','Welche Kanäle nutzt man im 2,4-GHz-Band idealerweise?',['1, 6 und 11','1, 2 und 3','12, 13 und 14','Alle 13 gleichzeitig'],'Benachbarte Kanäle überlappen sich. 1, 6 und 11 stören sich nicht gegenseitig.'],
+['w2','Welcher 2,4-GHz-Kanal ist in Europa nicht erlaubt?',['14','1','6','13'],'In Europa gibt es die Kanäle 1 bis 13.'],
+['w2','Welche Massnahme hat den grössten Einfluss auf die WLAN-Qualität?',['Den Standort des Access Points optimieren','Die SSID ändern','Einen MAC-Filter setzen','Das Admin-Passwort ändern'],'Weitere Massnahmen: Kanal wechseln, unnötige Funkgeräte ausschalten, neuere Standards nutzen.'],
+['w2','Welche WLAN-Verschlüsselung solltest du verwenden?',['WPA2 oder WPA3','WEP','WPA','Keine, dafür die SSID ausblenden'],'WEP und WPA gelten als unsicher.'],
+['w2','Warum konfigurierst du den Router besser per Kabel?',['Du verlierst die Verbindung nicht, wenn du WLAN-Einstellungen änderst','Weil WLAN keine Webseiten anzeigt','Weil das Kabel verschlüsselt ist','Weil die Seite sonst nicht lädt'],'Zum Beispiel über http://fritz.box.'],
+['w2','Warum änderst du das Standard-Admin-Passwort?',['Standardpasswörter sind bekannt oder leicht herauszufinden','Weil es sonst abläuft','Damit das WLAN schneller wird','Weil DHCP es verlangt'],'Danach SSID neutral wählen, WPA2/WPA3 aktivieren, optional MAC-Filter, Zeitplan und Gast-WLAN.'],
+['w2','«Es gibt nur eine Luft» bedeutet …',['Alle teilen sich dasselbe Frequenzspektrum','WLAN funktioniert nur in Innenräumen','Es gibt nur einen Kanal','Funk ist immer verschlüsselt'],'Mikrowellen, Nachbar-WLANs, Distanz und Wände beeinflussen die Qualität.'],
+['w2','Womit misst du die Geschwindigkeit zwischen zwei Rechnern?',['iperf3 (Server: -s, Client: -c <IP>)','ping -t','ipconfig /all','nslookup'],'Zur WLAN-Analyse eignen sich WifiInfoView, inSSIDer oder WiFi Analyzer.'],
+['w2','Was sollte eine SSID nicht verraten?',['Den Besitzer oder das Gerät','Die Sprache','Die Anzahl Geräte','Gar nichts, sie ist geheim'],'Eine SSID wie «FritzBox-Meier» liefert Angreifern unnötige Hinweise.'],
+// w3 Netzplan
+['w3','Was ist bei einem Netzplan am wichtigsten?',['Funktion vor Design: Genauigkeit und technische Richtigkeit','Schöne Farben','Möglichst viele Symbole','Diagonale Linien'],'Ein gut dokumentiertes Netz lässt sich leichter debuggen und erweitern.'],
+['w3','Wann wird ein Netzplan erstellt und aktualisiert?',['Als Erstes erstellt, als Letztes aktualisiert','Nur einmal ganz am Ende','Nur bei Problemen','Nie, er entsteht automatisch'],'Er enthält idealerweise Hostnamen sowie IP- und MAC-Adressen.'],
+['w3','Schematischer vs. geografischer Netzplan: Was stimmt?',['Schematisch gruppiert nach Funktion, geografisch nach realem Standort','Schematisch zeigt Gebäudepläne','Geografisch zeigt keine Standorte','Beide sind identisch'],'Schematisch ist früh in der Planung möglich. Geografisch hilft, defekte Geräte schnell zu finden.'],
+['w3','Wozu dient das Wolken-Symbol?',['Für unbekannte oder irrelevante Teile eines Netzes, z. B. das Internet','Für einen Cloud-Server','Für ein WLAN','Für defekte Geräte'],'Zum Beispiel das Internet zwischen per VPN verbundenen Standorten oder ein Teilnetz mit eigenem Plan. Keine Abkürzung aus Faulheit.'],
+['w3','Wer hat die gängigen Netzwerksymbole festgelegt?',['Niemand offiziell: Die Cisco-Symbole sind ein De-facto-Standard','ISO','DIN','IEC'],'Tools wie draw.io oder Excalidraw haben Bibliotheken mit diesen Symbolen.'],
+['w3','Welche Regel gilt für Linien im Netzplan?',['Nur gerade Linien, Kreuzungen vermeiden','Diagonale Linien bevorzugen','Kreuzungen sind ideal','Linien weglassen'],'Kreuzungen vermeidest du, indem du die Komponenten anders anordnest.'],
+['w3','Wie sieht das Switch-Symbol aus?',['Quadrat mit vier Pfeilen, je zwei nach links und rechts','Kreis mit Pfeilen in verschiedene Richtungen','Eine Wolke','Eine Mauer'],'Das Router-Symbol ist ein Kreis mit Pfeilen in verschiedene Richtungen.'],
+['w3','Wie sieht das Router-Symbol aus?',['Kreis mit Pfeilen in verschiedene Richtungen','Quadrat mit vier Pfeilen','Eine Wolke','Ein Blitz'],'Das Switch-Symbol ist ein Quadrat mit vier Pfeilen.'],
+// w4 Kommandozeile & Wireshark
+['w4','Was macht ping -t?',['Pingt ohne Ende, Abbruch mit Ctrl + C','Setzt die TTL','Sendet genau 10 Anfragen','Löst die IP in einen Namen auf'],'Windows sendet ohne Option standardmässig 4 Anfragen.'],
+['w4','Mit welcher Option sendet ping genau 10 Anfragen?',['-n 10','-t 10','-l 10','-w 10'],'-l = Datengrösse pro Anfrage, -w = Timeout in Millisekunden, -i = TTL.'],
+['w4','Was macht ping -a <IP>?',['Löst die IP-Adresse in einen Hostnamen auf (Reverse Lookup)','Pingt alle Geräte im Netz','Zeigt die ARP-Tabelle','Setzt die Paketgrösse'],'ping /? zeigt alle Optionen.'],
+['w4','Welche ping-Option setzt die Lebensdauer (TTL)?',['-i','-t','-l','-n'],'Achtung: -t heisst bei ping «endlos», nicht TTL.'],
+['w4','Ping zu einem PC im selben Netz schlägt fehl, obwohl alles verbunden ist. Häufiger Grund?',['Die Windows-Firewall blockiert Ping standardmässig','Der DNS-Server ist ausgefallen','Port 80 ist geschlossen','Die MAC ist randomisiert'],'Die Firewall-Regel muss auf beiden Rechnern angepasst werden.'],
+['w4','In welcher Reihenfolge pingst du bei der Fehlersuche?',['127.0.0.1 → eigene IP → Gateway → DNS-Server → Remote-IP → Remote-Name','Remote-Name → Gateway → 127.0.0.1','Gateway → 127.0.0.1 → DNS-Server','Nur google.ch'],'Der erste Schritt, der fehlschlägt, zeigt, wo das Problem liegt.'],
+['w4','Welcher Befehl verfolgt den Weg über die einzelnen Router (Hops)?',['tracert (bzw. pathping)','route print','netstat -an','arp -a'],'pathping hilft zusätzlich, Engpässe zu finden.'],
+['w4','Welcher Befehl zeigt aktive Verbindungen und offene Ports numerisch?',['netstat -an','ipconfig /all','tracert','nslookup'],'Gehört zur Transportschicht.'],
+['w4','Welcher Befehl zeigt die Routingtabelle?',['route print','arp -a','ipconfig /renew','ping -r'],'Mit route add und route delete lassen sich statische Routen erstellen und löschen.'],
+['w4','Mit welchem PowerShell-Befehl testest du einen bestimmten Port?',['Test-NetConnection <Host> -Port <Nr>','Get-Port <Host>','ping -p <Nr>','netstat -port <Nr>'],'Praktisch, weil ping keine Ports kennt.'],
+['w4','Was gilt für Portscans mit nmap auf fremde Netze?',['Nur mit Genehmigung erlaubt','Immer erlaubt','Nur nachts erlaubt','Nur mit UDP erlaubt'],'nmap bzw. Zenmap scannen offene Ports und Dienste.'],
+['w4','Wie löschst du den ganzen ARP-Cache?',['arp -d *','arp -a','arp -s','ipconfig /flushdns'],'arp -d <IP> löscht einen Eintrag, arp -s <IP> <MAC> fügt einen statischen hinzu.'],
+['w4','Mit welchem Befehl zeigst du den DNS-Cache an?',['ipconfig /displaydns','ipconfig /flushdns','nslookup /cache','arp -a'],'/flushdns leert den Cache, /registerdns registriert den DNS-Namen neu.'],
+['w4','Welcher Wireshark-Filter zeigt HTTP-Verkehr auf Port 5000?',['http and tcp.port == 5000','port=5000 http','filter(http, 5000)','tcp:5000 && web'],'Filter kannst du von Hand eingeben oder per Rechtsklick auf ein Paket erzeugen.'],
+['w4','In Wireshark fehlt ein erwartetes Paket. Was prüfst du zuerst?',['Ob ein Filter es ausblendet','Ob das Kabel defekt ist','Die MAC-Adresse','Den DNS-Cache'],'Filter wieder entfernen und erneut schauen.'],
+['w4','Was musst du beim Mitschneiden von Daten anderer Personen beachten?',['Datenschutz: Die Betroffenen vorher informieren','Nichts, es ist immer erlaubt','Nur HTTPS mitschneiden','Wireshark darf nur der Admin starten'],'Aufzeichnungen («Dumps») kann man speichern und an Spezialisten weitergeben.'],
+['w4','Wie gehst du bei Netzwerkproblemen vor?',['Problem beschreiben, dann Schicht für Schicht analysieren','Sofort alles neu installieren','Nur den Browser wechseln','Zufällig Kabel tauschen'],'Netzzugang (Hardware), Vermittlung (IP, Routing), Transport (Ports), Anwendung (Dienste).']
+].map((r,i)=>({id:'r'+i,obj:r[0],cat:goalById[r[0]].cat,q:r[1],opts:r[2],correct:r[2][0],ex:r[3]}));
+Q.push(...Q2);
+
+/* ---------- IP-Hilfsfunktionen und generierte Aufgaben ---------- */
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const ip2n=s=>{const p=String(s).trim().split('.');if(p.length!==4)return null;let n=0;for(const x of p){if(!/^\d{1,3}$/.test(x))return null;const v=+x;if(v>255)return null;n=n*256+v}return n};
+const n2ip=n=>[n>>>24,(n>>>16)&255,(n>>>8)&255,n&255].join('.');
+const maskN=p=>p===0?0:(0xFFFFFFFF<<(32-p))>>>0;
+const bin=n=>n2ip(n).split('.').map(o=>(+o).toString(2).padStart(8,'0')).join('.');
+const randIp=()=>{const r=rnd(0,2);
+  if(r===0)return 10*16777216+rnd(0,255)*65536+rnd(0,255)*256+rnd(1,254);
+  if(r===1)return 172*16777216+rnd(16,31)*65536+rnd(0,255)*256+rnd(1,254);
+  return 192*16777216+168*65536+rnd(0,255)*256+rnd(1,254)};
+const ord=n=>n+'.';
+const fmt=n=>n.toLocaleString('de-CH');
+const b8=n=>n.toString(2).padStart(8,'0').replace(/^(\d{4})/,"$1'");
+const hx=n=>'0x'+n.toString(16).toUpperCase();
+const PLACES=[128,64,32,16,8,4,2,1];
+const parts=n=>PLACES.filter(p=>n&p);
+const scale=n=>`Skala ${PLACES.map(p=>String(p).padStart(4)).join('')}\nBits  ${PLACES.map(p=>(n&p?'1':'0').padStart(4)).join('')}`;
+function parseAns(f,raw){
+  if(f.kind==='ip')return ip2n(raw);
+  if(f.kind==='bin'){const s=raw.replace(/^0b/i,'').replace(/[\s'’_.]/g,'');return /^[01]+$/.test(s)?parseInt(s,2):null}
+  if(f.kind==='hex'){const s=raw.replace(/\s/g,'').replace(/^(0x|x)/i,'');return /^[0-9a-f]+$/i.test(s)?parseInt(s,16):null}
+  const s=raw.replace(/^\//,'').replace(/[\s'’.,]/g,'');return /^\d+$/.test(s)?Number(s):null;
+}
+const showAns=f=>f.kind==='ip'?n2ip(f.ans):f.kind==='bin'?b8(f.ans):f.kind==='hex'?hx(f.ans):fmt(f.ans);
+const PH={ip:'z. B. 192.168.1.0',bin:'z. B. 0100\'0011',hex:'z. B. 0x2D8',num:'Zahl'};
+
+function octetWork(ip,p){
+  const o=n2ip(ip).split('.').map(Number);
+  if(p%8===0) return `/${p} endet genau auf einer Oktettgrenze: ${p/8===1?'das erste Oktett ist':'die ersten '+p/8+' Oktette sind'} Netzteil, der Rest ist Hostteil. Netzadresse = Hostteil alles 0, Broadcast = Hostteil alles 255.`;
+  const i=Math.floor(p/8), block=2**(8-p%8), start=Math.floor(o[i]/block)*block;
+  return `/${p} endet im ${i+1}. Oktett. Die Maske ist dort ${256-block}, also Blockgrösse = 256 − ${256-block} = ${block}. ${o[i]} liegt im Block ${start}–${start+block-1}. Netzadresse: ${i+1}. Oktett = ${start}${i<3?', folgende Oktette 0':''}. Broadcast: ${i+1}. Oktett = ${start+block-1}${i<3?', folgende Oktette 255':''}.`;
+}
+
+const GENS = [
+  {id:'g-cidr',obj:'ip1',make(){
+    const p=pick([16,18,19,20,21,22,23,24,25,26,26,27,27,28,28,29,30]);
+    const ip=randIp(), m=maskN(p), net=(ip&m)>>>0, bc=(net|(~m>>>0))>>>0, h=2**(32-p)-2;
+    return {q:`Analysiere <code>${n2ip(ip)}/${p}</code>.`,fields:[
+      {label:'Netzadresse',kind:'ip',ans:net},{label:'Broadcast-Adresse',kind:'ip',ans:bc},
+      {label:'Erste Host-Adresse',kind:'ip',ans:net+1},{label:'Anzahl nutzbarer Hosts',kind:'num',ans:h},
+      {label:'Subnetzmaske',kind:'ip',ans:m}],
+      ex:octetWork(ip,p)+` Nutzbare Hosts = 2^${32-p} − 2 = ${fmt(h)}. Erster Host = Netzadresse + 1.`,
+      binary:`IP     ${bin(ip)}\nMaske  ${bin(m)}\nNetz   ${bin(net)}`};
+  }},
+  {id:'g-mask',obj:'ip2',make(){
+    const p=rnd(8,30), m=maskN(p);
+    const ex=`/${p} bedeutet ${p} Einsen gefolgt von ${32-p} Nullen. Oktettwerte für 1–8 Einsen: 128, 192, 224, 240, 248, 252, 254, 255.`;
+    return Math.random()<.5
+      ? {q:`Wie lautet die Subnetzmaske für <code>/${p}</code> in Dezimalschreibweise?`,fields:[{label:'Subnetzmaske',kind:'ip',ans:m}],ex,binary:`Maske  ${bin(m)}`}
+      : {q:`Welche Präfixlänge gehört zur Maske <code>${n2ip(m)}</code>?`,fields:[{label:'Präfix (z. B. 24)',kind:'num',ans:p}],ex,binary:`Maske  ${bin(m)}`};
+  }},
+  {id:'g-subnets',obj:'ip3',make(){
+    const a=pick([8,16,16,20,22,24,24,24]), b=a+rnd(1,Math.min(6,30-a));
+    const net=(randIp()&maskN(a))>>>0, s=2**(b-a), h=2**(32-b)-2;
+    return {q:`Du teilst <code>${n2ip(net)}/${a}</code> in <code>/${b}</code>-Subnetze auf. Wie viele Subnetze erhältst du und wie viele nutzbare Hosts hat jedes?`,
+      fields:[{label:'Anzahl Subnetze',kind:'num',ans:s},{label:'Nutzbare Hosts pro Subnetz',kind:'num',ans:h}],
+      ex:`Ausgeliehene Bits = ${b} − ${a} = ${b-a}, also 2^${b-a} = ${fmt(s)} Subnetze. Verbleibende Hostbits = 32 − ${b} = ${32-b}, also je 2^${32-b} − 2 = ${fmt(h)} nutzbare Hosts.`};
+  }},
+  {id:'g-bcast',obj:'ip4',make(){
+    const base=Math.random()<.6?192*16777216+168*65536+rnd(0,255)*256:10*16777216+rnd(0,255)*65536+rnd(0,255)*256;
+    const b=rnd(25,29), size=2**(32-b), n=rnd(2,Math.min(2**(b-24),8));
+    const net=base+(n-1)*size, bc=net+size-1;
+    return {q:`<code>${n2ip(base)}/24</code> wird in <code>/${b}</code>-Subnetze aufgeteilt. Wie lauten Netz- und Broadcast-Adresse des <strong>${ord(n)} Subnetzes</strong>?`,
+      fields:[{label:`Netzadresse ${ord(n)} Subnetz`,kind:'ip',ans:net},{label:`Broadcast ${ord(n)} Subnetz`,kind:'ip',ans:bc}],
+      ex:`Blockgrösse für /${b} = 2^${32-b} = ${size}. Die Subnetze beginnen bei 0, ${size}, ${size*2}, … Das ${ord(n)} beginnt bei ${(n-1)*size}, sein Broadcast ist die Adresse direkt vor dem nächsten Block: ${(n-1)*size} + ${size} − 1 = ${(n-1)*size+size-1}.`};
+  }},
+  /* Zahlensysteme */
+  {id:'g-d2b',obj:'b3',make(){
+    const n=rnd(1,255);
+    return {q:`Wandle <code>${n}</code> von dezimal in binär um (8 Bit).`,fields:[{label:'Binär',kind:'bin',ans:n}],
+      ex:`Skalenmethode: ${n} = ${parts(n).join(' + ')}. Überall dort eine 1, sonst 0. Ergebnis: ${b8(n)}.`,binary:scale(n)};
+  }},
+  {id:'g-b2d',obj:'b3',make(){
+    const n=rnd(1,255);
+    return {q:`Wandle <code>${b8(n)}</code> von binär in dezimal um.`,fields:[{label:'Dezimal',kind:'num',ans:n}],
+      ex:`Stellenwerte der Einsen addieren: ${parts(n).join(' + ')} = ${n}. Kontrolle: erstes Bit ${n>=128?'1, also ≥ 128':'0, also < 128'}; letztes Bit ${n%2?'1, also ungerade':'0, also gerade'}.`,binary:scale(n)};
+  }},
+  {id:'g-b2h',obj:'b3',make(){
+    const n=rnd(1,255), hi=n>>4, lo=n&15, H=d=>d.toString(16).toUpperCase();
+    return {q:`Wandle <code>${b8(n)}</code> von binär in hexadezimal um.`,fields:[{label:'Hexadezimal',kind:'hex',ans:n}],
+      ex:`Von rechts in Nibbles teilen: ${hi.toString(2).padStart(4,'0')} = ${hi} = ${H(hi)}, ${lo.toString(2).padStart(4,'0')} = ${lo} = ${H(lo)}. Ergebnis: ${hx(n)}.`};
+  }},
+  {id:'g-h2d',obj:'b3',make(){
+    const n=Math.random()<.6?rnd(16,255):rnd(256,65535), s=n.toString(16).toUpperCase();
+    const terms=[...s].map((d,i)=>`${d} (${parseInt(d,16)}) × ${fmt(16**(s.length-1-i))}`);
+    return {q:`Wandle <code>${hx(n)}</code> von hexadezimal in dezimal um.`,fields:[{label:'Dezimal',kind:'num',ans:n}],
+      ex:`Stellenwerte sind Potenzen von 16: ${terms.join(' + ')} = ${fmt(n)}.`};
+  }},
+  {id:'g-d2h',obj:'b3',make(){
+    const n=rnd(16,4095), steps=[]; let x=n;
+    while(x>0){const r=x%16;steps.push(`${x} : 16 = ${Math.floor(x/16)} Rest ${r}${r>9?' ('+r.toString(16).toUpperCase()+')':''}`);x=Math.floor(x/16)}
+    return {q:`Wandle <code>${n}</code> von dezimal in hexadezimal um.`,fields:[{label:'Hexadezimal',kind:'hex',ans:n}],
+      ex:`Fortlaufend durch 16 teilen und die Reste von unten nach oben lesen. Ergebnis: ${hx(n)}.`,binary:steps.join('\n')};
+  }},
+  {id:'g-states',obj:'b2',make(){
+    const n=rnd(1,16);
+    return {q:`Wie viele Zustände lassen sich mit <code>${n}</code> Bit darstellen?`,fields:[{label:'Anzahl Zustände',kind:'num',ans:2**n}],
+      ex:`2^${n} = ${fmt(2**n)}. Mit jedem zusätzlichen Bit verdoppelt sich die Anzahl: 2, 4, 8, 16, 32 …`};
+  }},
+  /* Bool */
+  {id:'g-bitop',obj:'b4',make(){
+    const a=rnd(1,255), isAnd=Math.random()<.6, b=isAnd?pick([128,192,224,240,248,252,254,rnd(1,255)]):rnd(1,255), r=isAnd?a&b:a|b, op=isAnd?'AND':'OR';
+    return {q:`Berechne bitweise <code>${b8(a)} ${op} ${b8(b)}</code>.`,fields:[{label:'Ergebnis (binär)',kind:'bin',ans:r}],
+      ex:isAnd?`AND ergibt nur dort 1, wo beide Bits 1 sind. So berechnet man auch die Netz-ID: IP-Oktett ${a} AND Maskenoktett ${b} = ${r}.`:`OR ergibt dort 1, wo mindestens ein Bit 1 ist.`,
+      binary:`    ${b8(a)}\n${op.padEnd(4)}${b8(b)}\n=   ${b8(r)}`};
+  }},
+  {id:'g-bool',obj:'b4',make(){
+    const e1=rnd(0,1), e2=rnd(0,1);
+    const [expr,r]=pick([['E1 AND E2',e1&e2],['E1 OR E2',e1|e2],['NOT E1',1-e1],['E1 AND NOT E2',e1&(1-e2)],['NOT (E1 OR E2)',1-(e1|e2)],['NOT E1 OR E2',(1-e1)|e2]]);
+    return {q:`E1 = ${e1}, E2 = ${e2}. Was ergibt <code>${expr}</code>?`,opts:[String(r),String(1-r)],
+      ex:`AND ist nur 1, wenn alle Eingänge 1 sind; OR ist 1, wenn mindestens einer 1 ist; NOT kehrt um. Hier: ${expr} = ${r}.`};
+  }},
+  /* Maskenregeln, privat/öffentlich, Planung */
+  {id:'g-maskok',obj:'ip6',make(){
+    let s, ok=Math.random()<.45, p;
+    if(ok){p=rnd(8,30);s=n2ip(maskN(p))}
+    else{const r=rnd(0,2);
+      if(r===0){const i=rnd(1,3);s=[0,1,2,3].map(j=>j<i?255:j===i?pick([253,250,127,191,96,100,200,64,1]):0).join('.')}
+      else if(r===1)s=pick(['255.0.255.0','255.255.0.255','0.255.255.255','255.255.128.255','255.192.255.0','255.255.255.1']);
+      else s=pick(['255.255.256.0','255.255.255.260','256.0.0.0','255.300.0.0'])}
+    const rule='Regeln: jedes Oktett höchstens 255, alle Einsen links am Stück, nach einer 0 keine 1 mehr. Gültige Oktettwerte: 0, 128, 192, 224, 240, 248, 252, 254, 255.';
+    const valid=s.split('.').every(o=>+o<=255);
+    return {q:`Ist <code>${s}</code> eine gültige Subnetzmaske?`,opts:ok?['Gültig','Ungültig']:['Ungültig','Gültig'],
+      ex:ok?`Gültig: Alle Einsen stehen links am Stück, das ist /${p}. ${rule}`:`Ungültig. ${rule}`,
+      binary:valid?`Binär  ${bin(ip2n(s))}`:''};
+  }},
+  {id:'g-priv',obj:'ip5',make(){
+    const o=()=>rnd(0,255), h=()=>rnd(1,254), t=Math.random();
+    let ip, kind;
+    if(t<.4){ip=n2ip(randIp());kind='Privat'}
+    else if(t<.8){ip=pick([()=>`172.${rnd(32,63)}.${o()}.${h()}`,()=>`172.${rnd(1,15)}.${o()}.${h()}`,()=>`192.169.${o()}.${h()}`,()=>`11.${o()}.${o()}.${h()}`,()=>`${pick([8,1,212,170,62,85,193])}.${o()}.${o()}.${h()}`])();kind='Öffentlich'}
+    else{ip=pick([()=>`127.${o()}.${o()}.${h()}`,()=>`169.254.${o()}.${h()}`,()=>`${rnd(224,239)}.${o()}.${o()}.${h()}`])();kind='Spezialadresse'}
+    const all=['Privat','Öffentlich','Spezialadresse'];
+    return {q:`Wie ist <code>${ip}</code> einzuordnen?`,opts:[kind,...all.filter(k=>k!==kind)],
+      ex:'Privat: 10.0.0.0/8, 172.16.0.0/12 (172.16 bis 172.31), 192.168.0.0/16. Spezial: 127.0.0.0/8 Loopback, 169.254.0.0/16 APIPA, 224.0.0.0/4 Multicast. Alles andere (z. B. 172.32.x.x oder 192.169.x.x) ist öffentlich.'};
+  }},
+  {id:'g-plan',obj:'ip8',make(){
+    const N=rnd(3,500), need=N+1, h=Math.ceil(Math.log2(need+2)), p=32-h;
+    return {q:`Ein Subnetz soll <strong>${N} Geräte</strong> plus das Gateway aufnehmen. Welches ist das grösste Präfix (also das kleinste Netz), das reicht?`,
+      fields:[{label:'Präfix (z. B. 26)',kind:'num',ans:p}],
+      ex:`${N} Geräte + 1 Gateway = ${need} Adressen. 2^${h} − 2 = ${fmt(2**h-2)} reicht, 2^${h-1} − 2 = ${fmt(Math.max(0,2**(h-1)-2))} nicht. Also ${h} Hostbits → /${p}.`};
+  }}
+];
+GENS.forEach(g=>g.cat=goalById[g.obj].cat);
+
+/* ---------- Zustand ---------- */
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let stats=store.get('nfq-stats',{});
+let wrong=new Set(store.get('nfq-wrong',[]));
+let filter='all', deck=[], cur=null, answered=false, session={r:0,t:0,streak:0}, qCount=0, confirmReset=false;
+
+function matches(item){
+  if(filter==='all')return true;
+  if(filter==='wrong')return wrong.has(item.id);
+  if(CATS[filter])return item.cat===filter;
+  return item.obj===filter;
+}
+function pool(){
+  const gens=GENS.filter(matches);
+  return [...Q.filter(matches),...gens,...gens,...gens.filter(g=>g.id==='g-cidr')];
+}
+function next(){
+  if(!deck.length){deck=shuffle(pool());if(cur&&deck.length>1&&deck[deck.length-1].id===cur.id)deck.unshift(deck.pop())}
+  const item=deck.pop();
+  if(!item){cur=null;renderEmpty();return}
+  answered=false;qCount++;
+  if(item.make){
+    const g=item.make();
+    cur=g.opts?{...item,...g,type:'mc',correct:g.opts[0],shown:shuffle([...g.opts])}:{...item,...g,type:'input'};
+  }else cur={...item,type:'mc',shown:shuffle([...item.opts])};
+  render();
+}
+
+/* ---------- Darstellung ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const isAddr=s=>/\d/.test(s)&&/^[0-9A-Fa-f.:\-\/ ]+$/.test(s);
+
+function renderChips(){
+  const wc=wrong.size;
+  const items=[['all','Alle Themen',null],...Object.entries(CATS).map(([k,c])=>[k,c.name,c.color]),['wrong',`Meine Fehler (${wc})`,'var(--bad)']];
+  $('#chips').innerHTML=items.map(([k,n,c])=>`<button class="chip" data-f="${k}" aria-pressed="${filter===k}" ${c?`style="--cat:${c}"`:''}>${c?'<span class="dot"></span>':''}${esc(n)}</button>`).join('');
+}
+function renderGoals(){
+  let html='';
+  for(const [k,c] of Object.entries(CATS)){
+    html+=`<div style="--cat:${c.color}"><div class="cat-h">${esc(c.name)}</div>`;
+    for(const g of GOALS.filter(g=>g.cat===k).sort((a,b)=>a.id.localeCompare(b.id,undefined,{numeric:true}))){
+      const s=stats[g.id]||{r:0,t:0}, pct=s.t?Math.round(s.r/s.t*100):0;
+      html+=`<button class="goal" data-f="${g.id}" aria-pressed="${filter===g.id}" title="${esc(g.de)}"><span>${esc(g.name)}</span><span class="pct">${s.t?`${pct}% · ${s.r}/${s.t}`:'–'}</span><span class="bar"><i style="width:${pct}%"></i></span></button>`;
+    }
+    html+='</div>';
+  }
+  $('#goals').innerHTML=html;
+  $('#reset').innerHTML=confirmReset
+    ?`<span class="hint">Gesamten Fortschritt löschen?</span><button class="btn" id="reset-yes">Löschen</button><button class="btn ghost" id="reset-no">Behalten</button>`
+    :`<button class="btn ghost" id="reset-ask">Fortschritt zurücksetzen</button>`;
+}
+function renderScore(){$('#s-score').textContent=`${session.r}/${session.t}`;$('#s-streak').textContent=session.streak}
+
+function render(){
+  const g=goalById[cur.obj], c=CATS[cur.cat];
+  const card=$('#card'); card.style.setProperty('--cat',c.color);
+  let body='';
+  if(cur.type==='mc'){
+    body=`<div class="opts">${cur.shown.map((o,i)=>`<button class="opt" data-i="${i}"><span class="k">${i+1}</span><span class="${isAddr(o)?'mono':''}">${esc(o)}</span></button>`).join('')}</div>`;
+  }else{
+    body=`<form id="f" autocomplete="off"><div class="fields">${cur.fields.map((f,i)=>`<div class="field"><label for="in${i}">${esc(f.label)}</label><input id="in${i}" inputmode="${f.kind==='num'||f.kind==='bin'?'numeric':f.kind==='hex'?'text':'decimal'}" autocapitalize="off" spellcheck="false" placeholder="${esc(PH[f.kind])}"><div class="fix" id="fix${i}"></div></div>`).join('')}</div>
+      <div class="actions"><button class="btn" type="submit">Prüfen</button><button class="btn ghost" type="button" id="skip">Lösung zeigen</button><span class="hint">Enter prüft</span></div></form>`;
+  }
+  card.innerHTML=`<div class="meta"><span class="tag">${esc(c.name)}</span><span class="qno">#${qCount} · ${esc(g.name)}</span></div>
+    <p class="goal-de">Lernziel: ${esc(g.de)}</p>
+    <h2 class="q">${cur.q}</h2>${body}<div id="fb" aria-live="polite"></div>`;
+  if(cur.type==='input'){
+    $('#f').addEventListener('submit',e=>{e.preventDefault();checkInput(false)});
+    $('#skip').addEventListener('click',()=>checkInput(true));
+    $('#in0').focus({preventScroll:true});
+  }
+}
+function renderEmpty(){
+  const card=$('#card'); card.style.setProperty('--cat','var(--good)');
+  card.innerHTML=`<h2 class="q">Keine Fehler zum Wiederholen.</h2><p class="empty">Falsch beantwortete Fragen landen hier, bis du sie richtig beantwortest. Wähle ein Thema, um weiterzuüben.</p>`;
+}
+
+function record(ok){
+  const s=stats[cur.obj]||(stats[cur.obj]={r:0,t:0});
+  s.t++; if(ok)s.r++;
+  if(ok)wrong.delete(cur.id);else wrong.add(cur.id);
+  session.t++; if(ok){session.r++;session.streak++}else session.streak=0;
+  store.set('nfq-stats',stats); store.set('nfq-wrong',[...wrong]);
+  answered=true; renderScore(); renderGoals(); renderChips();
+}
+function feedback(ok,lead){
+  $('#fb').innerHTML=`<div class="fb ${ok?'ok':'no'}"><h3>${ok?'Richtig':'Nicht ganz'}</h3><p>${lead?lead+' ':''}${esc(cur.ex)}</p>${cur.binary?`<div class="bin">${esc(cur.binary)}</div>`:''}
+    <div class="actions"><button class="btn" id="next">Nächste Frage</button><span class="hint">oder Enter drücken</span></div></div>`;
+  $('#next').addEventListener('click',next);
+  $('#next').focus({preventScroll:true});
+  $('#fb').scrollIntoView({block:'nearest',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+}
+function answerMC(i){
+  if(answered)return;
+  const chosen=cur.shown[i], ok=chosen===cur.correct;
+  document.querySelectorAll('.opt').forEach((b,j)=>{b.disabled=true;if(cur.shown[j]===cur.correct)b.classList.add('right');else if(j===i)b.classList.add('wrong')});
+  record(ok);
+  feedback(ok,ok?'':`Richtig wäre: ${esc(cur.correct)}.`);
+}
+function checkInput(giveUp){
+  if(answered)return;
+  let all=true;
+  cur.fields.forEach((f,i)=>{
+    const el=$('#in'+i), raw=el.value.trim();
+    let ok=false;
+    if(!giveUp) ok = parseAns(f,raw)===f.ans;
+    el.classList.add(ok?'right':'wrong'); el.readOnly=true;
+    if(!ok){all=false;$('#fix'+i).textContent='→ '+showAns(f)}
+  });
+  document.querySelectorAll('#f .actions').forEach(a=>a.remove());
+  record(all);
+  feedback(all,'');
+}
+
+/* ---------- Ereignisse ---------- */
+document.addEventListener('click',e=>{
+  const opt=e.target.closest('.opt'); if(opt){answerMC(+opt.dataset.i);return}
+  const f=e.target.closest('[data-f]');
+  if(f){const v=f.dataset.f;filter=(filter===v&&v!=='all')?'all':v;deck=[];renderChips();renderGoals();next();return}
+  if(e.target.id==='reset-ask'){confirmReset=true;renderGoals()}
+  if(e.target.id==='reset-no'){confirmReset=false;renderGoals()}
+  if(e.target.id==='reset-yes'){stats={};wrong=new Set();store.set('nfq-stats',{});store.set('nfq-wrong',[]);confirmReset=false;renderGoals();renderChips()}
+});
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'||e.metaKey||e.ctrlKey||e.altKey)return;
+  if(answered&&e.key==='Enter'&&e.target.id!=='next'){e.preventDefault();next();return}
+  if(!answered&&cur&&cur.type==='mc'&&/^[1-4]$/.test(e.key)&&+e.key<=cur.shown.length)answerMC(+e.key-1);
+});
+
+renderChips();renderGoals();renderScore();next();
+</script>
+
+</body></html>

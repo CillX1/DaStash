@@ -37,7 +37,7 @@ jobs:
       - name: Build portable zip
         shell: pwsh
         run: |
-          $files = 'GameDesk.ps1','dashboard.html','logo.svg','logo.png','GameDesk.ico','Install GameDesk.bat','Install.ps1','Uninstall.ps1','README.txt' | ForEach-Object { "GameDesk/$_" }
+          $files ='GameDesk.ps1','dashboard.html','logo.svg','logo.png','GameDesk.ico','Install GameDesk.bat','Install.ps1','Uninstall.ps1','README.txt','quiz' | ForEach-Object { "GameDesk/$_" }
           Compress-Archive -Path $files -DestinationPath "installer/Output/GameDesk-${{ steps.ver.outputs.version }}-windows-portable.zip"
 
       - uses: actions/upload-artifact@v4

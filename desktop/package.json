@@ -1,7 +1,7 @@
 {
   "name": "gamedesk",
   "productName": "GameDesk",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "description": "All your everyday and gaming widgets in one window.",
   "author": "CillX1 <291351647+CillX1@users.noreply.github.com>",
   "homepage": "https://github.com/CillX1/GameDesk",
@@ -21,7 +21,7 @@
     "productName": "GameDesk",
     "files": ["main.js", "server.js", "platform.js", "package.json"],
     "extraResources": [
-      { "from": "../GameDesk", "to": "ui", "filter": ["dashboard.html", "logo.svg", "logo.png"] }
+      { "from": "../GameDesk", "to": "ui", "filter": ["dashboard.html", "logo.svg", "logo.png", "quiz/**"] }
     ],
     "directories": { "output": "dist" },
     "artifactName": "GameDesk-${version}-${arch}.${ext}",

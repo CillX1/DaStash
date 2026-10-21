@@ -1,6 +1,6 @@
 ﻿# Installs GameDesk for the current user. No admin rights needed.
 $ErrorActionPreference = 'Stop'
-$version = '1.7.0'
+$version = '1.8.0'
 $src = $PSScriptRoot
 $dest = Join-Path $env:LOCALAPPDATA 'Programs\GameDesk'
 $ps = "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe"
@@ -24,8 +24,10 @@ New-Item -ItemType Directory -Force $dest | Out-Null
 foreach ($f in 'GameDesk.ps1', 'dashboard.html', 'logo.svg', 'logo.png', 'GameDesk.ico', 'Uninstall.ps1') {
     Copy-Item -LiteralPath (Join-Path $src $f) -Destination $dest -Force
 }
+# QuizDesk (the Quizzes widget): its scripts and the quizzes that come with it.
+Copy-Item -LiteralPath (Join-Path $src 'quiz') -Destination $dest -Recurse -Force
 # Files from a downloaded zip are marked "from the internet"; clear that so they can run.
-Get-ChildItem -LiteralPath $dest | Unblock-File
+Get-ChildItem -LiteralPath $dest -Recurse -File | Unblock-File
 
 $sh = New-Object -ComObject WScript.Shell
 function New-GameDeskShortcut($path) {

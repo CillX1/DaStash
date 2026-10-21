@@ -26,6 +26,7 @@
 | 🛡️ **Anti-Freeze** | Spots programs that stop responding and lets you end them with one click, or automatically. Warns you before memory runs out. |
 | 🎮 **Games** | Launch Steam, Xbox, Ubisoft, Epic, EA, Battle.net and more, plus your installed Steam games. |
 | 🛠️ **Quick tools** | System shortcuts, weather, to-do list, timer and notes. |
+| 🧠 **Quizzes** | [QuizDesk](https://github.com/CillX1/QuizDesk) built in: study quizzes that work offline, the shared quiz collection to download from, and duels (live with a room code, or challenge codes). Works together with the standalone QuizDesk app. |
 | 🔗 **Quick links** | Your favourite websites one click away. Add or remove them with **Edit links**. |
 | 🎨 **Customize** | Hide the widgets you don't need. |
 

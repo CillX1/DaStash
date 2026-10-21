@@ -1,0 +1,56 @@
+{
+  "quizzes": [
+    {
+      "id": "sql-abfragen",
+      "title": "SQL-Abfragen-Quiz",
+      "tone": "sql",
+      "tag": "M162",
+      "desc": "SELECT bis Normalisierung in 10 Themen, mit SQLite-Testdatenbank. Jede Frage in mehreren Varianten.",
+      "author": "CillX1",
+      "added": "2026-10-21",
+      "file": "sql-abfragen.html",
+      "sha256": "a8f8a6104d06cf8ac62d16682bc419b190991fba96441013c6ff6c13074a48bc",
+      "duel": "sql-abfragen.duel.json",
+      "duelSha256": "fe897278af59353cc4b60f46c1ff15ef848c3b7b3f08225b1907af11db56e50c"
+    },
+    {
+      "id": "mathe-pruefungstraining",
+      "title": "Mathe-Prüfungstraining",
+      "tone": "mathe",
+      "tag": "Mathe",
+      "desc": "Runden, Einheiten, Potenzen, Prozent, Wachstum, Gleichungssysteme und mehr. Mit Eingabe-Aufgaben.",
+      "author": "CillX1",
+      "added": "2026-10-20",
+      "file": "mathe-pruefungstraining.html",
+      "sha256": "f546c14f940fe41890bb209494062ee13e0f28c225202a7b5c64d1ec419b5a30",
+      "duel": "mathe-pruefungstraining.duel.json",
+      "duelSha256": "66ebb8e1e3d37d1df49dedefe360589ae6148070cfe589d1bbfecf4cb6b00dcc"
+    },
+    {
+      "id": "netzwerkgrundlagen",
+      "title": "Netzwerkgrundlagen-Quiz",
+      "tone": "netz",
+      "tag": "Telematik",
+      "desc": "29 Lernziele von Zahlensystemen über Subnetting bis WLAN. Rechenaufgaben werden immer neu erzeugt.",
+      "author": "CillX1",
+      "added": "2026-10-15",
+      "file": "netzwerkgrundlagen.html",
+      "sha256": "ebb7fcec439c5c5500d8cb4d77ebce6e7e369d5a54f5a0756c2969039dd67615",
+      "duel": "netzwerkgrundlagen.duel.json",
+      "duelSha256": "1650b929e808ce9d4345a8e7907faaf9fd9a59b4bf7ef5f5df823be7ad1f2953"
+    },
+    {
+      "id": "http-quizshow",
+      "title": "HTTP Quizshow",
+      "tone": "web",
+      "tag": "HTTP",
+      "desc": "36 Fragen zu HTTP als Quizshow mit Zeitlimit und Punkten: Methoden, Header, Body, Wireshark.",
+      "author": "CillX1",
+      "added": "2026-10-15",
+      "file": "http-quizshow.html",
+      "sha256": "110bb9b84239ae71242927b525ecedb863c726d678a21b552a3e51174e6d49bd",
+      "duel": "http-quizshow.duel.json",
+      "duelSha256": "066eff71b786787c2911bf9b10a1e55d396ded88d5fe793d257111cf3f1e39e1"
+    }
+  ]
+}
